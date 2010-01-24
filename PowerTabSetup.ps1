@@ -95,14 +95,9 @@ $Yes = ([System.Management.Automation.Host.ChoiceDescription]"&Yes")
 $No = ([System.Management.Automation.Host.ChoiceDescription]"&No")
 $choices = [System.Management.Automation.Host.ChoiceDescription[]]($no,$Yes)
 
-# Set configuration location
-
-
-
+# Set configuration location - life is simpler if it can only be profile. Are arbitrary location really valuable?
 $Prof = ([System.Management.Automation.Host.ChoiceDescription]"&Profile Directory")
-$Install = ([System.Management.Automation.Host.ChoiceDescription]"&Installation Directory")
-$Other = ([System.Management.Automation.Host.ChoiceDescription]"&Other")
-$profileChoices = [System.Management.Automation.Host.ChoiceDescription[]]($Prof,$Install,$Other)
+$profileChoices = [System.Management.Automation.Host.ChoiceDescription[]]($Prof)
 
 Write-Host -ForegroundColor 'Yellow' "`nPowertab Configuration :`n"
   Write-Host "The configuration of Powertab is saved in a XML file called PowerTabConfig.xml `n"
@@ -158,7 +153,7 @@ Write-Host "For powertab to initalize when a new shell session is started it nee
 
 $ProfileText = @"
 
-################ Start of PowerTab Initialisatie Code ########################
+################ Start of PowerTab Initialisation Code ########################
 #
 #  added to Profile by PowerTab Setup For Loading of Custom TabExpansion,
 #
@@ -167,15 +162,10 @@ $ProfileText = @"
 # http://ThePowerShellGuy.com
 #
 
-
 # Initialize PowerTab 
+Import-Module PowerTab
 
-& '$installDir\Init-TabExpansion.ps1' ``
-     -ConfigurationLocation '$PowerTabConfigurationLocation' 
-
-
-
-################ End of PowerTab Initialisatie Code ##########################
+################ End of PowerTab Initialisation Code ##########################
 
 "@
 

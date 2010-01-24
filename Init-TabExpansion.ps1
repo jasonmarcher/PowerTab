@@ -3,7 +3,7 @@ param ($ConfigurationLocation = $PowerTabConfig.Setup.ConfigurationPath,[switch]
 $InitScriptVersion = 'PowerTab version 0.99 Beta 2' 
 
 if ($global:PowerTabConfig -and (-not $NoWarning)) {
-  Write-Warning "$($PowerTabConfig.Version) was allready loaded`n re-Initializing configuration from :`n $ConfigurationLocation`n`n"
+  Write-Warning "$($PowerTabConfig.Version) was already loaded`n re-Initializing configuration from :`n $ConfigurationLocation`n`n"
 }
 
 # Read Configuration 
