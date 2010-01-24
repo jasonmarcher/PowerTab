@@ -1,0 +1,10 @@
+#TYPE System.Management.Automation.PSCustomObject
+Name,Color
+BackColor,White
+BorderBackColor,Blue
+BorderColor,White
+BorderTextColor,Cyan
+FilterColor,Cyan
+SelectedBackColor,Cyan
+SelectedTextColor,Blue
+TextColor,Black

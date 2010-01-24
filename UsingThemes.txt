@@ -1,0 +1,27 @@
+You can now import and export colorthemes into PowerTab 0.95
+
+this works like this :
+
+# Export Example
+
+$PowerTabConfig.Colors.ExportTheme() | Export-Csv -noType C:\PowerShell\PowerTab\ThemeGreen.csv
+
+# Import Example
+
+$theme = Import-Csv C:\PowerShell\PowerTab\ThemeGreen.csv
+$PowerTabConfig.Colors.ImportTheme($theme)
+
+so if you use PowerTab in different settings you can easy change you Color Sheme by importing a Thema.
+(border might belong here also, might rename colors to theme in $powerTabconfig and move it ) 
+
+I included the following example Thema's in CSV format
+
+ThemeDragon.csv
+ThemeGray.csv
+ThemeGreen.csv
+ThemeOriginal.csv
+ThemeSimpleWhite.csv
+
+If you think you created some nice themes please share, 
+
+Greetings /\/\o\/\/
