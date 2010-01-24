@@ -13,13 +13,12 @@ $global:dsTabExpansion = new-object data.dataset
 
 [void]$global:dsTabExpansion.ReadXml("$ConfigurationLocation\$fileName",'InferSchema')
 
-$installDir = $global:dsTabExpansion.tables['Config'].select("Name = 'InstallPath'")[0].value
 $DatabaseName = $global:dsTabExpansion.tables['Config'].select("Name = 'DatabaseName'")[0].value
 $DatabasePath = $global:dsTabExpansion.tables['Config'].select("Name = 'DatabasePath'")[0].value
 
 # Load the PowerTab Utility Functions
 
-. "$installDir\TabExpansionLib.ps1" 
+. "$psScriptRoot\TabExpansionLib.ps1" 
 
 # Load TabExpansion database
 
@@ -178,16 +177,16 @@ $global:dsTabExpansion.Tables['Config'].select("Category = 'ShortcutChars'") |
 # load other functions 
 
 if ($PowerTabConfig.Enabled) {
-  . "$installDir\TabExpansion.ps1"          # Load Main Tabcompletion function
+  . "$psScriptRoot\TabExpansion.ps1"          # Load Main Tabcompletion function
 }
-. "$installDir\Out-DataGridView.ps1"      # Used for GUI TabExpansion
-. "$installDir\ConsoleLib.ps1"            # Used for RawUi ConsoleList border
-. "$installDir\Get-ScriptParameters.ps1"  # Get Parameters of Scripts
+. "$psScriptRoot\Out-DataGridView.ps1"      # Used for GUI TabExpansion
+. "$psScriptRoot\ConsoleLib.ps1"            # Used for RawUi ConsoleList border
+. "$psScriptRoot\Get-ScriptParameters.ps1"  # Get Parameters of Scripts
 
 
 # load External Library for Share Enumeration
 
-[void][System.Reflection.Assembly]::LoadFile("$installDir\shares.dll")
+[void][System.Reflection.Assembly]::LoadFile("$psScriptRoot\shares.dll")
 
 if ($PowerTabConfig.ShowBanner) {
 Write-Host -f 'Yellow' "$($PowerTabConfig.Version) PowerShell TabExpansion library "
