@@ -15,6 +15,25 @@ function global:TabExpansion {
 
     $script:TabexpansionHasOutput = $false
 
+    filter itemToTabCompletionName()
+    {
+
+        # If a type is returned from GetChildItems that needs to tab complete with something other than $_.Name, place the mapping here. 
+        $typeToTabCompletionName=@{
+        [Microsoft.Powershell.Commands.X509StoreLocation]={$_.Location};
+        [Microsoft.Win32.RegistryKey]={ $_.Name.Split("\")[-1] };
+        }
+
+        $convertToTabCompletionNameFunction =$typeToTabCompletionName[$_.GetType()]
+        if (-not $convertToTabCompletionNameFunction  )
+        {
+            # The default tab completion name is $_.Name
+            $convertToTabCompletionNameFunction  = {$_.Name}
+        }
+
+        $_ | % $convertToTabCompletionNameFunction 
+    }
+
 
     if ($powertabconfig.IgnoreConfirmPreference) {
       $OriginalConfirmPreference = $ConfirmPreference
@@ -565,15 +584,16 @@ $script:TabexpansionHasOutput = $true
       } else {
         $ChildItems = gci "$lastword*"
       }
-      if (-not $ChildItems) {$lastword;return}
+      if (-not $ChildItems) { $lastword; return }
       #if ((@($childitems).count -eq 1) -and ($lastword.endswith('\')) ) {$childitems = $childitems,@{name='..'}} 
+#
       $PathSlices = [regex]::Split($lastword,'\\|/')
       if ($PathSlices.count -eq 1) {$PathSlices = ,"." + $PathSlices}
       $container = [string]::join('\',$PathSlices[0..($PathSlices.Count -2)])
 
       $LastPath = ($container + "\$([regex]::Split($lastword,'\\|/|:')[-1])")
 
-      $ChildItems |% {$container + "\" + $_.name}| Invoke-TabItemSelector $lastPath -SelectionHandler $SelectionHandler -return $lastword -ForceList |% {
+      $ChildItems | itemToTabCompletionName |% {$container + "\" + $_}| Invoke-TabItemSelector $lastPath -SelectionHandler $SelectionHandler -return $lastword -ForceList |% {
           $Quote = ''
           $invoke = ''
           if (($_.IndexOf(' ') -ge 0) -and ($_.IndexOf('"') -lt 0) ) {
