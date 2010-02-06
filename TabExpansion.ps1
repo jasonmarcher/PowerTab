@@ -20,6 +20,8 @@ function global:TabExpansion {
 
         # If a type is returned from GetChildItems that needs to tab complete with something other than $_.Name, place the mapping here. 
         $typeToTabCompletionName=@{
+
+        [System.Security.Cryptography.X509Certificates.X509Certificate2]={$_.Thumbprint};
         [Microsoft.Powershell.Commands.X509StoreLocation]={$_.Location};
         [Microsoft.Win32.RegistryKey]={ $_.Name.Split("\")[-1] };
         }
