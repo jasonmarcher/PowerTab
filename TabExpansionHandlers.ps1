@@ -96,11 +96,12 @@ Register-TabExpansion "Reset-ComputerMachinePassword" -Type "Command" {
     }.GetNewClosure()
     
     $ComputerRestorePointHandler = {
-        param($Context, [ref]$TabExpansionHasOutput)
+        param($Context, [ref]$TabExpansionHasOutput, [ref]$QuoteSpaces)
         $Argument = $Context.Argument
         switch -exact ($Context.Parameter) {
             'RestorePoint' {
                 $TabExpansionHasOutput.Value = $true
+                $QuoteSpaces.Value = $false
                 ## TODO: Display more info
                 try {
                     Get-ComputerRestorePoint | ForEach-Object {"{0} <# {1} #>" -f ([String]$_.SequenceNumber),$_.CreationTime}
@@ -194,10 +195,12 @@ Register-TabExpansion "Reset-ComputerMachinePassword" -Type "Command" {
 ## EventLog
 & {
     $EventLogHandler = {
-        param($Context, [ref]$TabExpansionHasOutput)
+        param($Context, [ref]$TabExpansionHasOutput, [ref]$QuoteSpaces)
         $Argument = $Context.Argument
         switch -exact ($Context.Parameter) {
             'Category' {
+                $TabExpansionHasOutput.Value = $true
+                $QuoteSpaces.Value = $false
                 $Categories = (
                     @{'Id'='0';'Name'='None'},
                     @{'Id'='1';'Name'='Devices'},
@@ -428,11 +431,12 @@ Register-TabExpansion "Out-Printer" -Type "Command" {
 ## Process
 & {
     $ProcessHandler = {
-        param($Context, [ref]$TabExpansionHasOutput)
+        param($Context, [ref]$TabExpansionHasOutput, [ref]$QuoteSpaces)
         $Argument = $Context.Argument
         switch -exact ($Context.Parameter) {
             'Id' {
                 $TabExpansionHasOutput.Value = $true
+                $QuoteSpaces.Value = $false
                 if ($Argument -match '^[0-9]+$') {
                     Get-Process | Where-Object {$_.Id.ToString() -like "$Argument*"} | ForEach-Object {"{0:-4} <# {1} #>" -f ([String]$_.Id),$_.Name}
                 } else {
@@ -447,11 +451,12 @@ Register-TabExpansion "Out-Printer" -Type "Command" {
     }.GetNewClosure()
     
     $GetProcessHandler = {
-        param($Context, [ref]$TabExpansionHasOutput)
+        param($Context, [ref]$TabExpansionHasOutput, [ref]$QuoteSpaces)
         $Argument = $Context.Argument
         switch -exact ($Context.Parameter) {
             'Id' {
                 $TabExpansionHasOutput.Value = $true
+                $QuoteSpaces.Value = $false
                 $Parameters = @{}
                 if ($Context.OtherParameters["ComputerName"]) {
                     ## TODO: Needs work
@@ -516,7 +521,10 @@ Register-TabExpansion "Out-Printer" -Type "Command" {
                 }
             }
             'Variable' {
-                ## TODO:
+                if ($Argument -notlike '$*') {
+                    $TabExpansionHasOutput.Value = $true
+                    Get-Variable "$Argument*" -Scope Global | Select-Object -ExpandProperty Name
+                }
             }
         }
     }.GetNewClosure()
@@ -590,7 +598,36 @@ Register-TabExpansion "Out-Printer" -Type "Command" {
 
 ## PSSessionConfiguration
 & {
-    ## TODO: 
+    $PSSessionConfigurationHandler = {
+        param($Context, [ref]$TabExpansionHasOutput)
+        $Argument = $Context.Argument
+        switch -exact ($Context.Parameter) {
+            'ConfigurationTypeName' {
+                ## TODO: Find way to differentiate namespaces from types
+                $TabExpansionHasOutput.Value = $true
+                $Dots = $Argument.Split(".").Count - 1
+                $res = @()
+                $res += $dsTabExpansionDatabase.Tables['Types'].Select("ns like '$Argument%' and dc = $($Dots + 1)") |
+                    Select-Object -Unique -ExpandProperty ns
+                if ($Dots -gt 0) {
+                    $res += $dsTabExpansionDatabase.Tables['Types'].Select("name like '$Argument%' and dc = $Dots") |
+                        Select-Object -ExpandProperty Name
+                }
+                $res
+            }
+            'Name' {
+                $TabExpansionHasOutput.Value = $true
+                Get-PSSessionConfiguration "$Argument*" | Select-Object -ExpandProperty Name
+            }
+        }
+    }
+
+    Register-TabExpansion "Disable-PSSessionConfiguration" $PSSessionConfigurationHandler -Type "Command"
+    Register-TabExpansion "Enable-PSSessionConfiguration" $PSSessionConfigurationHandler -Type "Command"
+    Register-TabExpansion "Get-PSSessionConfiguration" $PSSessionConfigurationHandler -Type "Command"
+    Register-TabExpansion "Register-PSSessionConfiguration" $PSSessionConfigurationHandler -Type "Command"
+    Register-TabExpansion "Set-PSSessionConfiguration" $PSSessionConfigurationHandler -Type "Command"
+    Register-TabExpansion "Unregister-PSSessionConfiguration" $PSSessionConfigurationHandler -Type "Command"
 }
 
 ## Add-PSSnapin
@@ -743,9 +780,10 @@ Register-TabExpansion "Get-Verb" -Type "Command" {
         $Argument = $Context.Argument
         switch -exact ($Context.Parameter) {
             'Name' {
-                $TabExpansionHasOutput.Value = $true
-                ## TODO: Allow expansion of variables?  $a<TAB>
-                Get-Variable "$Argument*" -Scope "Global" | Select-Object -ExpandProperty Name
+                if ($Argument -notlike '$*') {
+                    $TabExpansionHasOutput.Value = $true
+                    Get-Variable "$Argument*" -Scope "Global" | Select-Object -ExpandProperty Name
+                }
             }
             'Scope' {
                 $TabExpansionHasOutput.Value = $true
@@ -806,16 +844,17 @@ Register-TabExpansion "Get-WinEvent" -Type "Command" {
 ## WMI
 & {
     $WmiObjectHandler = {
-        param($Context, [ref]$TabExpansionHasOutput)
+        param($Context, [ref]$TabExpansionHasOutput, [ref]$QuoteSpaces)
         $Argument = $Context.Argument
         switch -exact ($Context.Parameter) {
             'Class' {
                 $TabExpansionHasOutput.Value = $true
                 ## TODO: escape special characters?
-                $dsTabExpansionDatabase.Tables['WMI'].Select("name like '$Argument%'") | Select-Object -ExpandProperty Name
+                Get-TabExpansion "$Argument%" "WMI" | Select-Object -ExpandProperty Name
             }
             'Locale' {
                 $TabExpansionHasOutput.Value = $true
+                $QuoteSpaces.Value = $false
                 [System.Globalization.CultureInfo]::GetCultures([System.Globalization.CultureTypes]::InstalledWin32Cultures) |
                     Where-Object {$_.Name -like "$Argument*"} | Sort-Object -Property Name |
                         ForEach-Object {"<#{0}#> {1}" -f $_.Name,([String]$_.LCID)}
@@ -851,7 +890,7 @@ Register-TabExpansion "Get-WinEvent" -Type "Command" {
                 ## TODO: ???
             }
         }
-    }
+    }.GetNewClosure()
     
     Register-TabExpansion "Get-WmiObject" $WmiObjectHandler -Type "Command"
     Register-TabExpansion "Invoke-WmiMethod" $WmiObjectHandler -Type "Command"
@@ -913,9 +952,10 @@ Register-TabExpansion "ComputerName" -Type "Parameter" {
 & {
     $VariableHandler = {
         param($Argument, [ref]$TabExpansionHasOutput)
-        ## TODO: Allow expansion of variables?  $a<TAB>
-        $TabExpansionHasOutput.Value = $true
-        Get-Variable "$Argument*" -Scope "Global" | Select-Object -ExpandProperty "Name"
+        if ($Argument -notlike '$*') {
+            $TabExpansionHasOutput.Value = $true
+            Get-Variable "$Argument*" -Scope "Global" | Select-Object -ExpandProperty "Name"
+        }
     }.GetNewClosure()
     
     Register-TabExpansion "ErrorVariable" $VariableHandler -Type "Parameter"
@@ -986,7 +1026,7 @@ Register-TabExpansion "PSProvider" -Type "Parameter" {
     }.GetNewClosure()
 
     Register-TabExpansion "iexplore.exe" -Type "Command" {
-        param($Context, [ref]$TabExpansionHasOutput)
+        param($Context, [ref]$TabExpansionHasOutput, [ref]$QuoteSpaces)
         $Argument = $Context.Argument
         switch -exact ($Context.Parameter) {
             'URL' {
@@ -997,6 +1037,7 @@ Register-TabExpansion "PSProvider" -Type "Parameter" {
 
                 if ($Favorites) {
                     $TabExpansionHasOutput.Value = $true
+                    $QuoteSpaces.Value = $false
                     $Favorites
                 }
             }

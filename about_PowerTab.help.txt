@@ -1,0 +1,53 @@
+TOPIC
+    about_PowerTab
+
+SHORT DESCRIPTION
+    PowerTab extends the tab expansion feature of PowerShell to offer more
+    productivity for PowerShell users. 
+
+LONG DESCRIPTION
+    An alias is an alternate name or nickname for a cmdlet or for a command
+    element, such as a function, script, file, or executable file. You
+    can use the alias instead of the command name in any Windows PowerShell
+    commands.
+
+LOAD POWERTAB WITH AN EXISTING CONFIG
+    Foobar.
+
+        $Path = "C:\Users\Bob\Documents\WindowsPowerShell\PowerTabConfig.xml"
+        Import-Module PowerTab -ArgumentList $Path
+
+FEEDBACK
+    TODO.
+
+CREDITS
+    This is a list of people and/or groups who have directly or indirectly
+    helped by offering significant suggestions, code or linkable binaries. In
+    no particular order:
+
+    Marc "/\/\o\/\/" van Orsouw, MVP
+    https://mvp.support.microsoft.com/profile/van%20Orsouw
+    http://thepowershellguy.com/
+
+    Aaron Lerch / Invoke-Intellisense / Lerch.PowerShell.dll
+    http://www.aaronlerch.com/
+
+    Richard Deeming / Shares.dll
+    http://www.codeproject.com/KB/IP/networkshares.aspx
+
+    Jason Archer
+
+
+SEE ALSO
+
+    Get-TabExpansion
+    Add-TabExpansion
+    Update-TabExpansionDataBase
+    Register-TabExpansion
+    Import-TabExpansionTheme
+    Export-TabExpansionTheme
+    Import-TabExpansionConfig
+    Import-TabExpansionDataBase
+    Export-TabExpansionConfig
+    Export-TabExpansionDatabase
+    about_functions

@@ -179,7 +179,14 @@ Function Export-TabExpansionDatabase {
             $PowerTabConfig.Setup.DatabasePath = $LiteralPath
         }
 
-        $dsTabExpansionDatabase.WriteXml($LiteralPath)
+        if ($LiteralPath -eq "IsolatedStorage") {
+            New-IsolatedStorageDirectory "PowerTab"
+            $IsoFile = Open-IsolatedStorageFile "PowerTab\TabExpansion.xml" -Writable
+            $dsTabExpansionDatabase.WriteXml($IsoFile)
+        } else {
+            $dsTabExpansionDatabase.WriteXml($LiteralPath)
+        }
+
         Write-Verbose ($Resources.export_tabexpansiondatabase_ver_success -f $LiteralPath)
     }
 }
@@ -215,11 +222,22 @@ Function Export-TabExpansionConfig {
             $PowerTabConfig.Setup.ConfigurationPath = $LiteralPath
         }
         if (-not $PowerTabConfig.Setup.DatabasePath) {
-            $DatabasePath = Join-Path (Split-Path $LiteralPath) TabExpansion.xml
+            if ($LiteralPath -eq "IsolatedStorage") {
+                $DatabasePath = $LiteralPath
+            } else {
+                $DatabasePath = Join-Path (Split-Path $LiteralPath) TabExpansion.xml
+            }
             $PowerTabConfig.Setup.DatabasePath = $DatabasePath
         }
 
-        $dsTabExpansionConfig.Tables['Config'].WriteXml($LiteralPath)
+        if ($LiteralPath -eq "IsolatedStorage") {
+            New-IsolatedStorageDirectory "PowerTab"
+            $IsoFile = Open-IsolatedStorageFile "PowerTab\PowerTabConfig.xml" -Writable
+            $dsTabExpansionConfig.Tables['Config'].WriteXml($IsoFile)
+        } else {
+            $dsTabExpansionConfig.Tables['Config'].WriteXml($LiteralPath)
+        }
+
         Write-Verbose ($Resources.export_tabexpansionconfig_ver_success -f $LiteralPath)
     }
 }
@@ -667,9 +685,9 @@ Function Initialize-PowerTab {
         [ValidateNotNullOrEmpty()]
         [String]$ConfigurationPath = $PowerTabConfig.Setup.ConfigurationPath
     )
- 
+
     ## Load Configuration
-    if ($ConfigurationPath -and (Test-Path $ConfigurationPath)) {
+    if ($ConfigurationPath -and ((Test-Path $ConfigurationPath) -or ($ConfigurationPath -eq "IsolatedStorage"))) {
         $Config = InternalImportTabExpansionConfig $ConfigurationPath
     } else {
         ## TODO: Throw error or create new config?
@@ -677,8 +695,7 @@ Function Initialize-PowerTab {
     }
 
     ## Load Version
-    $ModuleManifest = "Data {`n" + (Get-Content "$PSScriptRoot\PowerTab.psd1" -Delimiter `0) + "`n}"
-    [System.Version]$CurVersion = $ExecutionContext.SessionState.InvokeCommand.NewScriptBlock($ModuleManifest).Invoke()[0]["ModuleVersion"]
+    [System.Version]$CurVersion = (Get-Module -ListAvailable $PSCmdlet.MyInvocation.MyCommand.Module.Name).Version
     $Version = $Config.Tables['Config'].Select("Name = 'Version'")[0].Value -as [System.Version]
     if ($Version -eq $null) {$Version = [System.Version]'0.99.0.0'}
 
@@ -705,6 +722,9 @@ Function Initialize-PowerTab {
 
     ## Create the user interface for the PowerTab settings
     CreatePowerTabConfig
+
+    ## Set version
+    $PowerTabConfig.Version = $CurVersion
 }
 
 
@@ -757,12 +777,17 @@ Function UpgradePowerTab99 {
 
 
 Function InternalNewTabExpansionConfig {
+    [CmdletBinding()]
     param(
         [String]$ConfigurationPath
     )
     
     if ($ConfigurationPath) {
-        $DatabasePath = Join-Path (Split-Path $ConfigurationPath) "TabExpansion.xml"
+        if ($ConfigurationPath -eq "IsolatedStorage") {
+            $DatabasePath = $ConfigurationPath
+        } else {
+            $DatabasePath = Join-Path (Split-Path $ConfigurationPath) "TabExpansion.xml"
+        }
     }
 
     $Config = New-Object System.Data.DataSet
@@ -774,13 +799,9 @@ Function InternalNewTabExpansionConfig {
     [Void]$dtConfig.Columns.Add('Type')
     $dtConfig.TableName = 'Config'
 
-    ## Load Version
-    $ModuleManifest = "Data {`n" + (Get-Content "$PSScriptRoot\PowerTab.psd1" -Delimiter `0) + "`n}"
-    $CurVersion = $ExecutionContext.SessionState.InvokeCommand.NewScriptBlock($ModuleManifest).Invoke()[0]["ModuleVersion"]
-
     ## Add global configuration
     @{
-        Version = $CurVersion
+        Version = (Get-Module -ListAvailable $PSCmdlet.MyInvocation.MyCommand.Module.Name).Version
         DefaultHandler = 'Dynamic'
         AlternateHandler = 'Dynamic'
         CustomUserFunction = 'Write-Warning'
@@ -904,9 +925,16 @@ Function InternalImportTabExpansionDataBase {
     param(
         [String]$LiteralPath
     )
-    
+
     $Database = New-Object System.Data.DataSet
-    [Void]$Database.ReadXml($LiteralPath)
+    if ($LiteralPath -eq "IsolatedStorage") {
+        $UserIsoStorage = [System.IO.IsolatedStorage.IsolatedStorageFile]::GetUserStoreForAssembly()
+        $IsoFile = New-Object System.IO.IsolatedStorage.IsolatedStorageFileStream("PowerTab\TabExpansion.xml",
+            [System.IO.FileMode]::Open, $UserIsoStorage)
+        [Void]$Database.ReadXml($IsoFile)
+    } else {
+        [Void]$Database.ReadXml($LiteralPath)
+    }
     $Database
 }
 
@@ -915,9 +943,16 @@ Function InternalImportTabExpansionConfig {
     param(
         [String]$LiteralPath
     )
-    
+
     $Config = New-Object System.Data.DataSet
-    [Void]$Config.ReadXml($LiteralPath, 'InferSchema')
+    if ($LiteralPath -eq "IsolatedStorage") {
+        $UserIsoStorage = [System.IO.IsolatedStorage.IsolatedStorageFile]::GetUserStoreForAssembly()
+        $IsoFile = New-Object System.IO.IsolatedStorage.IsolatedStorageFileStream("PowerTab\PowerTabConfig.xml",
+            [System.IO.FileMode]::Open, $UserIsoStorage)
+        [Void]$Config.ReadXml($IsoFile, 'InferSchema')
+    } else {
+        [Void]$Config.ReadXml($LiteralPath, 'InferSchema')
+    }
     $Config
 }
 

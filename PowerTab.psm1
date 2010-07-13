@@ -17,6 +17,8 @@ $ConfigurationPathParam = ""
 
     if ($ConfigurationPath) {
         $script:ConfigurationPathParam = $ConfigurationPath
+    } elseif ($PrivateData = (Get-Module -ListAvailable $PSCmdlet.MyInvocation.MyCommand.Module.Name).PrivateData) {
+        $script:ConfigurationPathParam = $PrivateData
     }
 } @args
 
@@ -72,15 +74,31 @@ Import-LocalizedData -BindingVariable "Resources" -FileName "Resources"
 . (Join-Path $PSScriptRoot "TabExpansionUtil.ps1")
 . (Join-Path $PSScriptRoot "TabExpansionHandlers.ps1")
 . (Join-Path $PSScriptRoot "ConsoleLib.ps1")
+Get-ChildItem (Join-Path $PSScriptRoot "thirdparty\*.ps1") | ForEach-Object {. $_.FullName}
 
 
 #########################
 ## Initialization code
 #########################
 
-if ($ConfigurationPathParam -and (Test-Path $ConfigurationPathParam)) {
+if ($ConfigurationPathParam -and ((Test-Path $ConfigurationPathParam) -or (
+        ($ConfigurationPathParam -eq "IsolatedStorage") -and (Test-IsolatedStoragePath "PowerTab\PowerTabConfig.xml")))) {
     ## Config exists, load it
     Initialize-PowerTab $ConfigurationPathParam
+} elseif ($ConfigurationPathParam) {
+    ## Config specified, but does not exist
+
+    ## Create config and database
+    New-TabExpansionConfig $ConfigurationPathParam
+    CreatePowerTabConfig
+    New-TabExpansionDatabase
+
+    ## Update database
+    Update-TabExpansionDataBase -Confirm
+
+    ## Export changes
+    Export-TabExpansionConfig
+    Export-TabExpansionDatabase
 } else {
     $Yes = [System.Management.Automation.Host.ChoiceDescription]($Resources.global_choice_yes)
     $No = [System.Management.Automation.Host.ChoiceDescription]($Resources.global_choice_no)
@@ -92,16 +110,18 @@ if ($ConfigurationPathParam -and (Test-Path $ConfigurationPathParam)) {
         ## Ask for location to place config and database
         $ProfileDir = [System.Management.Automation.Host.ChoiceDescription]($Resources.setup_wizard_choice_profile_directory)
         $InstallDir = [System.Management.Automation.Host.ChoiceDescription]($Resources.setup_wizard_choice_install_directory)
+        $AppDataDir = [System.Management.Automation.Host.ChoiceDescription]($Resources.setup_wizard_choice_appdata_directory)
         $OtherDir = [System.Management.Automation.Host.ChoiceDescription]($Resources.setup_wizard_choice_other_directory)
-        $LocationChoices = [System.Management.Automation.Host.ChoiceDescription[]]($ProfileDir,$InstallDir,$OtherDir)
+        $LocationChoices = [System.Management.Automation.Host.ChoiceDescription[]]($ProfileDir,$InstallDir,$AppDataDir,$OtherDir)
         $Answer = $Host.UI.PromptForChoice($Resources.setup_wizard_config_location_caption, $Resources.setup_wizard_config_location_message, $LocationChoices, 0)
         $SetupConfigurationPath = switch ($Answer) {
             0 {Split-Path $Profile}
             1 {$PSScriptRoot}
-            2 {
+            2 {Join-Path ([System.Environment]::GetFolderPath([System.Environment+SpecialFolder]::ApplicationData)) "PowerTab"}
+            3 {
                 $Path = Read-Host $Resources.setup_wizard_other_directory_prompt
                 while (-not (Test-Path -IsValid $Path)) {
-                    Write-Host 'Red' 'Path is invalid'
+                    Write-Host 'Red' 'Path is invalid.'  ## TODO: localize, maybe use standard PS message
                     $Path = Read-Host $Resources.setup_wizard_other_directory_prompt
                 }
                 $Path
@@ -109,7 +129,11 @@ if ($ConfigurationPathParam -and (Test-Path $ConfigurationPathParam)) {
         }
 
         ## Create config in chosen location
-        New-TabExpansionConfig (Join-Path $SetupConfigurationPath "PowerTabConfig.xml")
+        if ($SetupConfigurationPath -eq "IsolatedStorage") {
+            New-TabExpansionConfig $SetupConfigurationPath
+        } else {
+            New-TabExpansionConfig (Join-Path $SetupConfigurationPath "PowerTabConfig.xml")
+        }
         CreatePowerTabConfig
 
         ## Profile text
@@ -130,11 +154,17 @@ Import-Module "PowerTab" -ArgumentList "$(Join-Path $SetupConfigurationPath "Pow
         Write-Host $ProfileText
 
         ## Create new database or load existing database
-        $SetupDatabasePath = Join-Path $SetupConfigurationPath "TabExpansion.xml"
-        if (Test-Path $SetupDatabasePath) {
-            $Answer = $Host.UI.PromptForChoice($Resources.setup_wizard_upgrade_existing_database_caption, $Resources.setup_wizard_upgrade_existing_database_message, $YesNoChoices, 1)
-        } else {
+        if ($SetupConfigurationPath -eq "IsolatedStorage") {
+            $SetupDatabasePath = $SetupConfigurationPath
+            ## TODO: Detect exising database in Isolated Storage
             $Answer = 0
+        } else {
+            $SetupDatabasePath = Join-Path $SetupConfigurationPath "TabExpansion.xml"
+            if (Test-Path $SetupDatabasePath) {
+                $Answer = $Host.UI.PromptForChoice($Resources.setup_wizard_upgrade_existing_database_caption, $Resources.setup_wizard_upgrade_existing_database_message, $YesNoChoices, 1)
+            } else {
+                $Answer = 0
+            }
         }
         if ($Answer) {
             Import-TabExpansionDataBase $SetupDatabasePath

@@ -83,7 +83,7 @@ Function Invoke-TabExpansion {
                 if ($Parameter.ParameterType -eq [System.Management.Automation.SwitchParameter]) {
                     $CurrentContext.OtherParameters[$CurrentContext.Parameter] = $true
                     $CurrentContext.Parameter = ""
-                    $CurrentContext.Argument = $true
+                    $CurrentContext.Argument = ""
                     $CurrentContext.isParameterValue = $false
                 }
             } catch {}
@@ -245,6 +245,7 @@ Function Invoke-TabExpansion {
         }
 
         $TabExpansionHasOutput = $false
+        $QuoteSpaces = $true
         $PossibleValues = @()
         if ($CurrentContext.isParameterValue) {
             ## Tab complete parameter value
@@ -252,17 +253,17 @@ Function Invoke-TabExpansion {
             ## Command registry
             if ((-not $TabExpansionHasOutput) -and $TabExpansionCommandRegistry[$FullCommandName]) {
                 $ScriptBlock = $TabExpansionCommandRegistry[$FullCommandName]
-                $PossibleValues = & $ScriptBlock $CurrentContext ([ref]$TabExpansionHasOutput)
+                $PossibleValues = & $ScriptBlock $CurrentContext ([ref]$TabExpansionHasOutput) ([ref]$QuoteSpaces)
             }
             if ((-not $TabExpansionHasOutput) -and $TabExpansionCommandRegistry[$InternalCommandName]) {
                 $ScriptBlock = $TabExpansionCommandRegistry[$InternalCommandName]
-                $PossibleValues = & $ScriptBlock $CurrentContext ([ref]$TabExpansionHasOutput)
+                $PossibleValues = & $ScriptBlock $CurrentContext ([ref]$TabExpansionHasOutput) ([ref]$QuoteSpaces)
             }
 
             ## Parameter registry
             if ((-not $TabExpansionHasOutput) -and $TabExpansionParameterRegistry[$CurrentContext.Parameter]) {
                 $ScriptBlock = $TabExpansionParameterRegistry[$CurrentContext.Parameter]
-                $PossibleValues = & $ScriptBlock $CurrentContext.Argument ([ref]$TabExpansionHasOutput)
+                $PossibleValues = & $ScriptBlock $CurrentContext.Argument ([ref]$TabExpansionHasOutput) ([ref]$QuoteSpaces)
             }
 
             ## Enum and ValidateSet() support
@@ -329,7 +330,7 @@ Function Invoke-TabExpansion {
 
         if ($TabExpansionHasOutput) {
             $PossibleValues | Invoke-TabItemSelector $LastWord -SelectionHandler $SelectionHandler | ForEach-Object {
-                if (($_ -match " ") -and ($_ -notmatch "^[`"'].*[`"']`$") -and
+                if ($QuoteSpaces -and ($_ -match " ") -and ($_ -notmatch "^[`"'].*[`"']`$") -and
                     (($LastToken.Type -eq $_TokenTypes::CommandArgument) -or ($LastWord -eq ""))) {
                     "`"$_`""
                 } else {
