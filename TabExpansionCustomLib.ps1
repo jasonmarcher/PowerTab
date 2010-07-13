@@ -1,37 +1,26 @@
+
 # Add Enum Functions
-
-  [void](add-tabExpansion '|%' '| foreach {$_}' 'Alias')
-  [void](add-tabExpansion '|?' '| where {$_}' 'Alias')
-  [void](add-tabExpansion 'cc' "@{name='';expression={}}")
-  [void](add-tabExpansion 'cc' "@{Label='';expression={}}")
-  [void](add-tabExpansion 'cc' "@{Label='';expression={};Width=10}")
-  [void](add-tabExpansion 'tqb' 'The quick brown fox jumps over the lazy dog')
-  [void](add-tabExpansion 'Localhost' 'Localhost' 'Computer')
-  [void](add-tabExpansion 'ate' 'Add-Tabexpansion')
-  [void](add-tabExpansion 'rte' 'Refresh-TabExpansion' )
-  [void](add-tabExpansion 'gtcom' 'get-TabExpansionComputer' )
-  [void](add-tabExpansion 'gtc' 'get-TabExpansionCustom' )
-
-# Handy Enums
-
-[enum]::GetNames( [System.Management.Automation.ActionPreference] ) |% {  [void]( add-tabExpansion 'ap' $_ )}
-[enum]::GetNames( [System.Management.Automation.PSMemberTypes] ) |% {  [void] (add-tabExpansion mt $_ )}
-[enum]::getnames([System.Management.AuthenticationLevel])  |% {  [void] (add-tabExpansion al $_) }
+[Void](Add-TabExpansion '|%' '| foreach {$_}' 'Alias')
+[Void](Add-TabExpansion '|?' '| where {$_}' 'Alias')
+[Void](Add-TabExpansion 'cc' "@{name='';expression={}}")
+[Void](Add-TabExpansion 'cc' "@{Label='';expression={}}")
+[Void](Add-TabExpansion 'cc' "@{Label='';expression={};Width=10}")
+[Void](Add-TabExpansion 'tqb' 'The quick brown fox jumps over the lazy dog')
+[Void](Add-TabExpansion 'Localhost' 'Localhost' 'Computer')
+[Void](Add-TabExpansion 'ate' 'Add-TabExpansion')
+[Void](Add-TabExpansion 'rte' 'Refresh-TabExpansion' )
+[Void](Add-TabExpansion 'gtcom' 'Get-TabExpansionComputer' )
+[Void](Add-TabExpansion 'gtc' 'Get-TabExpansionCustom' )
 
 # Help Shortcuts
-
-  [void](add-tabExpansion h 'Get-help $^ -Full')
-  [void](add-tabExpansion h 'Get-help $^ -Detailed')
-  [void](add-tabExpansion h 'Get-help $^ -Examples')
+[Void](Add-TabExpansion 'h' 'Get-help $^ -Full')
+[Void](Add-TabExpansion 'h' 'Get-help $^ -Detailed')
+[Void](Add-TabExpansion 'h' 'Get-help $^ -Examples')
 
 # Font Selection
-
-  #[void]((New-Object System.Drawing.Text.InstalledFontCollection).Families |% { add-tabExpansion FontFamily $_.name })
-
-  [void]($dsTabExpansion.Tables['Custom'].select("type = 'Invoke'") | format-table -auto)
+#[Void]((New-Object System.Drawing.Text.InstalledFontCollection).Families | ForEach-Object { Add-TabExpansion 'FontFamily' $_.name })
 
 # Invoke ShortCuts
-
-  [void](add-tabExpansion now 'get-date' invoke)
-  [void](add-tabExpansion date 'get-date -date' invoke)
-  [void](add-tabExpansion time 'get-date -time' invoke)
+[Void](Add-TabExpansion 'now' 'Get-Date' 'Invoke')
+[Void](Add-TabExpansion 'date' 'Get-Date -date' 'Invoke')
+[Void](Add-TabExpansion 'time' 'Get-Date -time' 'Invoke')

@@ -1,0 +1,32 @@
+^@  0   NUL  
+^A  1        YES
+^B  2        YES
+^C  3        YES  Copy
+^D  4        YES
+^E  5        YES
+^F  6        YES
+^G  7   BEL  YES  Alarm, avoid
+^H  8   BS   NO   
+^I  9   TAB  NO   
+^J  10  LF   NOT  Adds a return without submitting command, but breaks backspacing
+^K  11  VT   YES
+^L  12  FF   YES
+^M  13  CR   NO
+^N  14       YES
+^O  15       YES
+^P  16       YES
+^Q  17       YES
+^R  18       YES
+^S  19       NOT
+^T  20       NOT
+^U  21       YES
+^V  22       YES  Paste
+^W  23       YES
+^X  24       YES  Cut
+^Y  25       YES
+^Z  26       YES  Cut word?
+^[  27  ESC  YES
+^\  28  FS   YES
+^]  29  GS   YES
+^^  30  RS   YES
+^_  31  US   YES
