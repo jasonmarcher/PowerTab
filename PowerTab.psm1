@@ -27,6 +27,11 @@ if (-not ([AppDomain]::CurrentDomain.GetAssemblies() | Where-Object {$_.Manifest
     [Void][System.Reflection.Assembly]::LoadWithPartialName("System.Windows.Forms")
 }
 
+## Load shares library
+if (-not ([AppDomain]::CurrentDomain.GetAssemblies() | Where-Object {$_.ManifestModule -like "Shares.*"})) {
+    [Void][System.Reflection.Assembly]::LoadFile((Join-Path $PSScriptRoot "Shares.dll"))
+}
+
 #########################
 ## Cleanup
 #########################
@@ -111,8 +116,9 @@ if ($ConfigurationPathParam -and ((Test-Path $ConfigurationPathParam) -or (
         $ProfileDir = [System.Management.Automation.Host.ChoiceDescription]($Resources.setup_wizard_choice_profile_directory)
         $InstallDir = [System.Management.Automation.Host.ChoiceDescription]($Resources.setup_wizard_choice_install_directory)
         $AppDataDir = [System.Management.Automation.Host.ChoiceDescription]($Resources.setup_wizard_choice_appdata_directory)
+        $IsoStorageDir = [System.Management.Automation.Host.ChoiceDescription]($Resources.setup_wizard_choice_isostorage_directory)
         $OtherDir = [System.Management.Automation.Host.ChoiceDescription]($Resources.setup_wizard_choice_other_directory)
-        $LocationChoices = [System.Management.Automation.Host.ChoiceDescription[]]($ProfileDir,$InstallDir,$AppDataDir,$OtherDir)
+        $LocationChoices = [System.Management.Automation.Host.ChoiceDescription[]]($ProfileDir,$InstallDir,$AppDataDir,$IsoStorageDir,$OtherDir)
         $Answer = $Host.UI.PromptForChoice($Resources.setup_wizard_config_location_caption, $Resources.setup_wizard_config_location_message, $LocationChoices, 0)
         $SetupConfigurationPath = switch ($Answer) {
             0 {Split-Path $Profile}
@@ -156,8 +162,11 @@ Import-Module "PowerTab" -ArgumentList "$(Join-Path $SetupConfigurationPath "Pow
         ## Create new database or load existing database
         if ($SetupConfigurationPath -eq "IsolatedStorage") {
             $SetupDatabasePath = $SetupConfigurationPath
-            ## TODO: Detect exising database in Isolated Storage
-            $Answer = 0
+            if (Test-IsolatedStoragePath "PowerTab\TabExpansion.xml") {
+                $Answer = $Host.UI.PromptForChoice($Resources.setup_wizard_upgrade_existing_database_caption, $Resources.setup_wizard_upgrade_existing_database_message, $YesNoChoices, 1)
+            } else {
+                $Answer = 0
+            }
         } else {
             $SetupDatabasePath = Join-Path $SetupConfigurationPath "TabExpansion.xml"
             if (Test-Path $SetupDatabasePath) {
@@ -191,8 +200,7 @@ if ($PowerTabConfig.Enabled) {
 }
 
 if ($PowerTabConfig.ShowBanner) {
-    $ModuleManifest = "Data {`n" + (Get-Content "$PSScriptRoot\PowerTab.psd1" -Delimiter `0) + "`n}"
-    $CurVersion = $ExecutionContext.SessionState.InvokeCommand.NewScriptBlock($ModuleManifest).Invoke()[0]["ModuleVersion"]
+    $CurVersion = (Get-Module -ListAvailable $PSCmdlet.MyInvocation.MyCommand.Module.Name).Version
     Write-Host -ForegroundColor 'Yellow' "PowerTab version ${CurVersion} PowerShell TabExpansion Library"
     Write-Host -ForegroundColor 'Yellow' "Technology Preview"
     Write-Host -ForegroundColor 'Blue' "/\/\o\/\/ 2007 http://thePowerShellGuy.com"
@@ -204,7 +212,7 @@ if ($PowerTabConfig.ShowBanner) {
 $ExcludedFuctions = @("Initialize-TabExpansion")
 $Functions = Get-Command "*-TabExpansion*" | Where-Object {$ExcludedFuctions -notcontains $_.Name}
 #$Functions = Get-Command "*-*" | Where-Object {$ExcludedFuctions -notcontains $_.Name}
-Export-ModuleMember -Function $Functions -Variable PowerTabConfig
+Export-ModuleMember -Function $Functions -Variable PowerTabConfig -Alias *
 
 <#
 TODOs
@@ -222,6 +230,7 @@ TODOs
 + ScriptBlock members:  { 1+1 }.inv<TAB>
 + COM object names (PROGIDs)?
 + Fix footer of console list getting longer than the width of the list (leaves some characters that don't get cleaned up)
++ Fixed interop types not getting added to the database correctly
 - Support variables in path:  $test = "C:"; $test\<TAB>
 ~ Expand items in a list:  Get-Command -CommandType Cm<TAB>,Fun<TAB>
 - Assignment to strongly type variables:  $ErrorActionPreference = <TAB>

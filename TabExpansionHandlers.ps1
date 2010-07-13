@@ -383,6 +383,21 @@ Register-TabExpansion "Remove-Module" -Type "Command" {
     }
 }.GetNewClosure()
 
+## Group-Object
+Register-TabExpansion "Group-Object" -Type "Command" {
+    param($Context, [ref]$TabExpansionHasOutput, [ref]$QuoteSpaces)
+    $Argument = $Context.Argument
+    switch -exact ($Context.Parameter) {
+        'Property' {
+            if ($Argument -like "@*") {
+                $TabExpansionHasOutput.Value = $true
+                $QuoteSpaces.Value = $false
+                '@{Name=""; Expression={$_.}}'
+            }
+        }
+    }
+}
+
 ## New-Object
 Register-TabExpansion "New-Object" -Type "Command" {
     param($Context, [ref]$TabExpansionHasOutput)
@@ -411,6 +426,38 @@ Register-TabExpansion "New-Object" -Type "Command" {
                     Select-Object -ExpandProperty Name
             }
             $res
+        }
+    }
+}
+
+## Select-Object
+Register-TabExpansion "Select-Object" -Type "Command" {
+    param($Context, [ref]$TabExpansionHasOutput, [ref]$QuoteSpaces)
+    $Argument = $Context.Argument
+    switch -exact ($Context.Parameter) {
+        'Property' {
+            if ($Argument -like "@*") {
+                $TabExpansionHasOutput.Value = $true
+                $QuoteSpaces.Value = $false
+                '@{Name=""; Expression={$_.}}'
+            }
+        }
+    }
+}
+
+## Sort-Object
+Register-TabExpansion "Sort-Object" -Type "Command" {
+    param($Context, [ref]$TabExpansionHasOutput, [ref]$QuoteSpaces)
+    $Argument = $Context.Argument
+    switch -exact ($Context.Parameter) {
+        'Property' {
+            if ($Argument -like "@*") {
+                $TabExpansionHasOutput.Value = $true
+                $QuoteSpaces.Value = $false
+                '@{Expression={$_.}}'
+                '@{Expression={$_.}; Ascending=$true}'
+                '@{Expression={$_.}; Descending=$true}'
+            }
         }
     }
 }
@@ -800,7 +847,7 @@ Register-TabExpansion "Get-Verb" -Type "Command" {
 
 ## Get-WinEvent
 Register-TabExpansion "Get-WinEvent" -Type "Command" {
-    param($Context, [ref]$TabExpansionHasOutput)
+    param($Context, [ref]$TabExpansionHasOutput, [ref]$QuoteSpaces)
     $Argument = $Context.Argument
     $Parameters = @{"ErrorAction" = "SilentlyContinue"}
     if ($Context.OtherParameters["ComputerName"]) {
@@ -814,6 +861,7 @@ Register-TabExpansion "Get-WinEvent" -Type "Command" {
     switch -exact ($Context.Parameter) {
         'FilterHashTable' {
             $TabExpansionHasOutput.Value = $true
+            $QuoteSpaces.Value = $false
             '@{LogName="*"}'
             '@{ProviderName="*"}'
             '@{Keywords=""}'
@@ -904,23 +952,117 @@ Register-TabExpansion "Get-WinEvent" -Type "Command" {
     ## TODO: 
 }
 
-## Format-*
-& {
-    $FormatHandler = {
-        param($Context, [ref]$TabExpansionHasOutput)
-        $Argument = $Context.Argument
-        switch -exact ($Context.Parameter) {
-            'View' {
-                ## TODO: Need to figure out what type of object will be coming in
+## Format-Custom
+Register-TabExpansion "Format-Custom" -Type "Command" {
+    param($Context, [ref]$TabExpansionHasOutput, [ref]$QuoteSpaces)
+    $Argument = $Context.Argument
+    switch -exact ($Context.Parameter) {
+        'GroupBy' {
+            if ($Argument -like "@*") {
+                $TabExpansionHasOutput.Value = $true
+                $QuoteSpaces.Value = $false
+                '@{Name=""; Expression={$_.}}'
+                '@{Name=""; Expression={$_.}; FormatString=""}'
             }
         }
+        'Property' {
+            if ($Argument -like "@*") {
+                $TabExpansionHasOutput.Value = $true
+                $QuoteSpaces.Value = $false
+                '@{Expression={$_.}}'
+                '@{Expression={$_.}; Depth=3}'
+            }
+        }
+        'View' {
+            ## TODO: Need to figure out what type of object will be coming in
+        }
     }
-    
-    Register-TabExpansion "Format-Custom" $FormatHandler -Type "Command"
-    Register-TabExpansion "Format-List" $FormatHandler -Type "Command"
-    Register-TabExpansion "Format-Table" $FormatHandler -Type "Command"
-    Register-TabExpansion "Format-Wide" $FormatHandler -Type "Command"
-}
+}.GetNewClosure()
+
+## Format-List
+Register-TabExpansion "Format-List" -Type "Command" {
+    param($Context, [ref]$TabExpansionHasOutput, [ref]$QuoteSpaces)
+    $Argument = $Context.Argument
+    switch -exact ($Context.Parameter) {
+        'GroupBy' {
+            if ($Argument -like "@*") {
+                $TabExpansionHasOutput.Value = $true
+                $QuoteSpaces.Value = $false
+                '@{Name=""; Expression={$_.}}'
+                '@{Name=""; Expression={$_.}; FormatString=""}'
+            }
+        }
+        'Property' {
+            if ($Argument -like "@*") {
+                $TabExpansionHasOutput.Value = $true
+                $QuoteSpaces.Value = $false
+                '@{Name=""; Expression={$_.}}'
+                '@{Name=""; Expression={$_.}; FormatString=""}'
+            }
+        }
+        'View' {
+            ## TODO: Need to figure out what type of object will be coming in
+        }
+    }
+}.GetNewClosure()
+
+## Format-Table
+Register-TabExpansion "Format-Table" -Type "Command" {
+    param($Context, [ref]$TabExpansionHasOutput, [ref]$QuoteSpaces)
+    $Argument = $Context.Argument
+    switch -exact ($Context.Parameter) {
+        'GroupBy' {
+            if ($Argument -like "@*") {
+                $TabExpansionHasOutput.Value = $true
+                $QuoteSpaces.Value = $false
+                '@{Name=""; Expression={$_.}}'
+                '@{Name=""; Expression={$_.}; FormatString=""}'
+            }
+        }
+        'Property' {
+            if ($Argument -like "@*") {
+                $TabExpansionHasOutput.Value = $true
+                $QuoteSpaces.Value = $false
+                '@{Name=""; Expression={$_.}}'
+                '@{Name=""; Expression={$_.}; FormatString=""}'
+                '@{Name=""; Expression={$_.}; Width=9}'
+                '@{Name=""; Expression={$_.}; Width=9; Alignment="Left"}'
+                '@{Name=""; Expression={$_.}; Width=9; Alignment="Center"}'
+                '@{Name=""; Expression={$_.}; Width=9; Alignment="Right"}'
+            }
+        }
+        'View' {
+            ## TODO: Need to figure out what type of object will be coming in
+        }
+    }
+}.GetNewClosure()
+
+## Format-Wide
+Register-TabExpansion "Format-Wide" -Type "Command" {
+    param($Context, [ref]$TabExpansionHasOutput, [ref]$QuoteSpaces)
+    $Argument = $Context.Argument
+    switch -exact ($Context.Parameter) {
+        'GroupBy' {
+            if ($Argument -like "@*") {
+                $TabExpansionHasOutput.Value = $true
+                $QuoteSpaces.Value = $false
+                '@{Name=""; Expression={$_.}}'
+                '@{Name=""; Expression={$_.}; FormatString=""}'
+            }
+        }
+        'Property' {
+            if ($Argument -like "@*") {
+                $TabExpansionHasOutput.Value = $true
+                $QuoteSpaces.Value = $false
+                '@{Expression={$_.}}'
+                '@{Expression={$_.}; FormatString=""}'
+            }
+        }
+        'View' {
+            ## TODO: Need to figure out what type of object will be coming in
+        }
+    }
+}.GetNewClosure()
 
 ## Function
 Register-TabExpansion "function" -Type "Command" {
@@ -1018,7 +1160,7 @@ Register-TabExpansion "PSProvider" -Type "Parameter" {
             [String]$URL
         )
     }
-    
+
     $IExploreCommandInfo = Get-Command "iexploreexeparameters"
     Register-TabExpansion "iexplore.exe" -Type "CommandInfo" {
         param($Context)
@@ -1098,7 +1240,7 @@ Register-TabExpansion "PSProvider" -Type "Parameter" {
             [String]$WindowStyle
         )
     }
-    
+
     $PowershellCommandInfo = Get-Command "powershellexeparameters"
     Register-TabExpansion "powershell.exe" -Type "CommandInfo" {
         param($Context)
@@ -1124,7 +1266,7 @@ Register-TabExpansion "PSProvider" -Type "Parameter" {
             }
         }
     }
-    
+
     Register-TabExpansion "Import-TabExpansionTheme" $ThemeHandler -Type "Command"
     Register-TabExpansion "Export-TabExpansionTheme" $ThemeHandler -Type "Command"
 }

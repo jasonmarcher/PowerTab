@@ -1,3 +1,8 @@
+# ConsoleLib.ps1
+#
+# 
+
+
 Function Out-ConsoleList {
     #[CmdletBinding()]
     param(
@@ -83,9 +88,9 @@ Function Out-ConsoleList {
         switch ($Key.VirtualKeyCode) {
             9 { ## Tab
                 if ($Shift -match 'ShiftPressed') {
-                    Move-Selection 1  ## Down
-                } else {
                     Move-Selection -1  ## Up
+                } else {
+                    Move-Selection 1  ## Down
                 }
                 break
             }
@@ -200,11 +205,9 @@ Function Out-ConsoleList {
                         $ListHandle.Clear()
                         $LinePart = $Line.SubString(0, $Line.Length - $LastWord.Length)
 
-                        if ($MessageHandle) {
-                            ## Remove message handle ([Tab]) because we will be reinvoking tab expansion
-                            $Host.UI.RawUI.SetBufferContents($MessageHandle.Top, $MessageHandle.Buffer)
-                            Remove-Variable -Name MessageHandle -Scope Script
-                        }
+                        ## Remove message handle ([Tab]) because we will be reinvoking tab expansion
+                        Remove-TabActivityIndicator
+
                         ## Recursive tab expansion
                         . TabExpansion ($LinePart + @($ListHandle.Items)[$ListHandle.SelectedItem].Trim() + '.') (@($ListHandle.Items)[$ListHandle.SelectedItem].Trim() + '.') -ForceList
                         $HasChild = $true
@@ -215,7 +218,7 @@ Function Out-ConsoleList {
                     break
                 }
             }
-            {($Key.Character -eq '\') -or ($Key.Character -eq '/')} { ## Path Separators
+            {'\','/' -contains $Key.Character} { ## Path Separators
                 if ($PowerTabConfig.BackSlashComplete) {
                     if ($PowerTabConfig.AutoExpandOnBackSlash) {
                         ## Expand with currently selected item
@@ -225,11 +228,9 @@ Function Out-ConsoleList {
                             $LinePart = $Line.SubString(0, $Line.Length - $LastWord.Length)
                         }
 
-                        if ($MessageHandle) {
-                            ## Remove message handle ([Tab]) because we will be reinvoking tab expansion
-                            $Host.UI.RawUI.SetBufferContents($MessageHandle.Top, $MessageHandle.Buffer)
-                            Remove-Variable -Name MessageHandle -Scope Script
-                        }
+                        ## Remove message handle ([Tab]) because we will be reinvoking tab expansion
+                        Remove-TabActivityIndicator
+
                         ## Recursive tab expansion
                         . Invoke-TabExpansion ($LinePart + @($ListHandle.Items)[$ListHandle.SelectedItem].Trim() + $Key.Character) (@($ListHandle.Items)[$ListHandle.SelectedItem].Trim() + $Key.Character) -ForceList
                         $HasChild = $true
@@ -413,7 +414,7 @@ Function Out-ConsoleList {
         )
 
         $MaxWidth = @($Content | Sort-Object Length -Descending)[0].Length
-        New-Object System.Drawing.Size $MaxWidth,$Content.Length
+        New-Object System.Drawing.Size $MaxWidth, $Content.Length
     }
 
 
@@ -427,21 +428,23 @@ Function Out-ConsoleList {
         $Position = $Host.UI.RawUI.WindowPosition
         $Position.X += $X
         $Position.Y += $Y
-        ,$Position
+        $Position
     }
 
 
     Function New-Buffer {
         param(
-            $Position,
+            [System.Management.Automation.Host.Coordinates]
+            $Position
+            ,
+            [System.Management.Automation.Host.BufferCell[,]]
             $Buffer
         )
-        
-        $BufferTop = $Position
-        $BufferBottom = $BufferTop
+
+        $BufferBottom = $BufferTop = $Position
         $BufferBottom.X += ($Buffer.GetUpperBound(1))
         $BufferBottom.Y += ($Buffer.GetUpperBound(0))
-        $Rectangle = New-Object System.Management.Automation.Host.Rectangle($BufferTop, $BufferBottom)
+        $Rectangle = New-Object System.Management.Automation.Host.Rectangle $BufferTop, $BufferBottom
         $OldBuffer = $Host.UI.RawUI.GetBufferContents($Rectangle)
         $Host.UI.RawUI.SetBufferContents($BufferTop, $Buffer)
         $Handle = New-Object System.Management.Automation.PSObject -Property @{
@@ -466,16 +469,17 @@ Function Out-ConsoleList {
             [System.ConsoleColor]
             $BackgroundColor = $Host.UI.RawUI.BackgroundColor
         )
-        
+
         $Content = $Content | ForEach-Object {$_}
         ,$Host.UI.RawUI.NewBufferCellArray($Content, $ForegroundColor, $BackgroundColor)
     }
+
 
     Function Parse-List {
         param(
             [System.Drawing.Size]$Size
         )
-        
+
         $WindowPosition  = $Host.UI.RawUI.WindowPosition
         $WindowSize = $Host.UI.RawUI.WindowSize
         $Cursor = $Host.UI.RawUI.CursorPosition
@@ -553,7 +557,7 @@ Function Out-ConsoleList {
         if ($Size.Width -lt $MinWidth) {$Size.Width = $MinWidth}
         $Content = $Content | ForEach-Object {" $_ ".PadRight($Size.Width + 2)}
         $ListConfig = Parse-List $Size
-        $BoxSize = New-Object Drawing.Size($ListConfig.ListWidth, $ListConfig.ListHeight)
+        $BoxSize = New-Object System.Drawing.Size $ListConfig.ListWidth, $ListConfig.ListHeight
         $Box = New-Box $BoxSize $BorderForegroundColor $BorderBackgroundColor
 
         $Position = New-Position $ListConfig.TopX $ListConfig.TopY
@@ -620,11 +624,11 @@ Function Out-ConsoleList {
             ,
             [Int]$Offset
         )
-        
+
         $Position = $ListHandle.Position
         $Position.X += $X
         $Position.Y += $Y
-        $Rectangle = New-Object System.Management.Automation.Host.Rectangle $Position.X,$Position.Y,($Position.X + $Width),($Position.Y + $Height - 1)
+        $Rectangle = New-Object System.Management.Automation.Host.Rectangle $Position.X, $Position.Y, ($Position.X + $Width), ($Position.Y + $Height - 1)
         $Position.Y += $OffSet
         $BufferCell = New-Object System.Management.Automation.Host.BufferCell
         $BufferCell.BackgroundColor = $PowerTabConfig.Colors.BackColor
@@ -650,7 +654,7 @@ Function Out-ConsoleList {
         $Position = $ListHandle.Position
         $Position.X += $X
         $Position.Y += $Y
-        $Rectangle = New-Object System.Management.Automation.Host.Rectangle $Position.X,$Position.Y,($Position.X + $Width),$Position.Y
+        $Rectangle = New-Object System.Management.Automation.Host.Rectangle $Position.X, $Position.Y, ($Position.X + $Width), $Position.Y
         $LineBuffer = $Host.UI.RawUI.GetBufferContents($Rectangle)
         $LineBuffer = $Host.UI.RawUI.NewBufferCellArray(@([String]::Join("", ($LineBuffer | ForEach-Object {$_.Character}))),
             $ForegroundColor, $BackgroundColor)
@@ -662,7 +666,7 @@ Function Out-ConsoleList {
         param(
             [Int]$Count
         )
-        
+
         $SelectedItem = $ListHandle.SelectedItem
         $Line = $ListHandle.SelectedLine
         if ($Count -eq ([Math]::Abs([Int]$Count))) { ## Down in list

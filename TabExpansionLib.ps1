@@ -7,6 +7,55 @@
 ## Public functions
 #########################
 
+Function Invoke-TabActivityIndicator {
+    [CmdletBinding()]
+    param(
+        [Switch]
+        $Error
+    )
+
+    end {
+        if ($PowerTabConfig.TabActivityIndicator) {
+            if ("ConsoleHost","PowerShellPlus Host" -contains $Host.Name) {
+                if ($Error) {
+                    $MessageBuffer = ConvertTo-BufferCellArray ([String[]]@("[Err]")) Yellow Red
+                } else {
+                    $MessageBuffer = ConvertTo-BufferCellArray ([String[]]@("[Tab]")) Yellow Blue
+                }
+                if ($MessageHandle) {
+                    $MessageHandle.Content = $MessageBuffer
+                    $MessageHandle.Show()
+                } else {
+                    $script:MessageHandle = New-Buffer $Host.UI.RawUI.WindowPosition $MessageBuffer
+                }
+                if ($Error) {
+                    Start-Sleep 1
+                }
+            } else {
+                Write-Progress "PowerTab" $Resources.invoke_tabactivityindicator_prog_status
+            }
+        }
+    }
+}
+
+
+Function Remove-TabActivityIndicator {
+    [CmdletBinding()]
+    param()
+
+    end {
+        if ("ConsoleHost","PowerShellPlus Host" -contains $Host.Name) {
+            if ($MessageHandle) {
+                $MessageHandle.Clear()
+                Remove-Variable -Name MessageHandle -Scope Script
+            }
+        } else {
+            Write-Progress "PowerTab" $Resources.invoke_tabactivityindicator_prog_status -Completed
+        }
+    }
+}
+
+
 Function Invoke-TabItemSelector {
     [CmdletBinding(DefaultParameterSetName = "Values")]
     param(
@@ -61,6 +110,9 @@ Function Invoke-TabItemSelector {
                 }
                 'Windows PowerShell ISE Host' {
                     $SelectionHandler = "Default"
+                }
+                'PowerShellPlus Host' {
+                    $SelectionHandler = "ConsoleList"
                 }
                 default {
                     $SelectionHandler = "Default"
@@ -326,6 +378,7 @@ Function Update-TabExpansionDataBase {
         }
     }
 }
+Set-Alias udte Update-TabExpansionDataBase
 
 
 Function Update-TabExpansionType {
@@ -342,21 +395,21 @@ Function Update-TabExpansionType {
                 trap{$Types = $Assembly.GetExportedTypes() | Where-Object {$_.IsPublic -eq $true}; continue}; $Types = $_.GetTypes() |
                     Where-Object {$_.IsPublic -eq $true}
                 $Types | Foreach-Object {$j = 0} {
-                        $j++;
+                        $j++
                         if (($j % 200) -eq 0) {
                             [Int]$TypeProgress = ($j * 100) / $Types.Length
                             Write-Progress "Adding types:" $TypeProgress -PercentComplete $TypeProgress -Id 1
                         }
                         $dc = & {trap{continue;0}; $_.FullName.Split(".").Count - 1}
                         $ns = $_.NameSpace
-                        [Void]$dsTabExpansionDatabase.Tables['Types'].Rows.Add("$_", $dc, $ns)
+                        [Void]$dsTabExpansionDatabase.Tables['Types'].Rows.Add($_.FullName, $dc, $ns)
                     }
             }
         Write-Progress "Adding types percent complete:" 100 -Id 1 -Completed
 
         # Add NameSpaces Without types
-        $NL = $dsTabExpansionDatabase.Tables['Types'] |
-            ForEach-Object {$i = 0} {$i++
+        $NL = $dsTabExpansionDatabase.Tables['Types'] | ForEach-Object {$i = 0} {
+                $i++
                 if (($i % 500) -eq 0) {
                     [Int]$TypeProgress = ($i * 100) / $dsTabExpansionDatabase.Tables['Types'].Rows.Count
                     Write-Progress "Adding namespaces:" $TypeProgress -PercentComplete $TypeProgress -Id 1
@@ -394,7 +447,7 @@ Function Add-TabExpansionType {
                         } 
                         $dc = & {trap{continue;0}; $_.FullName.Split(".").Count - 1} 
                         $ns = $_.NameSpace 
-                        [Void]$dsTabExpansionDatabase.Tables['Types'].Rows.Add("$_", $dc, $ns)
+                        [Void]$dsTabExpansionDatabase.Tables['Types'].Rows.Add($_.FullName, $dc, $ns)
                     }
             }
         Write-Progress "Adding types percent complete:" "100" -Id 1 -Completed
@@ -538,6 +591,7 @@ Function Get-TabExpansion {
         }
     }
 }
+Set-Alias gte Get-TabExpansion
 
 
 Function Add-TabExpansion {
@@ -566,6 +620,7 @@ Function Add-TabExpansion {
         }
     }
 }
+Set-Alias ate Add-TabExpansion
 
 
 Function Remove-TabExpansion {
@@ -586,6 +641,7 @@ Function Remove-TabExpansion {
         }
     }
 }
+Set-Alias rte Remove-TabExpansion
 
 
 Function Invoke-TabExpansionEditor {
@@ -612,6 +668,7 @@ Function Invoke-TabExpansionEditor {
         [Void]$Form.ShowDialog()
     }
 }
+Set-Alias itee Invoke-TabExpansionEditor
 
 ##########
 
@@ -671,6 +728,7 @@ Function Register-TabExpansion {
         }
     }
 }
+Set-Alias rgte Register-TabExpansion
 
 
 

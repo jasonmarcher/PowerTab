@@ -18,9 +18,6 @@ Function Invoke-TabExpansion {
         $ForceList
     )
 
-    $LineBlocks = [Regex]::Split($Line, '[|;]')
-    $LastBlock = $LineBlocks[-1]
-
     $null = [System.Management.Automation.PSParser]::Tokenize('', [ref]$null)
     $Errors = New-Object System.Collections.ObjectModel.Collection``1[System.Management.Automation.PSParseError]
     $Tokens = [System.Management.Automation.PSParser]::Tokenize($Line, [ref]$Errors)
@@ -157,6 +154,14 @@ Function Invoke-TabExpansion {
 
         $LastToken = $Token
     }
+    ## Special case, last word is "@", this causes a parsing error so we don't see the token
+    if ($LastWord -eq '@') {
+        if (-not $CurrentContext.Parameter) {
+            $CurrentContext.PositionalParameter += 1
+        }
+        $CurrentContext.Argument = $LastWord
+        $CurrentContext.isParameterValue = $true
+    }
     ## Special case, blank value for parameter
     if (-not $LastWord) {
         if ($LastToken.Content -eq ",") {
@@ -206,15 +211,7 @@ Function Invoke-TabExpansion {
     }
 
     ## Indicate we are busy
-    if ($PowerTabConfig.TabActivityIndicator) {
-        $Bottom = $Top = $Host.UI.RawUI.WindowPosition
-        $Bottom.X += 5
-        $Rectangle = New-Object System.Management.Automation.Host.Rectangle($Top, $Bottom)
-        $OldBuffer = $Host.UI.RawUI.GetBufferContents($Rectangle)
-        $Message = $Host.UI.RawUI.NewBufferCellArray([String[]]@('[Tab]'), 'Yellow', 'Blue')
-        $Host.UI.RawUI.SetBufferContents($Top, $Message)
-        $script:MessageHandle = 1 | Select-Object @{Name='Top';Expression={$Top}},@{Name='Buffer';Expression={,$OldBuffer}}
-    }
+    Invoke-TabActivityIndicator
 
     try {
         ## Detect DoubleTab if enabled
@@ -351,18 +348,11 @@ Function Invoke-TabExpansion {
             Invoke-PowerTab -Line $Line -LastWord $LastWord -Context $CurrentContext -ForceList:$ForceList
         }
     } catch {
-        if ($MessageHandle) {
-            $Message = $Host.UI.RawUI.NewBufferCellArray([String[]]@('[Err]'), 'Yellow', 'Red')
-            $Host.UI.RawUI.SetBufferContents($MessageHandle.Top, $Message)
-            Start-Sleep 1
-        }
+        Invoke-TabActivityIndicator -Error
         ""
     } finally {
         ## Remove busy indication on ready or error
-        if ($MessageHandle) {
-            $Host.UI.RawUI.SetBufferContents($MessageHandle.Top, $MessageHandle.Buffer)
-            Remove-Variable -Name MessageHandle -Scope Script
-        }
+        Remove-TabActivityIndicator
     }
 }
 
@@ -707,8 +697,8 @@ Function Invoke-PowerTab {
 
             ## Handle expansions for both "Scope Variable Name" and "Type Variable Names"
             '^\$(\w+):(\w*)$' {
-                $Type = $Matches[1];     # function, variable, global, etc.
-                $TypeName = $Matches[2]; # e.g. in '$function:C', value will be 'C'
+                $Type = $Matches[1]     # function, variable, global, etc.
+                $TypeName = $Matches[2] # e.g. in '$function:C', value will be 'C'
 
                 if ($_ScopeNames -contains $Type) {
                     # Scope variable name expansion ($global:, $script:, etc.)
@@ -726,11 +716,11 @@ Function Invoke-PowerTab {
             }
 
             ## Handle variable name expansion
-            '^\$(\w*)$' {
+            '^([\$@])(\w*)$' {
                 ## TODO: This could be simplified
-                $VarName = $Matches[1]
+                $VarName = $Matches[2]
                 Get-Variable "$VarName*" -Scope Global | Select-Object -ExpandProperty Name |
-                    ForEach-Object {'$' + (QuoteVariable $_)} | Invoke-TabItemSelector $LastWord -SelectionHandler $SelectionHandler
+                    ForEach-Object {$Matches[1] + (QuoteVariable $_)} | Invoke-TabItemSelector $LastWord -SelectionHandler $SelectionHandler
                 break
             }
 
@@ -743,17 +733,17 @@ Function Invoke-PowerTab {
                     Get-Command -CommandType Application -Name "$($Matches[1])*" |
                         Where-Object {($env:PATHEXT).Split(";") -contains $_.Extension}
                 } | Select-Object -ExpandProperty Name |
-                    Invoke-TabItemSelector $LastWord.Replace($PowerTabConfig.ShortcutChars.Native, '') -SelectionHandler $SelectionHandler
+                    Invoke-TabItemSelector $Matches[1] -SelectionHandler $SelectionHandler
                 break
             }
 
             ## Aliases
-            "(.*)$([Regex]::Escape($PowerTabConfig.ShortcutChars.Alias))`$" {
+            "(.+)$([Regex]::Escape($PowerTabConfig.ShortcutChars.Alias))`$" {
                 & {
-                    Get-Command -CommandType Alias -Name "[$($Matches[1].Insert(1,']'))" | Select-Object -ExpandProperty Definition
+                    Get-Command -CommandType Alias -Name $Matches[1] | Select-Object -ExpandProperty Definition
                     $dsTabExpansionDatabase.Tables['Custom'].Select("filter = '$($Matches[1])' AND type = 'Alias'") |
                         Select-Object -ExpandProperty Text
-                } | Invoke-TabItemSelector $LastWord.Replace($PowerTabConfig.ShortcutChars.Alias, '') -SelectionHandler $SelectionHandler
+                } | Invoke-TabItemSelector $Matches[1] -SelectionHandler $SelectionHandler
                 break
             }
 
@@ -761,7 +751,7 @@ Function Invoke-PowerTab {
             "(.*)$([Regex]::Escape($PowerTabConfig.ShortcutChars.Custom))`$" {
                 $dsTabExpansionDatabase.Tables['Custom'].Select("filter like '$($Matches[1])*' AND type = 'Custom'") |
                     Select-Object -ExpandProperty Text |
-                    Invoke-TabItemSelector $LastWord.Replace($PowerTabConfig.ShortcutChars.Custom, '') -SelectionHandler $SelectionHandler
+                    Invoke-TabItemSelector $Matches[1] -SelectionHandler $SelectionHandler
                 break
             }
 
@@ -769,39 +759,39 @@ Function Invoke-PowerTab {
             "(.+)$([Regex]::Escape($PowerTabConfig.ShortcutChars.Invoke))`$" { 
                 $dsTabExpansionDatabase.Tables['Custom'].Select("filter like '$($Matches[1])*' AND type = 'Invoke'") | ForEach-Object {
                     $ExecutionContext.InvokeCommand.InvokeScript($_.Text)
-                } | Invoke-TabItemSelector $LastWord.Replace($PowerTabConfig.ShortcutChars.Invoke, '') -SelectionHandler $SelectionHandler
+                } | Invoke-TabItemSelector $Matches[1] -SelectionHandler $SelectionHandler
                 break
             }
 
-            ## CallFunction
+            ## Call function
             "(.*)$([Regex]::Escape($PowerTabConfig.ShortcutChars.CustomFunction))`$" {
                 if ($PowerTabConfig.CustomFunctionEnabled) {
                     $Matches[1] | ForEach-Object {
                         $ExecutionContext.InvokeCommand.InvokeScript("$($PowerTabConfig.CustomUserFunction) '$_'")
-                    } | Invoke-TabItemSelector $LastWord.Replace($PowerTabConfig.ShortcutChars.CustomFunction, '') -SelectionHandler $SelectionHandler
+                    } | Invoke-TabItemSelector $Matches[1] -SelectionHandler $SelectionHandler
                 }
                 break
             }
 
-            ## Partial Functions or Commandlets
+            ## Partial functions or cmdlets
             "(.*)$([Regex]::Escape($PowerTabConfig.ShortcutChars.Partial))`$" {
                 Get-Command -CommandType Function,Filter,Cmdlet -Name "$($Matches[1])*" | Select-Object -ExpandProperty Name |
-                    Invoke-TabItemSelector $LastWord.Replace($PowerTabConfig.ShortcutChars.Partial, '') -SelectionHandler $SelectionHandler
+                    Invoke-TabItemSelector $Matches[1] -SelectionHandler $SelectionHandler
                 break
             }
 
-            ## Functions or Commandlets on dash
-            '(.*-.*)' {
+            ## Functions or cmdlets on dash
+            '(.+-.*)' {
                 Get-Command -CommandType Function,ExternalScript,Filter,Cmdlet -Name "$($Matches[1])*" | Select-Object -ExpandProperty Name |
                     Invoke-TabItemSelector $LastWord -SelectionHandler $SelectionHandler
                 break
             }
 
-            ## Alternate Alias
+            ## Alternate alias
             '(.+)$' {
                 if ($DoubleTab -or $PowerTabConfig.AliasQuickExpand) {
                     & {
-                        Get-Command -CommandType Alias -Name "[$($Matches[1].Insert(1,']'))" | Select-Object -ExpandProperty Definition
+                        Get-Command -CommandType Alias -Name $Matches[1] | Select-Object -ExpandProperty Definition
                         $dsTabExpansionDatabase.Tables['Custom'].Select("filter = '$($Matches[1])' AND type = 'Alias'") |
                             Select-Object -ExpandProperty Text
                     } | Invoke-TabItemSelector $LastWord -SelectionHandler $SelectionHandler
@@ -812,7 +802,7 @@ Function Invoke-PowerTab {
                 break
             }
      
-            ## Completion on Computers in database
+            ## Completion on computers in database
             '^\\\\([^\\]*)$' {
                 $dsTabExpansionDatabase.Tables['Custom'].Select("filter like '$($Matches[1])%' AND type = 'Computer' ", "text") |
                     ForEach-Object {"\\$($_.Text)"} | Invoke-TabItemSelector $LastWord -SelectionHandler $SelectionHandler

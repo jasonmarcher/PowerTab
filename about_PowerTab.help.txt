@@ -6,13 +6,29 @@ SHORT DESCRIPTION
     productivity for PowerShell users. 
 
 LONG DESCRIPTION
-    An alias is an alternate name or nickname for a cmdlet or for a command
-    element, such as a function, script, file, or executable file. You
-    can use the alias instead of the command name in any Windows PowerShell
-    commands.
+    Tab expansion is a productivity feature of PowerShell similar to
+    intellisense. Pressing the TAB key will cause PowerTab to suggest full
+    paths, command names or values based on the current context of the cursor.
+
+    PowerTab offers handling for many common features of PowerShell, such as
+    parameter names or enum values. PowerTab also contains extension points
+    for adding specialized tab expansion support for third party applications
+    and commands.
+
+GETTING STARTED
+    PowerTab is packaged as a PowerShell module and can simply be imported
+    after being saved to one of the locations of modules in $env:PSModulePath.
+
+        Import-Module PowerTab
+
+    With no arguments, PowerTab will offer to run the setup wizard which will
+    help setup a location to save the PowerTab config file. The config file
+    is required to persist configuration settings for PowerTab, and cached
+    values for .NET type, WMI class and computer name expansion.
 
 LOAD POWERTAB WITH AN EXISTING CONFIG
-    Foobar.
+    To load an existing conifig file into PowerTab, pass in the full path to
+    the config file as the first argument when importing the PowerTab module.
 
         $Path = "C:\Users\Bob\Documents\WindowsPowerShell\PowerTabConfig.xml"
         Import-Module PowerTab -ArgumentList $Path
@@ -28,6 +44,12 @@ CREDITS
     Marc "/\/\o\/\/" van Orsouw, MVP
     https://mvp.support.microsoft.com/profile/van%20Orsouw
     http://thepowershellguy.com/
+
+    Xaegr
+    http://xaegr.livejournal.com/
+
+    Jacques
+    http://janel.spaces.live.com/blog/
 
     Aaron Lerch / Invoke-Intellisense / Lerch.PowerShell.dll
     http://www.aaronlerch.com/
@@ -50,4 +72,3 @@ SEE ALSO
     Import-TabExpansionDataBase
     Export-TabExpansionConfig
     Export-TabExpansionDatabase
-    about_functions
