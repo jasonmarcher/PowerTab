@@ -12,6 +12,7 @@ Data Resources {
     setup_wizard_config_location_caption = "Where should the PowerTab configuration file and database be saved?"
     setup_wizard_config_location_message = "Any existing PowerTab configuration will be overwritten."
     setup_wizard_other_directory_prompt = "Enter the directory path for storing the PowerTab configuration file and database"
+    setup_wizard_err_path_not_valid = "The given path's format is not supported."
     setup_wizard_add_to_profile = "Add the following text to the PowerShell profile to launch PowerTab with the saved configuration."
     setup_wizard_upgrade_existing_database_caption = "Upgrade existing tab completion database?"
     setup_wizard_upgrade_existing_database_message = "An existing tab completion database has been detected."

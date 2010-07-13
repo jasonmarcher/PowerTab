@@ -86,48 +86,54 @@ Get-ChildItem (Join-Path $PSScriptRoot "thirdparty\*.ps1") | ForEach-Object {. $
 ## Initialization code
 #########################
 
-if ($ConfigurationPathParam -and ((Test-Path $ConfigurationPathParam) -or (
-        ($ConfigurationPathParam -eq "IsolatedStorage") -and (Test-IsolatedStoragePath "PowerTab\PowerTabConfig.xml")))) {
-    ## Config exists, load it
-    Initialize-PowerTab $ConfigurationPathParam
-} elseif ($ConfigurationPathParam) {
-    ## Config specified, but does not exist
+if ($ConfigurationPathParam) {
+    if ((Test-Path $ConfigurationPathParam) -or (
+            ($ConfigurationPathParam -eq "IsolatedStorage") -and (Test-IsolatedStoragePath "PowerTab\PowerTabConfig.xml"))) {
+        Initialize-PowerTab $ConfigurationPathParam
+    } elseif (Test-Path (Join-Path $PSScriptRoot $ConfigurationPathParam)) {
+        Initialize-PowerTab (Join-Path $PSScriptRoot $ConfigurationPathParam)
+    } else {
+        ## Config specified, but does not exist
 
-    ## Create config and database
-    New-TabExpansionConfig $ConfigurationPathParam
-    CreatePowerTabConfig
-    New-TabExpansionDatabase
+        ## Create config and database
+        New-TabExpansionConfig $ConfigurationPathParam
+        CreatePowerTabConfig
+        New-TabExpansionDatabase
 
-    ## Update database
-    Update-TabExpansionDataBase -Confirm
+        ## Update database
+        Update-TabExpansionDataBase -Confirm
 
-    ## Export changes
-    Export-TabExpansionConfig
-    Export-TabExpansionDatabase
+        ## Export changes
+        Export-TabExpansionConfig
+        Export-TabExpansionDatabase
+    }
 } else {
-    $Yes = [System.Management.Automation.Host.ChoiceDescription]($Resources.global_choice_yes)
-    $No = [System.Management.Automation.Host.ChoiceDescription]($Resources.global_choice_no)
+    $Yes = New-Object System.Management.Automation.Host.ChoiceDescription $Resources.global_choice_yes
+    $No = New-Object System.Management.Automation.Host.ChoiceDescription $Resources.global_choice_no
     $YesNoChoices = [System.Management.Automation.Host.ChoiceDescription[]]($No,$Yes)
 
     ## Launch setup wizard?
     $Answer = $Host.UI.PromptForChoice($Resources.setup_wizard_caption, $Resources.setup_wizard_message, $YesNoChoices, 1)
     if ($Answer) {
         ## Ask for location to place config and database
-        $ProfileDir = [System.Management.Automation.Host.ChoiceDescription]($Resources.setup_wizard_choice_profile_directory)
-        $InstallDir = [System.Management.Automation.Host.ChoiceDescription]($Resources.setup_wizard_choice_install_directory)
-        $AppDataDir = [System.Management.Automation.Host.ChoiceDescription]($Resources.setup_wizard_choice_appdata_directory)
-        $IsoStorageDir = [System.Management.Automation.Host.ChoiceDescription]($Resources.setup_wizard_choice_isostorage_directory)
-        $OtherDir = [System.Management.Automation.Host.ChoiceDescription]($Resources.setup_wizard_choice_other_directory)
+        $ProfileDir = New-Object System.Management.Automation.Host.ChoiceDescription $Resources.setup_wizard_choice_profile_directory
+        $InstallDir = New-Object System.Management.Automation.Host.ChoiceDescription $Resources.setup_wizard_choice_install_directory
+        $AppDataDir = New-Object System.Management.Automation.Host.ChoiceDescription $Resources.setup_wizard_choice_appdata_directory
+        $IsoStorageDir = New-Object System.Management.Automation.Host.ChoiceDescription $Resources.setup_wizard_choice_isostorage_directory
+        $OtherDir = New-Object System.Management.Automation.Host.ChoiceDescription $Resources.setup_wizard_choice_other_directory
         $LocationChoices = [System.Management.Automation.Host.ChoiceDescription[]]($ProfileDir,$InstallDir,$AppDataDir,$IsoStorageDir,$OtherDir)
         $Answer = $Host.UI.PromptForChoice($Resources.setup_wizard_config_location_caption, $Resources.setup_wizard_config_location_message, $LocationChoices, 0)
         $SetupConfigurationPath = switch ($Answer) {
             0 {Split-Path $Profile}
             1 {$PSScriptRoot}
             2 {Join-Path ([System.Environment]::GetFolderPath([System.Environment+SpecialFolder]::ApplicationData)) "PowerTab"}
-            3 {
+            3 {"IsolatedStorage"}
+            4 {
                 $Path = Read-Host $Resources.setup_wizard_other_directory_prompt
-                while (-not (Test-Path -IsValid $Path)) {
-                    Write-Host 'Red' 'Path is invalid.'  ## TODO: localize, maybe use standard PS message
+                while ((-not $Path) -or -not (Test-Path -IsValid $Path)) {
+                    ## TODO: Maybe write-error instead?
+                    Write-Host $Resources.setup_wizard_err_path_not_valid -ForegroundColor $Host.PrivateData.ErrorForegroundColor `
+                        -BackgroundColor $Host.PrivateData.ErrorBackgroundColor
                     $Path = Read-Host $Resources.setup_wizard_other_directory_prompt
                 }
                 $Path
@@ -200,10 +206,9 @@ if ($PowerTabConfig.Enabled) {
 }
 
 if ($PowerTabConfig.ShowBanner) {
-    $CurVersion = (Get-Module -ListAvailable $PSCmdlet.MyInvocation.MyCommand.Module.Name).Version
+    $CurVersion = (Get-Module -ListAvailable "PowerTab").Version
     Write-Host -ForegroundColor 'Yellow' "PowerTab version ${CurVersion} PowerShell TabExpansion Library"
     Write-Host -ForegroundColor 'Yellow' "Technology Preview"
-    Write-Host -ForegroundColor 'Blue' "/\/\o\/\/ 2007 http://thePowerShellGuy.com"
     Write-Host -ForegroundColor 'Yellow' "PowerTab Enabled: $($PowerTabConfig.Enabled)"
 }
 
