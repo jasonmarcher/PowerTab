@@ -570,17 +570,20 @@ Function Get-TabExpansion {
     param(
         [Parameter(Position = 0)]
         [String]
-        $Filter
+        $Filter = "*"
         ,
         [Parameter(Position = 1)]
         [String]
-        $Type = ""
+        $Type = "*"
     )
 
     ## TODO: Make Type a dynamic validateset?
     ## TODO: escape special characters?
 
     process {
+        $Filter = $Filter -replace "\*","%"
+        $Type = $Type -replace "\*","%"
+
         if ("Types","Wmi" -contains $Type){
             $dsTabExpansionDatabase.Tables[$Type].Select("Name LIKE '$Filter'")
         } else {
@@ -599,15 +602,18 @@ Set-Alias gte Get-TabExpansion
 Function Add-TabExpansion {
 	[CmdletBinding()]
     param(
-        [Parameter(Position = 0)]
+        [Parameter(Position = 0, Mandatory = $true)]
+        [ValidateNotNullOrEmpty()]
         [String]
         $Filter
         ,
-        [Parameter(Position = 1)]
+        [Parameter(Position = 1, Mandatory = $true)]
+        [ValidateNotNullOrEmpty()]
         [String]
         $Text
         ,
         [Parameter(Position = 2)]
+        [ValidateNotNull()]
         [String]
         $Type = 'Custom'
     )
@@ -628,13 +634,16 @@ Set-Alias ate Add-TabExpansion
 Function Remove-TabExpansion {
 	[CmdletBinding()]
     param(
-        [Parameter(Position = 0)]
+        [Parameter(Position = 0, Mandatory = $true)]
+        [ValidateNotNullOrEmpty()]
         [String]
         $Filter
     )
 
     ## TODO: Add type
     process {
+        $Filter = $Filter -replace "\*","%"
+
         $dsTabExpansionDatabase.Tables['Custom'].Select("Filter LIKE '$Filter'") | ForEach-Object {$_.Delete()}
 
         trap [System.Management.Automation.PipelineStoppedException] {
