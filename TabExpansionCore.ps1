@@ -523,11 +523,9 @@ Function Invoke-PowerTab {
             ## Handle inline type search, e.g. new-object .identityreference<tab> or .identityre<tab> (oisin) 
             '^(\[*?)\.(\w+)$' {
                 $TypeName = $Matches[2]
-                $Types = $dsTabExpansionDatabase.Tables["Types"]
-                $Selected = $Types.Select("name like '%.${TypeName}%'") | ForEach-Object {$_["Name"] } |
-                    Invoke-TabItemSelector $LastWord.Replace('[', '') -SelectionHandler $SelectionHandler
-                if ($Matches[1] -eq '[') {$Selected = '[' +$Selected +']'}
-                $Selected 
+                $dsTabExpansionDatabase.Tables["Types"].Select("name like '%.${TypeName}%'") | Select-Object -ExpandProperty Name |
+                    Invoke-TabItemSelector $LastWord.Replace('[', '') -SelectionHandler $SelectionHandler |
+                    ForEach-Object {if ($Matches[1] -eq '[') {"[$_]"}}
                 break
             }
 
@@ -614,7 +612,7 @@ Function Invoke-PowerTab {
 
             ## WMI completion
             '(win32_.*|cim_.*|MSFT_.*)' {
-                $dsTabExpansionDatabase.Tables['WMI'].Select("name like '$($Matches[1])%'") |Select-Object -ExpandProperty Name |
+                $dsTabExpansionDatabase.Tables['WMI'].Select("name like '$($Matches[1])%'") | Select-Object -ExpandProperty Name |
                     Invoke-TabItemSelector $LastWord -SelectionHandler $SelectionHandler
                 break
             }
