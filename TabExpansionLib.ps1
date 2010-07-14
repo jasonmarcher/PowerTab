@@ -232,19 +232,28 @@ Function Export-TabExpansionDatabase {
     )
 
     end {
-        if (-not $PowerTabConfig.Setup.DatabasePath) {
-            $PowerTabConfig.Setup.DatabasePath = $LiteralPath
-        }
+        try {
+            if (-not $PowerTabConfig.Setup.DatabasePath) {
+                $BlankDatabasePath = $true
+                Write-Debug "Setting DatabasePath to $LiteralPath"  ## TODO: localize
+                $PowerTabConfig.Setup.DatabasePath = $LiteralPath
+            }
 
-        if ($LiteralPath -eq "IsolatedStorage") {
-            New-IsolatedStorageDirectory "PowerTab"
-            $IsoFile = Open-IsolatedStorageFile "PowerTab\TabExpansion.xml" -Writable
-            $dsTabExpansionDatabase.WriteXml($IsoFile)
-        } else {
-            $dsTabExpansionDatabase.WriteXml($LiteralPath)
-        }
+            if ($LiteralPath -eq "IsolatedStorage") {
+                New-IsolatedStorageDirectory "PowerTab"
+                $IsoFile = Open-IsolatedStorageFile "PowerTab\TabExpansion.xml" -Writable
+                $dsTabExpansionDatabase.WriteXml($IsoFile)
+            } else {
+                $dsTabExpansionDatabase.WriteXml($LiteralPath)
+            }
 
-        Write-Verbose ($Resources.export_tabexpansiondatabase_ver_success -f $LiteralPath)
+            Write-Verbose ($Resources.export_tabexpansiondatabase_ver_success -f $LiteralPath)
+        } finally {
+            if ($BlankDatabasePath) {
+                Write-Debug "Reverting DatabasePath"  ## TODO: localize
+                $PowerTabConfig.Setup.DatabasePath = ""
+            }
+        }
     }
 }
 
@@ -277,27 +286,45 @@ Function Export-TabExpansionConfig {
     )
 
     end {
-        if (-not $PowerTabConfig.Setup.ConfigurationPath) {
-            $PowerTabConfig.Setup.ConfigurationPath = $LiteralPath
-        }
-        if (-not $PowerTabConfig.Setup.DatabasePath) {
-            if ($LiteralPath -eq "IsolatedStorage") {
-                $DatabasePath = $LiteralPath
-            } else {
-                $DatabasePath = Join-Path (Split-Path $LiteralPath) TabExpansion.xml
+        try {
+            if (-not $PowerTabConfig.Setup.ConfigurationPath) {
+                $BlankConfigurationPath = $true
+                Write-Debug "Setting ConfigurationPath to $LiteralPath"  ## TODO: localize
+                $PowerTabConfig.Setup.ConfigurationPath = $LiteralPath
             }
-            $PowerTabConfig.Setup.DatabasePath = $DatabasePath
-        }
+            if (-not $PowerTabConfig.Setup.DatabasePath) {
+                $BlankDatabasePath = $true
+                if ($LiteralPath -eq "IsolatedStorage") {
+                    $DatabasePath = $LiteralPath
+                } else {
+                    $DatabasePath = Join-Path (Split-Path $LiteralPath) TabExpansion.xml
+                }
+                Write-Debug "Setting DatabasePath to $DatabasePath"  ## TODO: localize
+                $PowerTabConfig.Setup.DatabasePath = $DatabasePath
+            }
 
-        if ($LiteralPath -eq "IsolatedStorage") {
-            New-IsolatedStorageDirectory "PowerTab"
-            $IsoFile = Open-IsolatedStorageFile "PowerTab\PowerTabConfig.xml" -Writable
-            $dsTabExpansionConfig.Tables['Config'].WriteXml($IsoFile)
-        } else {
-            $dsTabExpansionConfig.Tables['Config'].WriteXml($LiteralPath)
-        }
+            if ($LiteralPath -eq "IsolatedStorage") {
+                New-IsolatedStorageDirectory "PowerTab"
+                $IsoFile = Open-IsolatedStorageFile "PowerTab\PowerTabConfig.xml" -Writable
+                $dsTabExpansionConfig.Tables['Config'].WriteXml($IsoFile)
+            } else {
+                $dsTabExpansionConfig.Tables['Config'].WriteXml($LiteralPath)
+            }
 
-        Write-Verbose ($Resources.export_tabexpansionconfig_ver_success -f $LiteralPath)
+            Write-Verbose ($Resources.export_tabexpansionconfig_ver_success -f $LiteralPath)
+        } finally {
+            if ($BlankConfigurationPath) {
+                Write-Debug "Reverting ConfigurationPath"  ## TODO: localize
+                $PowerTabConfig.Setup.ConfigurationPath = ""
+            }
+            if ($BlankDatabasePath) {
+                Write-Debug "Reverting DatabasePath"  ## TODO: localize
+                $PowerTabConfig.Setup.DatabasePath = ""
+            }
+            if ($IsoFile) {
+                $IsoFile.Close()
+            }
+        }
     }
 }
 
