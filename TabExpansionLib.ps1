@@ -804,7 +804,7 @@ Function Initialize-PowerTab {
       $DatabasePath = Join-Path $PSScriptRoot $DataBasePath
     }
     
-    $Database = InternalImportTabExpansionDataBase Convert-Path (Resolve-Path $DatabasePath)
+    $Database = InternalImportTabExpansionDataBase (Convert-Path (Resolve-Path $DatabasePath))
 
     ## Upgrade if needed
     if ($Version -lt $CurVersion) {
