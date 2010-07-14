@@ -50,7 +50,9 @@ Function Remove-TabActivityIndicator {
                 Remove-Variable -Name MessageHandle -Scope Script
             }
         } else {
-            Write-Progress "PowerTab" $Resources.invoke_tabactivityindicator_prog_status -Completed
+            if ($PowerTabConfig.TabActivityIndicator) {
+                Write-Progress "PowerTab" $Resources.invoke_tabactivityindicator_prog_status -Completed
+            }
         }
     }
 }
