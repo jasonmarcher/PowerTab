@@ -64,7 +64,7 @@ $TabExpansionParameterNameRegistry = @{}
 ## Public properties
 #########################
 
-$PowerTabConfig = New-Object System.Object
+$PowerTabConfig = New-Object PSObject
 
 
 #########################
@@ -94,7 +94,7 @@ if ($ConfigurationPathParam) {
         Initialize-PowerTab (Join-Path $PSScriptRoot $ConfigurationPathParam)
     } else {
         ## Config specified, but does not exist
-
+        Write-Warning "Configuration File does not exist: '$ConfigurationPathParam'"
         ## Create config and database
         New-TabExpansionConfig $ConfigurationPathParam
         CreatePowerTabConfig

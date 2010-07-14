@@ -1059,7 +1059,7 @@ Function CreatePowerTabConfig {
     [CmdletBinding()]
     param()
     
-    $script:PowerTabConfig = New-Object System.Object
+    $script:PowerTabConfig = New-Object PSObject
 
     Add-Member -InputObject $PowerTabConfig -MemberType NoteProperty -Name Version -Value $dsTabExpansionConfig.Tables['Config'].Select("Name = 'Version'")[0].Value
 
@@ -1083,13 +1083,13 @@ Function CreatePowerTabConfig {
             }") `
         -Force
 
-    Add-Member -InputObject $PowerTabConfig -MemberType NoteProperty -Name Colors -Value (New-Object System.Object)
+    Add-Member -InputObject $PowerTabConfig -MemberType NoteProperty -Name Colors -Value (New-Object PSObject)
     Add-Member -InputObject $PowerTabConfig.Colors -MemberType ScriptMethod -Name ToString -Value {"{PowerTab Color Configuration}"} -Force
 
-    Add-Member -InputObject $PowerTabConfig -MemberType NoteProperty -Name ShortcutChars -Value (New-Object System.Object)
+    Add-Member -InputObject $PowerTabConfig -MemberType NoteProperty -Name ShortcutChars -Value (New-Object PSObject)
     Add-Member -InputObject $PowerTabConfig.ShortcutChars -MemberType ScriptMethod -Name ToString -Value {"{PowerTab Shortcut Characters}"} -Force
 
-    Add-Member -InputObject $PowerTabConfig -MemberType NoteProperty -Name Setup -Value (New-Object System.Object)
+    Add-Member -InputObject $PowerTabConfig -MemberType NoteProperty -Name Setup -Value (New-Object PSObject)
     Add-Member -InputObject $PowerTabConfig.Setup -MemberType ScriptMethod -Name ToString -Value {"{PowerTab Setup Data}"} -Force
 
     ## Make global properties on config object
