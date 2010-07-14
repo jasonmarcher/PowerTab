@@ -1,0 +1,1962 @@
+﻿<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<helpItems schema="maml">
+  <command:command xmlns:maml="http://schemas.microsoft.com/maml/2004/10" xmlns:command="http://schemas.microsoft.com/maml/dev/command/2004/10" xmlns:dev="http://schemas.microsoft.com/maml/dev/2004/10">
+    <command:details>
+      <command:name>Add-TabExpansionComputer</command:name>
+      <maml:description>
+        <maml:para>Adds computer names to the tab expansion database.</maml:para>
+      </maml:description>
+      <maml:copyright/>
+      <command:verb>Add</command:verb>
+      <command:noun>TabExpansionComputer</command:noun>
+      <dev:version />
+    </command:details>
+    <maml:description>
+      <maml:para>TODO Add Long description</maml:para>
+    </maml:description>
+    <command:syntax>
+      <command:syntaxItem>
+        <command:name>Add-TabExpansionComputer</command:name>
+        <command:parameter required="false" position="1">
+          <maml:name>OU</maml:name>
+          <maml:description/>
+          <command:parameterValue required="true">DirectoryEntry</command:parameterValue>
+        </command:parameter>
+      </command:syntaxItem>
+    </command:syntax>
+    <command:parameters>
+      <command:parameter required="false" globbing="false" pipelineInput="true (ByValue)" position="1">
+        <maml:name>OU</maml:name>
+        <maml:description>
+          <maml:para>TODO Add OU Description</maml:para>
+        </maml:description>
+        <command:parameterValue required="true">DirectoryEntry</command:parameterValue>
+        <dev:defaultValue />
+      </command:parameter>
+    </command:parameters>
+    <command:inputTypes>
+      <command:inputType>
+        <dev:type>
+          <maml:name>System.DirectoryServices.DirectoryEntry</maml:name>
+          <maml:uri />
+          <maml:description/>
+        </dev:type>
+        <maml:description>
+          <maml:para>You can pipe a DirectoryEntry to Add-TabExpansionComputer to store all computer names that are a part of an OU in the tab expansion database.</maml:para>
+        </maml:description>
+      </command:inputType>
+    </command:inputTypes>
+    <command:returnValues>
+      <command:returnValue>
+        <dev:type>
+          <maml:name>None</maml:name>
+          <maml:uri />
+          <maml:description/>
+        </dev:type>
+        <maml:description/>
+      </command:returnValue>
+    </command:returnValues>
+    <command:terminatingErrors />
+    <command:nonTerminatingErrors />
+    <maml:alertSet>
+      <maml:title />
+      <maml:alert>
+        <maml:para />
+      </maml:alert>
+    </maml:alertSet>
+    <command:examples>
+      <command:example>
+        <maml:title>-------------------------- EXAMPLE 1 --------------------------</maml:title>
+        <maml:introduction>
+          <maml:para>C:\PS&gt;</maml:para>
+        </maml:introduction>
+        <dev:code>TODO Add Add-TabExpansionComputer Example code</dev:code>
+        <dev:remarks>
+          <maml:para>Description</maml:para>
+          <maml:para>-----------</maml:para>
+          <maml:para>TODO Add Add-TabExpansionComputer Example Comment</maml:para>
+          <maml:para />
+          <maml:para />
+          <maml:para />
+          <maml:para />
+        </dev:remarks>
+        <command:commandLines>
+          <command:commandLine>
+            <command:commandText />
+          </command:commandLine>
+        </command:commandLines>
+      </command:example>
+    </command:examples>
+    <maml:relatedLinks>
+      <maml:navigationLink>
+        <maml:linkText>Remove-TabExpansionComputer</maml:linkText>
+        <maml:uri />
+      </maml:navigationLink>
+    </maml:relatedLinks>
+  </command:command>
+  <command:command xmlns:maml="http://schemas.microsoft.com/maml/2004/10" xmlns:command="http://schemas.microsoft.com/maml/dev/command/2004/10" xmlns:dev="http://schemas.microsoft.com/maml/dev/2004/10">
+    <command:details>
+      <command:name>Add-TabExpansionEnumFromLastError</command:name>
+      <maml:description>
+        <maml:para>TODO Add Short description</maml:para>
+      </maml:description>
+      <maml:copyright/>
+      <command:verb>Add</command:verb>
+      <command:noun>TabExpansionEnumFromLastError</command:noun>
+      <dev:version />
+    </command:details>
+    <maml:description>
+      <maml:para>TODO Add Long description</maml:para>
+    </maml:description>
+    <command:syntax>
+      <command:syntaxItem>
+        <command:name>Add-TabExpansionEnumFromLastError</command:name>
+        <command:parameter required="false" position="1">
+          <maml:name>Name</maml:name>
+          <maml:description/>
+          <command:parameterValue required="true">String</command:parameterValue>
+        </command:parameter>
+      </command:syntaxItem>
+    </command:syntax>
+    <command:parameters>
+      <command:parameter required="false" globbing="false" pipelineInput="false" position="1">
+        <maml:name>Name</maml:name>
+        <maml:description>
+          <maml:para>TODO Add Name Description</maml:para>
+        </maml:description>
+        <command:parameterValue required="true">String</command:parameterValue>
+        <dev:defaultValue />
+      </command:parameter>
+    </command:parameters>
+    <command:inputTypes>
+      <command:inputType>
+        <dev:type>
+          <maml:name>None</maml:name>
+          <maml:uri />
+          <maml:description/>
+        </dev:type>
+        <maml:description/>
+      </command:inputType>
+    </command:inputTypes>
+    <command:returnValues>
+      <command:returnValue>
+        <dev:type>
+          <maml:name>None</maml:name>
+          <maml:uri />
+          <maml:description/>
+        </dev:type>
+        <maml:description/>
+      </command:returnValue>
+    </command:returnValues>
+    <command:terminatingErrors />
+    <command:nonTerminatingErrors />
+    <maml:alertSet>
+      <maml:title />
+      <maml:alert>
+        <maml:para />
+      </maml:alert>
+    </maml:alertSet>
+    <command:examples>
+      <command:example>
+        <maml:title>-------------------------- EXAMPLE 1 --------------------------</maml:title>
+        <maml:introduction>
+          <maml:para>C:\PS&gt;</maml:para>
+        </maml:introduction>
+        <dev:code>TODO Add Add-TabExpansionEnumFromLastError Example code</dev:code>
+        <dev:remarks>
+          <maml:para>Description</maml:para>
+          <maml:para>-----------</maml:para>
+          <maml:para>TODO Add Add-TabExpansionEnumFromLastError Example Comment</maml:para>
+          <maml:para />
+          <maml:para />
+          <maml:para />
+          <maml:para />
+        </dev:remarks>
+        <command:commandLines>
+          <command:commandLine>
+            <command:commandText />
+          </command:commandLine>
+        </command:commandLines>
+      </command:example>
+    </command:examples>
+    <maml:relatedLinks>
+      <maml:navigationLink>
+        <maml:linkText>Add-TabExpansion</maml:linkText>
+        <maml:uri />
+      </maml:navigationLink>
+    </maml:relatedLinks>
+  </command:command>
+  <command:command xmlns:maml="http://schemas.microsoft.com/maml/2004/10" xmlns:command="http://schemas.microsoft.com/maml/dev/command/2004/10" xmlns:dev="http://schemas.microsoft.com/maml/dev/2004/10">
+    <command:details>
+      <command:name>Add-TabExpansion</command:name>
+      <maml:description>
+        <maml:para>Adds an item to the tab expansion database.</maml:para>
+      </maml:description>
+      <maml:copyright/>
+      <command:verb>Add</command:verb>
+      <command:noun>TabExpansion</command:noun>
+      <dev:version />
+    </command:details>
+    <maml:description>
+      <maml:para>TODO Add Long description</maml:para>
+    </maml:description>
+    <command:syntax>
+      <command:syntaxItem>
+        <command:name>Add-TabExpansion</command:name>
+        <command:parameter required="true" position="1">
+          <maml:name>Filter</maml:name>
+          <maml:description/>
+          <command:parameterValue required="true">String</command:parameterValue>
+        </command:parameter>
+        <command:parameter required="true" position="2">
+          <maml:name>Text</maml:name>
+          <maml:description/>
+          <command:parameterValue required="true">String</command:parameterValue>
+        </command:parameter>
+        <command:parameter required="true" position="3">
+          <maml:name>Type</maml:name>
+          <maml:description/>
+          <command:parameterValue required="true">String</command:parameterValue>
+        </command:parameter>
+      </command:syntaxItem>
+    </command:syntax>
+    <command:parameters>
+      <command:parameter required="true" globbing="false" pipelineInput="false" position="1">
+        <maml:name>Filter</maml:name>
+        <maml:description>
+          <maml:para>TODO Add Filter Description</maml:para>
+        </maml:description>
+        <command:parameterValue required="true">String</command:parameterValue>
+        <dev:defaultValue />
+      </command:parameter>
+      <command:parameter required="true" globbing="false" pipelineInput="false" position="2">
+        <maml:name>Text</maml:name>
+        <maml:description>
+          <maml:para>TODO Add Text Description</maml:para>
+        </maml:description>
+        <command:parameterValue required="true">String</command:parameterValue>
+        <dev:defaultValue />
+      </command:parameter>
+      <command:parameter required="true" globbing="false" pipelineInput="false" position="3">
+        <maml:name>Type</maml:name>
+        <maml:description>
+          <maml:para>TODO Add Type Description</maml:para>
+        </maml:description>
+        <command:parameterValue required="true">String</command:parameterValue>
+        <dev:defaultValue>Custom</dev:defaultValue>
+      </command:parameter>
+    </command:parameters>
+    <command:inputTypes>
+      <command:inputType>
+        <dev:type>
+          <maml:name>None</maml:name>
+          <maml:uri />
+          <maml:description/>
+        </dev:type>
+        <maml:description/>
+      </command:inputType>
+    </command:inputTypes>
+    <command:returnValues>
+      <command:returnValue>
+        <dev:type>
+          <maml:name>None</maml:name>
+          <maml:uri />
+          <maml:description/>
+        </dev:type>
+        <maml:description/>
+      </command:returnValue>
+    </command:returnValues>
+    <command:terminatingErrors />
+    <command:nonTerminatingErrors />
+    <maml:alertSet>
+      <maml:title />
+      <maml:alert>
+        <maml:para />
+      </maml:alert>
+    </maml:alertSet>
+    <command:examples>
+      <command:example>
+        <maml:title>-------------------------- EXAMPLE 1 --------------------------</maml:title>
+        <maml:introduction>
+          <maml:para>C:\PS&gt;</maml:para>
+        </maml:introduction>
+        <dev:code>TODO Add Add-TabExpansion Example code</dev:code>
+        <dev:remarks>
+          <maml:para>Description</maml:para>
+          <maml:para>-----------</maml:para>
+          <maml:para>TODO Add Add-TabExpansion Example Comment</maml:para>
+          <maml:para />
+          <maml:para />
+          <maml:para />
+          <maml:para />
+        </dev:remarks>
+        <command:commandLines>
+          <command:commandLine>
+            <command:commandText />
+          </command:commandLine>
+        </command:commandLines>
+      </command:example>
+    </command:examples>
+    <maml:relatedLinks>
+      <maml:navigationLink>
+        <maml:linkText>Get-TabExpansion</maml:linkText>
+        <maml:uri />
+      </maml:navigationLink>
+      <maml:navigationLink>
+        <maml:linkText>Remove-TabExpansion</maml:linkText>
+        <maml:uri />
+      </maml:navigationLink>
+    </maml:relatedLinks>
+  </command:command>
+  <command:command xmlns:maml="http://schemas.microsoft.com/maml/2004/10" xmlns:command="http://schemas.microsoft.com/maml/dev/command/2004/10" xmlns:dev="http://schemas.microsoft.com/maml/dev/2004/10">
+    <command:details>
+      <command:name>Add-TabExpansionType</command:name>
+      <maml:description>
+        <maml:para>Add type names from an assembly to the tab expansion database.</maml:para>
+      </maml:description>
+      <maml:copyright/>
+      <command:verb>Add</command:verb>
+      <command:noun>TabExpansionType</command:noun>
+      <dev:version />
+    </command:details>
+    <maml:description>
+      <maml:para>TODO Add Long description</maml:para>
+    </maml:description>
+    <command:syntax>
+      <command:syntaxItem>
+        <command:name>Add-TabExpansionType</command:name>
+        <command:parameter required="true" position="1">
+          <maml:name>Assembly</maml:name>
+          <maml:description/>
+          <command:parameterValue required="true">Assembly</command:parameterValue>
+        </command:parameter>
+      </command:syntaxItem>
+    </command:syntax>
+    <command:parameters>
+      <command:parameter required="true" globbing="false" pipelineInput="true (ByValue)" position="1">
+        <maml:name>Assembly</maml:name>
+        <maml:description>
+          <maml:para>TODO Add Assembly Description</maml:para>
+        </maml:description>
+        <command:parameterValue required="true">Assembly</command:parameterValue>
+        <dev:defaultValue />
+      </command:parameter>
+    </command:parameters>
+    <command:inputTypes>
+      <command:inputType>
+        <dev:type>
+          <maml:name>System.Reflection.Assembly</maml:name>
+          <maml:uri />
+          <maml:description/>
+        </dev:type>
+        <maml:description>
+          <maml:para>You can pipe an Assembly to Add-TabExpansionType to store all type names from the assembly in the tab expansion database.</maml:para>
+        </maml:description>
+      </command:inputType>
+    </command:inputTypes>
+    <command:returnValues>
+      <command:returnValue>
+        <dev:type>
+          <maml:name>None</maml:name>
+          <maml:uri />
+          <maml:description/>
+        </dev:type>
+        <maml:description/>
+      </command:returnValue>
+    </command:returnValues>
+    <command:terminatingErrors />
+    <command:nonTerminatingErrors />
+    <maml:alertSet>
+      <maml:title />
+      <maml:alert>
+        <maml:para />
+      </maml:alert>
+    </maml:alertSet>
+    <command:examples>
+      <command:example>
+        <maml:title>-------------------------- EXAMPLE 1 --------------------------</maml:title>
+        <maml:introduction>
+          <maml:para>C:\PS&gt;</maml:para>
+        </maml:introduction>
+        <dev:code>TODO Add Add-TabExpansionType Example code</dev:code>
+        <dev:remarks>
+          <maml:para>Description</maml:para>
+          <maml:para>-----------</maml:para>
+          <maml:para>TODO Add Add-TabExpansionType Example Comment</maml:para>
+          <maml:para />
+          <maml:para />
+          <maml:para />
+          <maml:para />
+        </dev:remarks>
+        <command:commandLines>
+          <command:commandLine>
+            <command:commandText />
+          </command:commandLine>
+        </command:commandLines>
+      </command:example>
+    </command:examples>
+    <maml:relatedLinks>
+      <maml:navigationLink>
+        <maml:linkText>Update-TabExpansionType</maml:linkText>
+        <maml:uri />
+      </maml:navigationLink>
+      <maml:navigationLink>
+        <maml:linkText>Remove-TabExpansion</maml:linkText>
+        <maml:uri />
+      </maml:navigationLink>
+    </maml:relatedLinks>
+  </command:command>
+  <command:command xmlns:maml="http://schemas.microsoft.com/maml/2004/10" xmlns:command="http://schemas.microsoft.com/maml/dev/command/2004/10" xmlns:dev="http://schemas.microsoft.com/maml/dev/2004/10">
+    <command:details>
+      <command:name>Export-TabExpansionConfig</command:name>
+      <maml:description>
+        <maml:para>Saves the current PowerTab configuration to a file.</maml:para>
+      </maml:description>
+      <maml:copyright/>
+      <command:verb>Export</command:verb>
+      <command:noun>TabExpansionConfig</command:noun>
+      <dev:version />
+    </command:details>
+    <maml:description>
+      <maml:para>TODO Add Long description</maml:para>
+    </maml:description>
+    <command:syntax>
+      <command:syntaxItem>
+        <command:name>Export-TabExpansionConfig</command:name>
+        <command:parameter required="false" position="1">
+          <maml:name>LiteralPath</maml:name>
+          <maml:description/>
+          <command:parameterValue required="true">String</command:parameterValue>
+        </command:parameter>
+      </command:syntaxItem>
+    </command:syntax>
+    <command:parameters>
+      <command:parameter required="false" globbing="false" pipelineInput="true (ByValue)" position="1">
+        <maml:name>LiteralPath</maml:name>
+        <maml:description>
+          <maml:para>TODO Add LiteralPath Description</maml:para>
+        </maml:description>
+        <command:parameterValue required="true">String</command:parameterValue>
+        <dev:defaultValue>$PowerTabConfig.Setup.ConfigurationPath</dev:defaultValue>
+      </command:parameter>
+    </command:parameters>
+    <command:inputTypes>
+      <command:inputType>
+        <dev:type>
+          <maml:name>System.String</maml:name>
+          <maml:uri />
+          <maml:description/>
+        </dev:type>
+        <maml:description>
+          <maml:para>You can pipe a string that contains a path to Export-TabExpansionConfig.</maml:para>
+        </maml:description>
+      </command:inputType>
+    </command:inputTypes>
+    <command:returnValues>
+      <command:returnValue>
+        <dev:type>
+          <maml:name>None</maml:name>
+          <maml:uri />
+          <maml:description/>
+        </dev:type>
+        <maml:description/>
+      </command:returnValue>
+    </command:returnValues>
+    <command:terminatingErrors />
+    <command:nonTerminatingErrors />
+    <maml:alertSet>
+      <maml:title />
+      <maml:alert>
+        <maml:para />
+      </maml:alert>
+    </maml:alertSet>
+    <command:examples>
+      <command:example>
+        <maml:title>-------------------------- EXAMPLE 1 --------------------------</maml:title>
+        <maml:introduction>
+          <maml:para>C:\PS&gt;</maml:para>
+        </maml:introduction>
+        <dev:code>TODO Add Export-TabExpansionConfig Example code</dev:code>
+        <dev:remarks>
+          <maml:para>Description</maml:para>
+          <maml:para>-----------</maml:para>
+          <maml:para>TODO Add Export-TabExpansionConfig Example Comment</maml:para>
+          <maml:para />
+          <maml:para />
+          <maml:para />
+          <maml:para />
+        </dev:remarks>
+        <command:commandLines>
+          <command:commandLine>
+            <command:commandText />
+          </command:commandLine>
+        </command:commandLines>
+      </command:example>
+    </command:examples>
+    <maml:relatedLinks>
+      <maml:navigationLink>
+        <maml:linkText>Import-TabExpansionConfig</maml:linkText>
+        <maml:uri />
+      </maml:navigationLink>
+      <maml:navigationLink>
+        <maml:linkText>New-TabExpansionConfig</maml:linkText>
+        <maml:uri />
+      </maml:navigationLink>
+    </maml:relatedLinks>
+  </command:command>
+  <command:command xmlns:maml="http://schemas.microsoft.com/maml/2004/10" xmlns:command="http://schemas.microsoft.com/maml/dev/command/2004/10" xmlns:dev="http://schemas.microsoft.com/maml/dev/2004/10">
+    <command:details>
+      <command:name>Export-TabExpansionDatabase</command:name>
+      <maml:description>
+        <maml:para>Saves the tab expansion database to a file.</maml:para>
+      </maml:description>
+      <maml:copyright/>
+      <command:verb>Export</command:verb>
+      <command:noun>TabExpansionDatabase</command:noun>
+      <dev:version />
+    </command:details>
+    <maml:description>
+      <maml:para>TODO Add Long description</maml:para>
+    </maml:description>
+    <command:syntax>
+      <command:syntaxItem>
+        <command:name>Export-TabExpansionDatabase</command:name>
+        <command:parameter required="false" position="1">
+          <maml:name>LiteralPath</maml:name>
+          <maml:description/>
+          <command:parameterValue required="true">String</command:parameterValue>
+        </command:parameter>
+      </command:syntaxItem>
+    </command:syntax>
+    <command:parameters>
+      <command:parameter required="false" globbing="false" pipelineInput="true (ByValue)" position="1">
+        <maml:name>LiteralPath</maml:name>
+        <maml:description>
+          <maml:para>TODO Add LiteralPath Description</maml:para>
+        </maml:description>
+        <command:parameterValue required="true">String</command:parameterValue>
+        <dev:defaultValue>$PowerTabConfig.Setup.DatabasePath</dev:defaultValue>
+      </command:parameter>
+    </command:parameters>
+    <command:inputTypes>
+      <command:inputType>
+        <dev:type>
+          <maml:name>System.String</maml:name>
+          <maml:uri />
+          <maml:description/>
+        </dev:type>
+        <maml:description>
+          <maml:para>You can pipe a string that contains a path to Export-TabExpansionDatabase.</maml:para>
+        </maml:description>
+      </command:inputType>
+    </command:inputTypes>
+    <command:returnValues>
+      <command:returnValue>
+        <dev:type>
+          <maml:name>None</maml:name>
+          <maml:uri />
+          <maml:description/>
+        </dev:type>
+        <maml:description/>
+      </command:returnValue>
+    </command:returnValues>
+    <command:terminatingErrors />
+    <command:nonTerminatingErrors />
+    <maml:alertSet>
+      <maml:title />
+      <maml:alert>
+        <maml:para />
+      </maml:alert>
+    </maml:alertSet>
+    <command:examples>
+      <command:example>
+        <maml:title>-------------------------- EXAMPLE 1 --------------------------</maml:title>
+        <maml:introduction>
+          <maml:para>C:\PS&gt;</maml:para>
+        </maml:introduction>
+        <dev:code>TODO Add Export-TabExpansionDatabase Example code</dev:code>
+        <dev:remarks>
+          <maml:para>Description</maml:para>
+          <maml:para>-----------</maml:para>
+          <maml:para>TODO Add Export-TabExpansionDatabase Example Comment</maml:para>
+          <maml:para />
+          <maml:para />
+          <maml:para />
+          <maml:para />
+        </dev:remarks>
+        <command:commandLines>
+          <command:commandLine>
+            <command:commandText />
+          </command:commandLine>
+        </command:commandLines>
+      </command:example>
+    </command:examples>
+    <maml:relatedLinks>
+      <maml:navigationLink>
+        <maml:linkText>Import-TabExpansionDatabase</maml:linkText>
+        <maml:uri />
+      </maml:navigationLink>
+      <maml:navigationLink>
+        <maml:linkText>New-TabExpansionDatabase</maml:linkText>
+        <maml:uri />
+      </maml:navigationLink>
+      <maml:navigationLink>
+        <maml:linkText>Update-TabExpansionDatabase</maml:linkText>
+        <maml:uri />
+      </maml:navigationLink>
+    </maml:relatedLinks>
+  </command:command>
+  <command:command xmlns:maml="http://schemas.microsoft.com/maml/2004/10" xmlns:command="http://schemas.microsoft.com/maml/dev/command/2004/10" xmlns:dev="http://schemas.microsoft.com/maml/dev/2004/10">
+    <command:details>
+      <command:name>Export-TabExpansionTheme</command:name>
+      <maml:description>
+        <maml:para>Saves the current PowerTab color theme to a file.</maml:para>
+      </maml:description>
+      <maml:copyright/>
+      <command:verb>Export</command:verb>
+      <command:noun>TabExpansionTheme</command:noun>
+      <dev:version />
+    </command:details>
+    <maml:description>
+      <maml:para>TODO Add Long description</maml:para>
+    </maml:description>
+    <command:syntax>
+      <command:syntaxItem>
+        <command:name>Export-TabExpansionTheme</command:name>
+        <command:parameter required="true" position="1">
+          <maml:name>Name</maml:name>
+          <maml:description/>
+          <command:parameterValue required="true">String</command:parameterValue>
+        </command:parameter>
+      </command:syntaxItem>
+      <command:syntaxItem>
+        <command:name>Export-TabExpansionTheme</command:name>
+        <command:parameter required="false" globbing="false" pipelineInput="false" position="named">
+          <maml:name>LiteralPath</maml:name>
+          <maml:description/>
+          <command:parameterValue required="true">String</command:parameterValue>
+        </command:parameter>
+      </command:syntaxItem>
+    </command:syntax>
+    <command:parameters>
+      <command:parameter required="false" globbing="false" pipelineInput="true (ByValue)" position="named">
+        <maml:name>LiteralPath</maml:name>
+        <maml:description>
+          <maml:para>TODO Add LiteralPath Description</maml:para>
+        </maml:description>
+        <command:parameterValue required="true">String</command:parameterValue>
+        <dev:defaultValue />
+      </command:parameter>
+      <command:parameter required="true" globbing="false" pipelineInput="false" position="1">
+        <maml:name>Name</maml:name>
+        <maml:description>
+          <maml:para>TODO Add Name Description</maml:para>
+        </maml:description>
+        <command:parameterValue required="true">String</command:parameterValue>
+        <dev:defaultValue />
+      </command:parameter>
+    </command:parameters>
+    <command:inputTypes>
+      <command:inputType>
+        <dev:type>
+          <maml:name>System.String</maml:name>
+          <maml:uri />
+          <maml:description/>
+        </dev:type>
+        <maml:description>
+          <maml:para>You can pipe a string that contains a path to Export-TabExpansionTheme.</maml:para>
+        </maml:description>
+      </command:inputType>
+    </command:inputTypes>
+    <command:returnValues>
+      <command:returnValue>
+        <dev:type>
+          <maml:name>None</maml:name>
+          <maml:uri />
+          <maml:description/>
+        </dev:type>
+        <maml:description/>
+      </command:returnValue>
+    </command:returnValues>
+    <command:terminatingErrors />
+    <command:nonTerminatingErrors />
+    <maml:alertSet>
+      <maml:title />
+      <maml:alert>
+        <maml:para />
+      </maml:alert>
+    </maml:alertSet>
+    <command:examples>
+      <command:example>
+        <maml:title>-------------------------- EXAMPLE 1 --------------------------</maml:title>
+        <maml:introduction>
+          <maml:para>C:\PS&gt;</maml:para>
+        </maml:introduction>
+        <dev:code>TODO Add Export-TabExpansionTheme Example code</dev:code>
+        <dev:remarks>
+          <maml:para>Description</maml:para>
+          <maml:para>-----------</maml:para>
+          <maml:para>TODO Add Export-TabExpansionTheme Example Comment</maml:para>
+          <maml:para />
+          <maml:para />
+          <maml:para />
+          <maml:para />
+        </dev:remarks>
+        <command:commandLines>
+          <command:commandLine>
+            <command:commandText />
+          </command:commandLine>
+        </command:commandLines>
+      </command:example>
+    </command:examples>
+    <maml:relatedLinks>
+      <maml:navigationLink>
+        <maml:linkText>Import-TabExpansionTheme</maml:linkText>
+        <maml:uri />
+      </maml:navigationLink>
+    </maml:relatedLinks>
+  </command:command>
+  <command:command xmlns:maml="http://schemas.microsoft.com/maml/2004/10" xmlns:command="http://schemas.microsoft.com/maml/dev/command/2004/10" xmlns:dev="http://schemas.microsoft.com/maml/dev/2004/10">
+    <command:details>
+      <command:name>Get-TabExpansion</command:name>
+      <maml:description>
+        <maml:para>Gets items available in the tab expansion database.</maml:para>
+      </maml:description>
+      <maml:copyright/>
+      <command:verb>Get</command:verb>
+      <command:noun>TabExpansion</command:noun>
+      <dev:version />
+    </command:details>
+    <maml:description>
+      <maml:para>TODO Add Long description</maml:para>
+    </maml:description>
+    <command:syntax>
+      <command:syntaxItem>
+        <command:name>Get-TabExpansion</command:name>
+        <command:parameter required="false" position="1">
+          <maml:name>Filter</maml:name>
+          <maml:description/>
+          <command:parameterValue required="true">String</command:parameterValue>
+        </command:parameter>
+        <command:parameter required="false" position="2">
+          <maml:name>Type</maml:name>
+          <maml:description/>
+          <command:parameterValue required="true">String</command:parameterValue>
+        </command:parameter>
+      </command:syntaxItem>
+    </command:syntax>
+    <command:parameters>
+      <command:parameter required="false" globbing="true" pipelineInput="false" position="1">
+        <maml:name>Filter</maml:name>
+        <maml:description>
+          <maml:para>TODO Add Filter Description</maml:para>
+        </maml:description>
+        <command:parameterValue required="true">String</command:parameterValue>
+        <dev:defaultValue>*</dev:defaultValue>
+      </command:parameter>
+      <command:parameter required="false" globbing="true" pipelineInput="false" position="2">
+        <maml:name>Type</maml:name>
+        <maml:description>
+          <maml:para>TODO Add Type Description</maml:para>
+        </maml:description>
+        <command:parameterValue required="true">String</command:parameterValue>
+        <dev:defaultValue>*</dev:defaultValue>
+      </command:parameter>
+    </command:parameters>
+    <command:inputTypes>
+      <command:inputType>
+        <dev:type>
+          <maml:name>None</maml:name>
+          <maml:uri />
+          <maml:description/>
+        </dev:type>
+        <maml:description/>
+      </command:inputType>
+    </command:inputTypes>
+    <command:returnValues>
+      <command:returnValue>
+        <dev:type>
+          <maml:name>TODO Add Get-TabExpansion returnType</maml:name>
+          <maml:uri />
+          <maml:description/>
+        </dev:type>
+        <maml:description>
+          <maml:para>TODO.</maml:para>
+        </maml:description>
+      </command:returnValue>
+    </command:returnValues>
+    <command:terminatingErrors />
+    <command:nonTerminatingErrors />
+    <maml:alertSet>
+      <maml:title />
+      <maml:alert>
+        <maml:para />
+      </maml:alert>
+    </maml:alertSet>
+    <command:examples>
+      <command:example>
+        <maml:title>-------------------------- EXAMPLE 1 --------------------------</maml:title>
+        <maml:introduction>
+          <maml:para>C:\PS&gt;</maml:para>
+        </maml:introduction>
+        <dev:code>TODO Add Get-TabExpansion Example code</dev:code>
+        <dev:remarks>
+          <maml:para>Description</maml:para>
+          <maml:para>-----------</maml:para>
+          <maml:para>TODO Add Get-TabExpansion Example Comment</maml:para>
+          <maml:para />
+          <maml:para />
+          <maml:para />
+          <maml:para />
+        </dev:remarks>
+        <command:commandLines>
+          <command:commandLine>
+            <command:commandText />
+          </command:commandLine>
+        </command:commandLines>
+      </command:example>
+    </command:examples>
+    <maml:relatedLinks>
+      <maml:navigationLink>
+        <maml:linkText>Add-TabExpansion</maml:linkText>
+        <maml:uri />
+      </maml:navigationLink>
+      <maml:navigationLink>
+        <maml:linkText>Remove-TabExpansion</maml:linkText>
+        <maml:uri />
+      </maml:navigationLink>
+    </maml:relatedLinks>
+  </command:command>
+  <command:command xmlns:maml="http://schemas.microsoft.com/maml/2004/10" xmlns:command="http://schemas.microsoft.com/maml/dev/command/2004/10" xmlns:dev="http://schemas.microsoft.com/maml/dev/2004/10">
+    <command:details>
+      <command:name>Import-TabExpansionConfig</command:name>
+      <maml:description>
+        <maml:para>Loads the PowerTab configuration from a file.</maml:para>
+      </maml:description>
+      <maml:copyright/>
+      <command:verb>Import</command:verb>
+      <command:noun>TabExpansionConfig</command:noun>
+      <dev:version />
+    </command:details>
+    <maml:description>
+      <maml:para>TODO Add Long description</maml:para>
+    </maml:description>
+    <command:syntax>
+      <command:syntaxItem>
+        <command:name>Import-TabExpansionConfig</command:name>
+        <command:parameter required="false" position="1">
+          <maml:name>LiteralPath</maml:name>
+          <maml:description/>
+          <command:parameterValue required="true">String</command:parameterValue>
+        </command:parameter>
+      </command:syntaxItem>
+    </command:syntax>
+    <command:parameters>
+      <command:parameter required="false" globbing="false" pipelineInput="true (ByPropertyName)" position="1">
+        <maml:name>LiteralPath</maml:name>
+        <maml:description>
+          <maml:para>TODO Add LiteralPath Description</maml:para>
+        </maml:description>
+        <command:parameterValue required="true">String</command:parameterValue>
+        <dev:defaultValue>$PowerTabConfig.Setup.ConfigurationPath</dev:defaultValue>
+      </command:parameter>
+    </command:parameters>
+    <command:inputTypes>
+      <command:inputType>
+        <dev:type>
+          <maml:name>System.String</maml:name>
+          <maml:uri />
+          <maml:description/>
+        </dev:type>
+        <maml:description>
+          <maml:para>You can pipe a string that contains a path to Import-TabExpansionConfig.</maml:para>
+        </maml:description>
+      </command:inputType>
+    </command:inputTypes>
+    <command:returnValues>
+      <command:returnValue>
+        <dev:type>
+          <maml:name>None</maml:name>
+          <maml:uri />
+          <maml:description/>
+        </dev:type>
+        <maml:description/>
+      </command:returnValue>
+    </command:returnValues>
+    <command:terminatingErrors />
+    <command:nonTerminatingErrors />
+    <maml:alertSet>
+      <maml:title />
+      <maml:alert>
+        <maml:para />
+      </maml:alert>
+    </maml:alertSet>
+    <command:examples>
+      <command:example>
+        <maml:title>-------------------------- EXAMPLE 1 --------------------------</maml:title>
+        <maml:introduction>
+          <maml:para>C:\PS&gt;</maml:para>
+        </maml:introduction>
+        <dev:code>TODO Add Import-TabExpansionConfig Example code</dev:code>
+        <dev:remarks>
+          <maml:para>Description</maml:para>
+          <maml:para>-----------</maml:para>
+          <maml:para>TODO Add Import-TabExpansionConfig Example Comment</maml:para>
+          <maml:para />
+          <maml:para />
+          <maml:para />
+          <maml:para />
+        </dev:remarks>
+        <command:commandLines>
+          <command:commandLine>
+            <command:commandText />
+          </command:commandLine>
+        </command:commandLines>
+      </command:example>
+    </command:examples>
+    <maml:relatedLinks>
+      <maml:navigationLink>
+        <maml:linkText>Export-TabExpansionConfig</maml:linkText>
+        <maml:uri />
+      </maml:navigationLink>
+      <maml:navigationLink>
+        <maml:linkText>New-TabExpansionConfig</maml:linkText>
+        <maml:uri />
+      </maml:navigationLink>
+    </maml:relatedLinks>
+  </command:command>
+  <command:command xmlns:maml="http://schemas.microsoft.com/maml/2004/10" xmlns:command="http://schemas.microsoft.com/maml/dev/command/2004/10" xmlns:dev="http://schemas.microsoft.com/maml/dev/2004/10">
+    <command:details>
+      <command:name>Import-TabExpansionDataBase</command:name>
+      <maml:description>
+        <maml:para>Loads the tab expansion database from a file.</maml:para>
+      </maml:description>
+      <maml:copyright/>
+      <command:verb>Import</command:verb>
+      <command:noun>TabExpansionDataBase</command:noun>
+      <dev:version />
+    </command:details>
+    <maml:description>
+      <maml:para>TODO Add Long description</maml:para>
+    </maml:description>
+    <command:syntax>
+      <command:syntaxItem>
+        <command:name>Import-TabExpansionDataBase</command:name>
+        <command:parameter required="false" position="1">
+          <maml:name>LiteralPath</maml:name>
+          <maml:description/>
+          <command:parameterValue required="true">String</command:parameterValue>
+        </command:parameter>
+      </command:syntaxItem>
+    </command:syntax>
+    <command:parameters>
+      <command:parameter required="false" globbing="false" pipelineInput="true (ByPropertyName)" position="1">
+        <maml:name>LiteralPath</maml:name>
+        <maml:description>
+          <maml:para>TODO Add LiteralPath Description</maml:para>
+        </maml:description>
+        <command:parameterValue required="true">String</command:parameterValue>
+        <dev:defaultValue>$PowerTabConfig.Setup.DatabasePath</dev:defaultValue>
+      </command:parameter>
+    </command:parameters>
+    <command:inputTypes>
+      <command:inputType>
+        <dev:type>
+          <maml:name>System.String</maml:name>
+          <maml:uri />
+          <maml:description/>
+        </dev:type>
+        <maml:description>
+          <maml:para>You can pipe a string that contains a path to Import-TabExpansionDatabase.</maml:para>
+        </maml:description>
+      </command:inputType>
+    </command:inputTypes>
+    <command:returnValues>
+      <command:returnValue>
+        <dev:type>
+          <maml:name>None</maml:name>
+          <maml:uri />
+          <maml:description/>
+        </dev:type>
+        <maml:description/>
+      </command:returnValue>
+    </command:returnValues>
+    <command:terminatingErrors />
+    <command:nonTerminatingErrors />
+    <maml:alertSet>
+      <maml:title />
+      <maml:alert>
+        <maml:para />
+      </maml:alert>
+    </maml:alertSet>
+    <command:examples>
+      <command:example>
+        <maml:title>-------------------------- EXAMPLE 1 --------------------------</maml:title>
+        <maml:introduction>
+          <maml:para>C:\PS&gt;</maml:para>
+        </maml:introduction>
+        <dev:code>TODO Add Import-TabExpansionDataBase Example code</dev:code>
+        <dev:remarks>
+          <maml:para>Description</maml:para>
+          <maml:para>-----------</maml:para>
+          <maml:para>TODO Add Import-TabExpansionDataBase Example Comment</maml:para>
+          <maml:para />
+          <maml:para />
+          <maml:para />
+          <maml:para />
+        </dev:remarks>
+        <command:commandLines>
+          <command:commandLine>
+            <command:commandText />
+          </command:commandLine>
+        </command:commandLines>
+      </command:example>
+    </command:examples>
+    <maml:relatedLinks>
+      <maml:navigationLink>
+        <maml:linkText>Export-TabExpansionDataBase</maml:linkText>
+        <maml:uri />
+      </maml:navigationLink>
+      <maml:navigationLink>
+        <maml:linkText>New-TabExpansionDataBase</maml:linkText>
+        <maml:uri />
+      </maml:navigationLink>
+    </maml:relatedLinks>
+  </command:command>
+  <command:command xmlns:maml="http://schemas.microsoft.com/maml/2004/10" xmlns:command="http://schemas.microsoft.com/maml/dev/command/2004/10" xmlns:dev="http://schemas.microsoft.com/maml/dev/2004/10">
+    <command:details>
+      <command:name>Import-TabExpansionTheme</command:name>
+      <maml:description>
+        <maml:para>Loads a PowerTab color theme from a file.</maml:para>
+      </maml:description>
+      <maml:copyright/>
+      <command:verb>Import</command:verb>
+      <command:noun>TabExpansionTheme</command:noun>
+      <dev:version />
+    </command:details>
+    <maml:description>
+      <maml:para>TODO Add Long description</maml:para>
+    </maml:description>
+    <command:syntax>
+      <command:syntaxItem>
+        <command:name>Import-TabExpansionTheme</command:name>
+        <command:parameter required="true" position="1">
+          <maml:name>Name</maml:name>
+          <maml:description/>
+          <command:parameterValue required="true">String</command:parameterValue>
+        </command:parameter>
+      </command:syntaxItem>
+      <command:syntaxItem>
+        <command:name>Import-TabExpansionTheme</command:name>
+        <command:parameter required="false" position="named">
+          <maml:name>LiteralPath</maml:name>
+          <maml:description/>
+          <command:parameterValue required="true">String</command:parameterValue>
+        </command:parameter>
+      </command:syntaxItem>
+    </command:syntax>
+    <command:parameters>
+      <command:parameter required="false" globbing="false" pipelineInput="true (ByPropertyName)" position="named">
+        <maml:name>LiteralPath</maml:name>
+        <maml:description>
+          <maml:para>TODO Add LiteralPath Description</maml:para>
+        </maml:description>
+        <command:parameterValue required="true">String</command:parameterValue>
+        <dev:defaultValue />
+      </command:parameter>
+      <command:parameter required="true" globbing="false" pipelineInput="false" position="1">
+        <maml:name>Name</maml:name>
+        <maml:description>
+          <maml:para>TODO Add Name Description</maml:para>
+        </maml:description>
+        <command:parameterValue required="true">String</command:parameterValue>
+        <dev:defaultValue />
+      </command:parameter>
+    </command:parameters>
+    <command:inputTypes>
+      <command:inputType>
+        <dev:type>
+          <maml:name>System.String</maml:name>
+          <maml:uri />
+          <maml:description/>
+        </dev:type>
+        <maml:description>
+          <maml:para>You can pipe a string that contains a path to Import-TabExpansionTheme.</maml:para>
+        </maml:description>
+      </command:inputType>
+    </command:inputTypes>
+    <command:returnValues>
+      <command:returnValue>
+        <dev:type>
+          <maml:name>None</maml:name>
+          <maml:uri />
+          <maml:description/>
+        </dev:type>
+        <maml:description/>
+      </command:returnValue>
+    </command:returnValues>
+    <command:terminatingErrors />
+    <command:nonTerminatingErrors />
+    <maml:alertSet>
+      <maml:title />
+      <maml:alert>
+        <maml:para />
+      </maml:alert>
+    </maml:alertSet>
+    <command:examples>
+      <command:example>
+        <maml:title>-------------------------- EXAMPLE 1 --------------------------</maml:title>
+        <maml:introduction>
+          <maml:para>C:\PS&gt;</maml:para>
+        </maml:introduction>
+        <dev:code>TODO Add Import-TabExpansionTheme Example code</dev:code>
+        <dev:remarks>
+          <maml:para>Description</maml:para>
+          <maml:para>-----------</maml:para>
+          <maml:para>TODO Add Import-TabExpansionTheme Example Comment</maml:para>
+          <maml:para />
+          <maml:para />
+          <maml:para />
+          <maml:para />
+        </dev:remarks>
+        <command:commandLines>
+          <command:commandLine>
+            <command:commandText />
+          </command:commandLine>
+        </command:commandLines>
+      </command:example>
+    </command:examples>
+    <maml:relatedLinks>
+      <maml:navigationLink>
+        <maml:linkText>Export-TabExpansionTheme</maml:linkText>
+        <maml:uri />
+      </maml:navigationLink>
+    </maml:relatedLinks>
+  </command:command>
+  <command:command xmlns:maml="http://schemas.microsoft.com/maml/2004/10" xmlns:command="http://schemas.microsoft.com/maml/dev/command/2004/10" xmlns:dev="http://schemas.microsoft.com/maml/dev/2004/10">
+    <command:details>
+      <command:name>Invoke-TabExpansionEditor</command:name>
+      <maml:description>
+        <maml:para>Opens a user interface for editing the tab expansion database.</maml:para>
+      </maml:description>
+      <maml:copyright/>
+      <command:verb>Invoke</command:verb>
+      <command:noun>TabExpansionEditor</command:noun>
+      <dev:version />
+    </command:details>
+    <maml:description>
+      <maml:para>TODO Add Long description</maml:para>
+    </maml:description>
+    <command:syntax>
+      <command:syntaxItem>
+        <command:name>Invoke-TabExpansionEditor</command:name>
+      </command:syntaxItem>
+    </command:syntax>
+    <command:parameters/>
+    <command:inputTypes>
+      <command:inputType>
+        <dev:type>
+          <maml:name>None</maml:name>
+          <maml:uri />
+          <maml:description/>
+        </dev:type>
+        <maml:description/>
+      </command:inputType>
+    </command:inputTypes>
+    <command:returnValues>
+      <command:returnValue>
+        <dev:type>
+          <maml:name>None</maml:name>
+          <maml:uri />
+          <maml:description/>
+        </dev:type>
+        <maml:description/>
+      </command:returnValue>
+    </command:returnValues>
+    <command:terminatingErrors />
+    <command:nonTerminatingErrors />
+    <maml:alertSet>
+      <maml:title />
+      <maml:alert>
+        <maml:para />
+      </maml:alert>
+    </maml:alertSet>
+    <command:examples>
+      <command:example>
+        <maml:title>-------------------------- EXAMPLE 1 --------------------------</maml:title>
+        <maml:introduction>
+          <maml:para>C:\PS&gt;</maml:para>
+        </maml:introduction>
+        <dev:code>Invoke-TabExpansionEditor</dev:code>
+        <dev:remarks>
+          <maml:para>Description</maml:para>
+          <maml:para>-----------</maml:para>
+          <maml:para>TODO Add Invoke-TabExpansionEditor Example Comment</maml:para>
+          <maml:para />
+          <maml:para />
+          <maml:para />
+          <maml:para />
+        </dev:remarks>
+        <command:commandLines>
+          <command:commandLine>
+            <command:commandText />
+          </command:commandLine>
+        </command:commandLines>
+      </command:example>
+    </command:examples>
+    <maml:relatedLinks>
+      <maml:navigationLink>
+        <maml:linkText>Invoke-TabExpansionEditor</maml:linkText>
+        <maml:uri />
+      </maml:navigationLink>
+    </maml:relatedLinks>
+  </command:command>
+  <command:command xmlns:maml="http://schemas.microsoft.com/maml/2004/10" xmlns:command="http://schemas.microsoft.com/maml/dev/command/2004/10" xmlns:dev="http://schemas.microsoft.com/maml/dev/2004/10">
+    <command:details>
+      <command:name>New-TabExpansionConfig</command:name>
+      <maml:description>
+        <maml:para>Replaces the PowerTab configuration with default values.</maml:para>
+      </maml:description>
+      <maml:copyright/>
+      <command:verb>New</command:verb>
+      <command:noun>TabExpansionConfig</command:noun>
+      <dev:version />
+    </command:details>
+    <maml:description>
+      <maml:para>TODO Add Long description</maml:para>
+    </maml:description>
+    <command:syntax>
+      <command:syntaxItem>
+        <command:name>New-TabExpansionConfig</command:name>
+        <command:parameter required="false" position="1">
+          <maml:name>LiteralPath</maml:name>
+          <maml:description/>
+          <command:parameterValue required="true">String</command:parameterValue>
+        </command:parameter>
+      </command:syntaxItem>
+    </command:syntax>
+    <command:parameters>
+      <command:parameter required="false" globbing="false" pipelineInput="true (ByPropertyName)" position="1">
+        <maml:name>LiteralPath</maml:name>
+        <maml:description>
+          <maml:para>TODO Add LiteralPath Description</maml:para>
+        </maml:description>
+        <command:parameterValue required="true">String</command:parameterValue>
+        <dev:defaultValue>$PowerTabConfig.Setup.ConfigurationPath</dev:defaultValue>
+      </command:parameter>
+    </command:parameters>
+    <command:inputTypes>
+      <command:inputType>
+        <dev:type>
+          <maml:name>System.String</maml:name>
+          <maml:uri />
+          <maml:description/>
+        </dev:type>
+        <maml:description>
+          <maml:para>You can pipe a string that contains a path to New-TabExpansionConfig.</maml:para>
+        </maml:description>
+      </command:inputType>
+    </command:inputTypes>
+    <command:returnValues>
+      <command:returnValue>
+        <dev:type>
+          <maml:name>None</maml:name>
+          <maml:uri />
+          <maml:description/>
+        </dev:type>
+        <maml:description/>
+      </command:returnValue>
+    </command:returnValues>
+    <command:terminatingErrors />
+    <command:nonTerminatingErrors />
+    <maml:alertSet>
+      <maml:title />
+      <maml:alert>
+        <maml:para />
+      </maml:alert>
+    </maml:alertSet>
+    <command:examples>
+      <command:example>
+        <maml:title>-------------------------- EXAMPLE 1 --------------------------</maml:title>
+        <maml:introduction>
+          <maml:para>C:\PS&gt;</maml:para>
+        </maml:introduction>
+        <dev:code>TODO Add New-TabExpansionConfig Example code</dev:code>
+        <dev:remarks>
+          <maml:para>Description</maml:para>
+          <maml:para>-----------</maml:para>
+          <maml:para>TODO Add New-TabExpansionConfig Example Comment</maml:para>
+          <maml:para />
+          <maml:para />
+          <maml:para />
+          <maml:para />
+        </dev:remarks>
+        <command:commandLines>
+          <command:commandLine>
+            <command:commandText />
+          </command:commandLine>
+        </command:commandLines>
+      </command:example>
+    </command:examples>
+    <maml:relatedLinks>
+      <maml:navigationLink>
+        <maml:linkText>Export-TabExpansionConfig</maml:linkText>
+        <maml:uri />
+      </maml:navigationLink>
+      <maml:navigationLink>
+        <maml:linkText>Import-TabExpansionConfig</maml:linkText>
+        <maml:uri />
+      </maml:navigationLink>
+    </maml:relatedLinks>
+  </command:command>
+  <command:command xmlns:maml="http://schemas.microsoft.com/maml/2004/10" xmlns:command="http://schemas.microsoft.com/maml/dev/command/2004/10" xmlns:dev="http://schemas.microsoft.com/maml/dev/2004/10">
+    <command:details>
+      <command:name>New-TabExpansionDatabase</command:name>
+      <maml:description>
+        <maml:para>Replaces the tab expansion database with a new clear database.</maml:para>
+      </maml:description>
+      <maml:copyright/>
+      <command:verb>New</command:verb>
+      <command:noun>TabExpansionDatabase</command:noun>
+      <dev:version />
+    </command:details>
+    <maml:description>
+      <maml:para>TODO Add Long description</maml:para>
+    </maml:description>
+    <command:syntax>
+      <command:syntaxItem>
+        <command:name>New-TabExpansionDatabase</command:name>
+      </command:syntaxItem>
+    </command:syntax>
+    <command:parameters/>
+    <command:inputTypes>
+      <command:inputType>
+        <dev:type>
+          <maml:name>None</maml:name>
+          <maml:uri />
+          <maml:description/>
+        </dev:type>
+        <maml:description/>
+      </command:inputType>
+    </command:inputTypes>
+    <command:returnValues>
+      <command:returnValue>
+        <dev:type>
+          <maml:name>None</maml:name>
+          <maml:uri />
+          <maml:description/>
+        </dev:type>
+        <maml:description/>
+      </command:returnValue>
+    </command:returnValues>
+    <command:terminatingErrors />
+    <command:nonTerminatingErrors />
+    <maml:alertSet>
+      <maml:title />
+      <maml:alert>
+        <maml:para />
+      </maml:alert>
+    </maml:alertSet>
+    <command:examples>
+      <command:example>
+        <maml:title>-------------------------- EXAMPLE 1 --------------------------</maml:title>
+        <maml:introduction>
+          <maml:para>C:\PS&gt;</maml:para>
+        </maml:introduction>
+        <dev:code>New-TabExpansionDatabase</dev:code>
+        <dev:remarks>
+          <maml:para>Description</maml:para>
+          <maml:para>-----------</maml:para>
+          <maml:para>TODO Add New-TabExpansionDatabase Example Comment</maml:para>
+          <maml:para />
+          <maml:para />
+          <maml:para />
+          <maml:para />
+        </dev:remarks>
+        <command:commandLines>
+          <command:commandLine>
+            <command:commandText />
+          </command:commandLine>
+        </command:commandLines>
+      </command:example>
+    </command:examples>
+    <maml:relatedLinks>
+      <maml:navigationLink>
+        <maml:linkText>Export-TabExpansionDatabase</maml:linkText>
+        <maml:uri />
+      </maml:navigationLink>
+      <maml:navigationLink>
+        <maml:linkText>Import-TabExpansionDatabase</maml:linkText>
+        <maml:uri />
+      </maml:navigationLink>
+      <maml:navigationLink>
+        <maml:linkText>Update-TabExpansionDatabase</maml:linkText>
+        <maml:uri />
+      </maml:navigationLink>
+    </maml:relatedLinks>
+  </command:command>
+  <command:command xmlns:maml="http://schemas.microsoft.com/maml/2004/10" xmlns:command="http://schemas.microsoft.com/maml/dev/command/2004/10" xmlns:dev="http://schemas.microsoft.com/maml/dev/2004/10">
+    <command:details>
+      <command:name>Register-TabExpansion</command:name>
+      <maml:description>
+        <maml:para>Registers a handler to take part in tab expansion of parameters and parameter values.</maml:para>
+      </maml:description>
+      <maml:copyright/>
+      <command:verb>Register</command:verb>
+      <command:noun>TabExpansion</command:noun>
+      <dev:version />
+    </command:details>
+    <maml:description>
+      <maml:para>TODO Add Long description</maml:para>
+    </maml:description>
+    <command:syntax>
+      <command:syntaxItem>
+        <command:name>Register-TabExpansion</command:name>
+        <command:parameter required="true" position="1">
+          <maml:name>Name</maml:name>
+          <maml:description/>
+          <command:parameterValue required="true">String</command:parameterValue>
+        </command:parameter>
+        <command:parameter required="true" position="2">
+          <maml:name>Handler</maml:name>
+          <maml:description/>
+          <command:parameterValue required="true">ScriptBlock</command:parameterValue>
+        </command:parameter>
+        <command:parameter required="false" position="named">
+          <maml:name>Type</maml:name>
+          <maml:description/>
+          <command:parameterValue required="true">String</command:parameterValue>
+        </command:parameter>
+        <command:parameter required="false" position="named">
+          <maml:name>Force</maml:name>
+          <maml:description/>
+        </command:parameter>
+      </command:syntaxItem>
+    </command:syntax>
+    <command:parameters>
+      <command:parameter required="false" globbing="false" pipelineInput="false" position="named">
+        <maml:name>Force</maml:name>
+        <maml:description>
+          <maml:para>TODO Add Force Description</maml:para>
+        </maml:description>
+        <command:parameterValue required="true">SwitchParameter</command:parameterValue>
+        <dev:defaultValue />
+      </command:parameter>
+      <command:parameter required="true" globbing="false" pipelineInput="true (ByPropertyName)" position="2">
+        <maml:name>Handler</maml:name>
+        <maml:description>
+          <maml:para>TODO Add Handler Description</maml:para>
+        </maml:description>
+        <command:parameterValue required="true">ScriptBlock</command:parameterValue>
+        <dev:defaultValue />
+      </command:parameter>
+      <command:parameter required="true" globbing="false" pipelineInput="true (ByPropertyName)" position="1">
+        <maml:name>Name</maml:name>
+        <maml:description>
+          <maml:para>TODO Add Name Description</maml:para>
+        </maml:description>
+        <command:parameterValue required="true">String</command:parameterValue>
+        <dev:defaultValue />
+      </command:parameter>
+      <command:parameter required="false" globbing="false" pipelineInput="false" position="named">
+        <maml:name>Type</maml:name>
+        <maml:description>
+          <maml:para>TODO Add Type Description</maml:para>
+        </maml:description>
+        <command:parameterValue required="true">String</command:parameterValue>
+        <dev:defaultValue>Command</dev:defaultValue>
+      </command:parameter>
+    </command:parameters>
+    <command:inputTypes>
+      <command:inputType>
+        <dev:type>
+          <maml:name>System.Collections.Hashtable</maml:name>
+          <maml:uri />
+          <maml:description/>
+        </dev:type>
+        <maml:description>
+          <maml:para>You can pipe a hashtable that contains keys named "Name" or "Handler to Register-TabExpansion.</maml:para>
+        </maml:description>
+      </command:inputType>
+    </command:inputTypes>
+    <command:returnValues>
+      <command:returnValue>
+        <dev:type>
+          <maml:name>None</maml:name>
+          <maml:uri />
+          <maml:description/>
+        </dev:type>
+        <maml:description/>
+      </command:returnValue>
+    </command:returnValues>
+    <command:terminatingErrors />
+    <command:nonTerminatingErrors />
+    <maml:alertSet>
+      <maml:title />
+      <maml:alert>
+        <maml:para />
+      </maml:alert>
+    </maml:alertSet>
+    <command:examples>
+      <command:example>
+        <maml:title>-------------------------- EXAMPLE 1 --------------------------</maml:title>
+        <maml:introduction>
+          <maml:para>C:\PS&gt;</maml:para>
+        </maml:introduction>
+        <dev:code>TODO Add Register-TabExpansion Example code</dev:code>
+        <dev:remarks>
+          <maml:para>Description</maml:para>
+          <maml:para>-----------</maml:para>
+          <maml:para>TODO Add Register-TabExpansion Example Comment</maml:para>
+          <maml:para />
+          <maml:para />
+          <maml:para />
+          <maml:para />
+        </dev:remarks>
+        <command:commandLines>
+          <command:commandLine>
+            <command:commandText />
+          </command:commandLine>
+        </command:commandLines>
+      </command:example>
+    </command:examples>
+    <maml:relatedLinks>
+      <maml:navigationLink>
+        <maml:linkText>about_PowerTab</maml:linkText>
+        <maml:uri />
+      </maml:navigationLink>
+    </maml:relatedLinks>
+  </command:command>
+  <command:command xmlns:maml="http://schemas.microsoft.com/maml/2004/10" xmlns:command="http://schemas.microsoft.com/maml/dev/command/2004/10" xmlns:dev="http://schemas.microsoft.com/maml/dev/2004/10">
+    <command:details>
+      <command:name>Remove-TabExpansionComputer</command:name>
+      <maml:description>
+        <maml:para>Removes all stored computer names from the tab expansion database.</maml:para>
+      </maml:description>
+      <maml:copyright/>
+      <command:verb>Remove</command:verb>
+      <command:noun>TabExpansionComputer</command:noun>
+      <dev:version />
+    </command:details>
+    <maml:description>
+      <maml:para>TODO Add Long description</maml:para>
+    </maml:description>
+    <command:syntax>
+      <command:syntaxItem>
+        <command:name>Remove-TabExpansionComputer</command:name>
+      </command:syntaxItem>
+    </command:syntax>
+    <command:parameters/>
+    <command:inputTypes>
+      <command:inputType>
+        <dev:type>
+          <maml:name>None</maml:name>
+          <maml:uri />
+          <maml:description/>
+        </dev:type>
+        <maml:description/>
+      </command:inputType>
+    </command:inputTypes>
+    <command:returnValues>
+      <command:returnValue>
+        <dev:type>
+          <maml:name>None</maml:name>
+          <maml:uri />
+          <maml:description/>
+        </dev:type>
+        <maml:description/>
+      </command:returnValue>
+    </command:returnValues>
+    <command:terminatingErrors />
+    <command:nonTerminatingErrors />
+    <maml:alertSet>
+      <maml:title />
+      <maml:alert>
+        <maml:para />
+      </maml:alert>
+    </maml:alertSet>
+    <command:examples>
+      <command:example>
+        <maml:title>-------------------------- EXAMPLE 1 --------------------------</maml:title>
+        <maml:introduction>
+          <maml:para>C:\PS&gt;</maml:para>
+        </maml:introduction>
+        <dev:code>Remove-TabExpansionComputer</dev:code>
+        <dev:remarks>
+          <maml:para>Description</maml:para>
+          <maml:para>-----------</maml:para>
+          <maml:para>TODO Add Remove-TabExpansionComputer Example Comment</maml:para>
+          <maml:para />
+          <maml:para />
+          <maml:para />
+          <maml:para />
+        </dev:remarks>
+        <command:commandLines>
+          <command:commandLine>
+            <command:commandText />
+          </command:commandLine>
+        </command:commandLines>
+      </command:example>
+    </command:examples>
+    <maml:relatedLinks>
+      <maml:navigationLink>
+        <maml:linkText>Add-TabExpansionComputer</maml:linkText>
+        <maml:uri />
+      </maml:navigationLink>
+    </maml:relatedLinks>
+  </command:command>
+  <command:command xmlns:maml="http://schemas.microsoft.com/maml/2004/10" xmlns:command="http://schemas.microsoft.com/maml/dev/command/2004/10" xmlns:dev="http://schemas.microsoft.com/maml/dev/2004/10">
+    <command:details>
+      <command:name>Remove-TabExpansion</command:name>
+      <maml:description>
+        <maml:para>Removes items from the tab expansion database.</maml:para>
+      </maml:description>
+      <maml:copyright/>
+      <command:verb>Remove</command:verb>
+      <command:noun>TabExpansion</command:noun>
+      <dev:version />
+    </command:details>
+    <maml:description>
+      <maml:para>TODO Add Long description</maml:para>
+    </maml:description>
+    <command:syntax>
+      <command:syntaxItem>
+        <command:name>Remove-TabExpansion</command:name>
+        <command:parameter required="true" position="1">
+          <maml:name>Filter</maml:name>
+          <maml:description/>
+          <command:parameterValue required="true">String</command:parameterValue>
+        </command:parameter>
+      </command:syntaxItem>
+    </command:syntax>
+    <command:parameters>
+      <command:parameter required="true" globbing="true" pipelineInput="false" position="1">
+        <maml:name>Filter</maml:name>
+        <maml:description>
+          <maml:para>TODO Add Filter Description</maml:para>
+        </maml:description>
+        <command:parameterValue required="true">String</command:parameterValue>
+        <dev:defaultValue />
+      </command:parameter>
+    </command:parameters>
+    <command:inputTypes>
+      <command:inputType>
+        <dev:type>
+          <maml:name>None</maml:name>
+          <maml:uri />
+          <maml:description/>
+        </dev:type>
+        <maml:description/>
+      </command:inputType>
+    </command:inputTypes>
+    <command:returnValues>
+      <command:returnValue>
+        <dev:type>
+          <maml:name>None</maml:name>
+          <maml:uri />
+          <maml:description/>
+        </dev:type>
+        <maml:description/>
+      </command:returnValue>
+    </command:returnValues>
+    <command:terminatingErrors />
+    <command:nonTerminatingErrors />
+    <maml:alertSet>
+      <maml:title />
+      <maml:alert>
+        <maml:para />
+      </maml:alert>
+    </maml:alertSet>
+    <command:examples>
+      <command:example>
+        <maml:title>-------------------------- EXAMPLE 1 --------------------------</maml:title>
+        <maml:introduction>
+          <maml:para>C:\PS&gt;</maml:para>
+        </maml:introduction>
+        <dev:code>TODO Add Remove-TabExpansion Example code</dev:code>
+        <dev:remarks>
+          <maml:para>Description</maml:para>
+          <maml:para>-----------</maml:para>
+          <maml:para>TODO Add Remove-TabExpansion Example Comment</maml:para>
+          <maml:para />
+          <maml:para />
+          <maml:para />
+          <maml:para />
+        </dev:remarks>
+        <command:commandLines>
+          <command:commandLine>
+            <command:commandText />
+          </command:commandLine>
+        </command:commandLines>
+      </command:example>
+    </command:examples>
+    <maml:relatedLinks>
+      <maml:navigationLink>
+        <maml:linkText>Add-TabExpansion</maml:linkText>
+        <maml:uri />
+      </maml:navigationLink>
+      <maml:navigationLink>
+        <maml:linkText>Get-TabExpansion</maml:linkText>
+        <maml:uri />
+      </maml:navigationLink>
+    </maml:relatedLinks>
+  </command:command>
+  <command:command xmlns:maml="http://schemas.microsoft.com/maml/2004/10" xmlns:command="http://schemas.microsoft.com/maml/dev/command/2004/10" xmlns:dev="http://schemas.microsoft.com/maml/dev/2004/10">
+    <command:details>
+      <command:name>Update-TabExpansionDataBase</command:name>
+      <maml:description>
+        <maml:para>Updates the tab expansion database with fresh lists of items.</maml:para>
+      </maml:description>
+      <maml:copyright/>
+      <command:verb>Update</command:verb>
+      <command:noun>TabExpansionDataBase</command:noun>
+      <dev:version />
+    </command:details>
+    <maml:description>
+      <maml:para>TODO Add Long description</maml:para>
+    </maml:description>
+    <command:syntax>
+      <command:syntaxItem>
+        <command:name>Update-TabExpansionDataBase</command:name>
+        <command:parameter required="false" position="named">
+          <maml:name>Force</maml:name>
+          <maml:description/>
+        </command:parameter>
+      </command:syntaxItem>
+    </command:syntax>
+    <command:parameters>
+      <command:parameter required="false" globbing="false" pipelineInput="false" position="named">
+        <maml:name>Force</maml:name>
+        <maml:description>
+          <maml:para>TODO Add Force Description</maml:para>
+        </maml:description>
+        <command:parameterValue required="true">SwitchParameter</command:parameterValue>
+        <dev:defaultValue />
+      </command:parameter>
+    </command:parameters>
+    <command:inputTypes>
+      <command:inputType>
+        <dev:type>
+          <maml:name>None</maml:name>
+          <maml:uri />
+          <maml:description/>
+        </dev:type>
+        <maml:description/>
+      </command:inputType>
+    </command:inputTypes>
+    <command:returnValues>
+      <command:returnValue>
+        <dev:type>
+          <maml:name>None</maml:name>
+          <maml:uri />
+          <maml:description/>
+        </dev:type>
+        <maml:description/>
+      </command:returnValue>
+    </command:returnValues>
+    <command:terminatingErrors />
+    <command:nonTerminatingErrors />
+    <maml:alertSet>
+      <maml:title />
+      <maml:alert>
+        <maml:para />
+      </maml:alert>
+    </maml:alertSet>
+    <command:examples>
+      <command:example>
+        <maml:title>-------------------------- EXAMPLE 1 --------------------------</maml:title>
+        <maml:introduction>
+          <maml:para>C:\PS&gt;</maml:para>
+        </maml:introduction>
+        <dev:code>Update-TabExpansionDataBase -Confirm</dev:code>
+        <dev:remarks>
+          <maml:para>Description</maml:para>
+          <maml:para>-----------</maml:para>
+          <maml:para>TODO Add Update-TabExpansionDataBase Example Comment</maml:para>
+          <maml:para />
+          <maml:para />
+          <maml:para />
+        </dev:remarks>
+        <command:commandLines>
+          <command:commandLine>
+            <command:commandText />
+          </command:commandLine>
+        </command:commandLines>
+      </command:example>
+    </command:examples>
+    <maml:relatedLinks>
+      <maml:navigationLink>
+        <maml:linkText>Export-TabExpansionDataBase</maml:linkText>
+        <maml:uri />
+      </maml:navigationLink>
+      <maml:navigationLink>
+        <maml:linkText>Import-TabExpansionDataBase</maml:linkText>
+        <maml:uri />
+      </maml:navigationLink>
+      <maml:navigationLink>
+        <maml:linkText>New-TabExpansionDataBase</maml:linkText>
+        <maml:uri />
+      </maml:navigationLink>
+    </maml:relatedLinks>
+  </command:command>
+  <command:command xmlns:maml="http://schemas.microsoft.com/maml/2004/10" xmlns:command="http://schemas.microsoft.com/maml/dev/command/2004/10" xmlns:dev="http://schemas.microsoft.com/maml/dev/2004/10">
+    <command:details>
+      <command:name>Update-TabExpansionType</command:name>
+      <maml:description>
+        <maml:para>Updates the tab expansion database with a fresh list of type names.</maml:para>
+      </maml:description>
+      <maml:copyright/>
+      <command:verb>Update</command:verb>
+      <command:noun>TabExpansionType</command:noun>
+      <dev:version />
+    </command:details>
+    <maml:description>
+      <maml:para>TODO Add Long description</maml:para>
+    </maml:description>
+    <command:syntax>
+      <command:syntaxItem>
+        <command:name>Update-TabExpansionType</command:name>
+      </command:syntaxItem>
+    </command:syntax>
+    <command:parameters/>
+    <command:inputTypes>
+      <command:inputType>
+        <dev:type>
+          <maml:name>None</maml:name>
+          <maml:uri />
+          <maml:description/>
+        </dev:type>
+        <maml:description/>
+      </command:inputType>
+    </command:inputTypes>
+    <command:returnValues>
+      <command:returnValue>
+        <dev:type>
+          <maml:name>None</maml:name>
+          <maml:uri />
+          <maml:description/>
+        </dev:type>
+        <maml:description/>
+      </command:returnValue>
+    </command:returnValues>
+    <command:terminatingErrors />
+    <command:nonTerminatingErrors />
+    <maml:alertSet>
+      <maml:title />
+      <maml:alert>
+        <maml:para />
+      </maml:alert>
+    </maml:alertSet>
+    <command:examples>
+      <command:example>
+        <maml:title>-------------------------- EXAMPLE 1 --------------------------</maml:title>
+        <maml:introduction>
+          <maml:para>C:\PS&gt;</maml:para>
+        </maml:introduction>
+        <dev:code>Update-TabExpansionType</dev:code>
+        <dev:remarks>
+          <maml:para>Description</maml:para>
+          <maml:para>-----------</maml:para>
+          <maml:para>TODO Add Update-TabExpansionType Example Comment</maml:para>
+          <maml:para />
+          <maml:para />
+          <maml:para />
+          <maml:para />
+        </dev:remarks>
+        <command:commandLines>
+          <command:commandLine>
+            <command:commandText />
+          </command:commandLine>
+        </command:commandLines>
+      </command:example>
+    </command:examples>
+    <maml:relatedLinks>
+      <maml:navigationLink>
+        <maml:linkText>Add-TabExpansionType</maml:linkText>
+        <maml:uri />
+      </maml:navigationLink>
+      <maml:navigationLink>
+        <maml:linkText>Remove-TabExpansion</maml:linkText>
+        <maml:uri />
+      </maml:navigationLink>
+    </maml:relatedLinks>
+  </command:command>
+  <command:command xmlns:maml="http://schemas.microsoft.com/maml/2004/10" xmlns:command="http://schemas.microsoft.com/maml/dev/command/2004/10" xmlns:dev="http://schemas.microsoft.com/maml/dev/2004/10">
+    <command:details>
+      <command:name>Update-TabExpansionWmi</command:name>
+      <maml:description>
+        <maml:para>Updates the tab expansion database with a fresh list of WMI class names.</maml:para>
+      </maml:description>
+      <maml:copyright/>
+      <command:verb>Update</command:verb>
+      <command:noun>TabExpansionWmi</command:noun>
+      <dev:version />
+    </command:details>
+    <maml:description>
+      <maml:para>TODO Add Long description</maml:para>
+    </maml:description>
+    <command:syntax>
+      <command:syntaxItem>
+        <command:name>Update-TabExpansionWmi</command:name>
+      </command:syntaxItem>
+    </command:syntax>
+    <command:parameters/>
+    <command:inputTypes>
+      <command:inputType>
+        <dev:type>
+          <maml:name>None</maml:name>
+          <maml:uri />
+          <maml:description/>
+        </dev:type>
+        <maml:description/>
+      </command:inputType>
+    </command:inputTypes>
+    <command:returnValues>
+      <command:returnValue>
+        <dev:type>
+          <maml:name>None</maml:name>
+          <maml:uri />
+          <maml:description/>
+        </dev:type>
+        <maml:description/>
+      </command:returnValue>
+    </command:returnValues>
+    <command:terminatingErrors />
+    <command:nonTerminatingErrors />
+    <maml:alertSet>
+      <maml:title />
+      <maml:alert>
+        <maml:para />
+      </maml:alert>
+    </maml:alertSet>
+    <command:examples>
+      <command:example>
+        <maml:title>-------------------------- EXAMPLE 1 --------------------------</maml:title>
+        <maml:introduction>
+          <maml:para>C:\PS&gt;</maml:para>
+        </maml:introduction>
+        <dev:code>Update-TabExpansionWmi</dev:code>
+        <dev:remarks>
+          <maml:para>Description</maml:para>
+          <maml:para>-----------</maml:para>
+          <maml:para>TODO Add Update-TabExpansionWmi Example Comment</maml:para>
+          <maml:para />
+          <maml:para />
+          <maml:para />
+          <maml:para />
+        </dev:remarks>
+        <command:commandLines>
+          <command:commandLine>
+            <command:commandText />
+          </command:commandLine>
+        </command:commandLines>
+      </command:example>
+    </command:examples>
+    <maml:relatedLinks>
+      <maml:navigationLink>
+        <maml:linkText>Remove-TabExpansion</maml:linkText>
+        <maml:uri />
+      </maml:navigationLink>
+    </maml:relatedLinks>
+  </command:command>
+</helpItems>

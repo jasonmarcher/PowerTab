@@ -156,6 +156,7 @@ Function Invoke-TabItemSelector {
 
 ############
 
+# .ExternalHelp TabExpansionLib-Help.xml
 Function New-TabExpansionDatabase {
     [CmdletBinding()]
     param()
@@ -188,6 +189,7 @@ Function New-TabExpansionDatabase {
 }
 
 
+# .ExternalHelp TabExpansionLib-Help.xml
 Function New-TabExpansionConfig {
     [CmdletBinding()]
     param(
@@ -204,6 +206,7 @@ Function New-TabExpansionConfig {
 }
 
 
+# .ExternalHelp TabExpansionLib-Help.xml
 Function Import-TabExpansionDataBase {
     [CmdletBinding()]
     param(
@@ -221,6 +224,7 @@ Function Import-TabExpansionDataBase {
 }
 
 
+# .ExternalHelp TabExpansionLib-Help.xml
 Function Export-TabExpansionDatabase {
     [CmdletBinding()]
     param(
@@ -258,6 +262,7 @@ Function Export-TabExpansionDatabase {
 }
 
 
+# .ExternalHelp TabExpansionLib-Help.xml
 Function Import-TabExpansionConfig {
     [CmdletBinding()]
     param(
@@ -275,6 +280,7 @@ Function Import-TabExpansionConfig {
 }
 
 
+# .ExternalHelp TabExpansionLib-Help.xml
 Function Export-TabExpansionConfig {
     [CmdletBinding()]
     param(
@@ -329,6 +335,7 @@ Function Export-TabExpansionConfig {
 }
 
 
+# .ExternalHelp TabExpansionLib-Help.xml
 Function Import-TabExpansionTheme {
     [CmdletBinding(DefaultParameterSetName = "Name")]
     param(
@@ -354,6 +361,7 @@ Function Import-TabExpansionTheme {
 }
 
 
+# .ExternalHelp TabExpansionLib-Help.xml
 Function Export-TabExpansionTheme {
     [CmdletBinding(DefaultParameterSetName = "Name")]
     param(
@@ -388,6 +396,7 @@ Function Export-TabExpansionTheme {
 
 ############
 
+# .ExternalHelp TabExpansionLib-Help.xml
 Function Update-TabExpansionDataBase {
 	[CmdletBinding(SupportsShouldProcess = $true, SupportsTransactions = $false,
 		ConfirmImpact = "Low", DefaultParameterSetName = "")]
@@ -415,6 +424,7 @@ Function Update-TabExpansionDataBase {
 Set-Alias udte Update-TabExpansionDataBase
 
 
+# .ExternalHelp TabExpansionLib-Help.xml
 Function Update-TabExpansionType {
 	[CmdletBinding()]
     param()
@@ -459,6 +469,7 @@ Function Update-TabExpansionType {
 }
 
 
+# .ExternalHelp TabExpansionLib-Help.xml
 Function Add-TabExpansionType {
 	[CmdletBinding()]
     param(
@@ -510,6 +521,7 @@ Function Add-TabExpansionType {
 }
 
 
+# .ExternalHelp TabExpansionLib-Help.xml
 Function Update-TabExpansionWmi {
 	[CmdletBinding()]
     param()
@@ -533,6 +545,7 @@ Function Update-TabExpansionWmi {
 }
 
 
+# .ExternalHelp TabExpansionLib-Help.xml
 Function Add-TabExpansionEnumFromLastError {
 	[CmdletBinding()]
     param(
@@ -553,6 +566,7 @@ Function Add-TabExpansionEnumFromLastError {
 }
 
 
+# .ExternalHelp TabExpansionLib-Help.xml
 Function Add-TabExpansionComputer {
 	[CmdletBinding(SupportsShouldProcess = $false, SupportsTransactions = $false,
 		ConfirmImpact = "None", DefaultParameterSetName = "")]
@@ -587,6 +601,8 @@ Function Add-TabExpansionComputer {
     }
 }
 
+
+# .ExternalHelp TabExpansionLib-Help.xml
 Function Remove-TabExpansionComputer {
 	[CmdletBinding()]
     param()
@@ -598,6 +614,7 @@ Function Remove-TabExpansionComputer {
 
 ############
 
+# .ExternalHelp TabExpansionLib-Help.xml
 Function Get-TabExpansion {
 	[CmdletBinding()]
     param(
@@ -632,6 +649,7 @@ Function Get-TabExpansion {
 Set-Alias gte Get-TabExpansion
 
 
+# .ExternalHelp TabExpansionLib-Help.xml
 Function Add-TabExpansion {
 	[CmdletBinding()]
     param(
@@ -664,6 +682,7 @@ Function Add-TabExpansion {
 Set-Alias ate Add-TabExpansion
 
 
+# .ExternalHelp TabExpansionLib-Help.xml
 Function Remove-TabExpansion {
 	[CmdletBinding()]
     param(
@@ -688,6 +707,7 @@ Function Remove-TabExpansion {
 Set-Alias rte Remove-TabExpansion
 
 
+# .ExternalHelp TabExpansionLib-Help.xml
 Function Invoke-TabExpansionEditor {
 	[CmdletBinding()]
     param()
@@ -718,6 +738,7 @@ Set-Alias itee Invoke-TabExpansionEditor
 
 ############
 
+# .ExternalHelp TabExpansionLib-Help.xml
 Function Register-TabExpansion {
 	[CmdletBinding()]
     param(
@@ -823,6 +844,7 @@ Function Initialize-PowerTab {
 
 
 Function UpgradeTabExpansionDatabase {
+    [CmdletBinding()]
     param(
         [Ref]$Config
         ,
@@ -846,6 +868,7 @@ Function UpgradeTabExpansionDatabase {
 
 
 Function UpgradePowerTab99 {
+    [CmdletBinding()]
     param(
         [Ref]$Config
         ,
