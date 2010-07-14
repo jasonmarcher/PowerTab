@@ -433,17 +433,19 @@ Register-TabExpansion "New-Object" -Type "Command" {
                 Where-Object {$_ -like "$Argument*"} | Sort-Object
         }
         'TypeName' {
-            ## TODO: Find way to differentiate namespaces from types
-            $TabExpansionHasOutput.Value = $true
-            $Dots = $Argument.Split(".").Count - 1
-            $res = @()
-            $res += $dsTabExpansionDatabase.Tables['Types'].Select("ns like '$Argument%' and dc = $($Dots + 1)") |
-                Select-Object -Unique -ExpandProperty ns
-            if ($Dots -gt 0) {
-                $res += $dsTabExpansionDatabase.Tables['Types'].Select("name like '$Argument%' and dc = $Dots") |
-                    Select-Object -ExpandProperty Name
+            if ($Argument -notmatch '^\.') {
+                ## TODO: Find way to differentiate namespaces from types
+                $TabExpansionHasOutput.Value = $true
+                $Dots = $Argument.Split(".").Count - 1
+                $res = @()
+                $res += $dsTabExpansionDatabase.Tables['Types'].Select("ns like '$Argument%' and dc = $($Dots + 1)") |
+                    Select-Object -Unique -ExpandProperty ns
+                if ($Dots -gt 0) {
+                    $res += $dsTabExpansionDatabase.Tables['Types'].Select("name like '$Argument%' and dc = $Dots") |
+                        Select-Object -ExpandProperty Name
+                }
+                $res
             }
-            $res
         }
     }
 }
