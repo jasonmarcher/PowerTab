@@ -615,8 +615,19 @@ Register-TabExpansion "Out-Printer" -Type "Command" {
             }
         }
     }.GetNewClosure()
+    $NewPSDriveHandler = {
+        param($Context, [ref]$TabExpansionHasOutput)
+        $Argument = $Context.Argument
+        switch -exact ($Context.Parameter) {
+            'Scope' {
+                $TabExpansionHasOutput.Value = $true
+                "Global","Local","Script","0"
+            }
+        }
+    }.GetNewClosure()
     
     Register-TabExpansion "Get-PSDrive" $PSDriveHandler -Type "Command"
+    Register-TabExpansion "New-PSDrive" $NewPSDriveHandler -Type "Command"
     Register-TabExpansion "Remove-PSDrive" $PSDriveHandler -Type "Command"
 }
 
