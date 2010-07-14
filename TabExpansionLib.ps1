@@ -651,9 +651,11 @@ Function Invoke-TabExpansionEditor {
     param()
     
     end {
+        [System.Version]$CurVersion = (Get-Module -ListAvailable $PSCmdlet.MyInvocation.MyCommand.Module.Name).Version
+
         $Form = New-Object System.Windows.Forms.Form
         $Form.Size = New-Object System.Drawing.Size @(500,300)
-        $Form.Text = "PowerTab 0.99 PowerShell TabExpansion Library"
+        $Form.Text = "PowerTab $CurVersion PowerShell TabExpansion Library"
 
         $DataGrid = New-Object System.Windows.Forms.DataGrid
         $DataGrid.CaptionText = "Custom TabExpansion Database Editor"
