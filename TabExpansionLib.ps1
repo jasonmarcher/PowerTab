@@ -546,27 +546,6 @@ Function Update-TabExpansionWmi {
 
 
 # .ExternalHelp TabExpansionLib-Help.xml
-Function Add-TabExpansionEnumFromLastError {
-	[CmdletBinding()]
-    param(
-        [Parameter(Position = 0)]
-        [String]
-        $Name
-    )
-
-    end {
-        [Void]($Error[0] -match 'to type \"(.*?)\".*are \"(.*?)\"')
-        if ($Name) {
-            $Filter = $Name
-        } else {
-            $Filter = $Matches[1].Split('.')[-1]   
-        }
-        $Matches[2].Split(',') | ForEach-Object {Add-TabExpansion $Filter $_.Trim('" ')}
-    }
-}
-
-
-# .ExternalHelp TabExpansionLib-Help.xml
 Function Add-TabExpansionComputer {
 	[CmdletBinding(SupportsShouldProcess = $false, SupportsTransactions = $false,
 		ConfirmImpact = "None", DefaultParameterSetName = "")]
