@@ -317,12 +317,30 @@ Register-TabExpansion "Get-HotFix" -Type "Command" {
 ## Job
 & {
     $JobHandler = {
-        param($Context, [ref]$TabExpansionHasOutput)
+        param($Context, [ref]$TabExpansionHasOutput, [ref]$QuoteSpaces)
         $Argument = $Context.Argument
         switch -exact ($Context.Parameter) {
             'Id' {
                 $TabExpansionHasOutput.Value = $true
                 Get-Job | Select-Object -ExpandProperty Id
+            }
+            'InstanceId' {
+                $TabExpansionHasOutput.Value = $true
+                Get-Job | Select-Object -ExpandProperty InstanceId
+            }
+            'Location' {
+                ## TODO:
+            }
+            'Name' {
+                $TabExpansionHasOutput.Value = $true
+                Get-Job -Name "$Argument*" | Select-Object -ExpandProperty Name
+            }
+            'Job' {
+                if ($Argument -notlike '$*') {
+                    $TabExpansionHasOutput.Value = $true
+                    $QuoteSpaces.Value = $false
+                    Get-Job -Name "$Argument*" | ForEach-Object {'(Get-Job "{0}")' -f $_.Name}
+                }
             }
         }
     }.GetNewClosure()
