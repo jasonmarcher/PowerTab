@@ -44,13 +44,13 @@ Function Remove-TabActivityIndicator {
     param()
 
     end {
-        if ("ConsoleHost","PowerShellPlus Host" -contains $Host.Name) {
-            if ($MessageHandle) {
-                $MessageHandle.Clear()
-                Remove-Variable -Name MessageHandle -Scope Script
-            }
-        } else {
-            if ($PowerTabConfig.TabActivityIndicator) {
+        if ($PowerTabConfig.TabActivityIndicator) {
+            if ("ConsoleHost","PowerShellPlus Host" -contains $Host.Name) {
+                if ($MessageHandle) {
+                    $MessageHandle.Clear()
+                    Remove-Variable -Name MessageHandle -Scope Script
+                }
+            } else {
                 Write-Progress "PowerTab" $Resources.invoke_tabactivityindicator_prog_status -Completed
             }
         }
