@@ -567,12 +567,15 @@ Register-TabExpansion "Out-Printer" -Type "Command" {
         param($Context, [ref]$TabExpansionHasOutput)
         $Argument = $Context.Argument
         switch -exact ($Context.Parameter) {
-            'Id' {
+            'Breakpoint' {
                 ## TODO:
-                Get-PSBreakpoint | Select-Object -ExpandProperty Id
             }
             'Command' {
                 ## TODO:
+            }
+            'Id' {
+                ## TODO:
+                Get-PSBreakpoint | Select-Object -ExpandProperty Id
             }
             'Line' {
                 ## TODO:
@@ -594,6 +597,8 @@ Register-TabExpansion "Out-Printer" -Type "Command" {
         }
     }.GetNewClosure()
     
+    Register-TabExpansion "Disable-PSBreakpoint" $PSBreakpointHandler -Type "Command"
+    Register-TabExpansion "Enable-PSBreakpoint" $PSBreakpointHandler -Type "Command"
     Register-TabExpansion "Get-PSBreakpoint" $PSBreakpointHandler -Type "Command"
     Register-TabExpansion "Set-PSBreakpoint" $PSBreakpointHandler -Type "Command"
 }
