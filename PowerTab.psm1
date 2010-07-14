@@ -221,44 +221,17 @@ Export-ModuleMember -Function $Functions -Variable PowerTabConfig -Alias *
 
 <#
 TODOs
-+ Console List: Fixed use of backspace and left arrow in some cases
-+ Console List: Fixed exception from Write-Line
-+ Console List: Fixed completing folder names with "/" causing problems (forces "\")
-+ Fixed variable expansion looking at wrong scope
-+ Fixed file system completion showing list for only one result
-+ Fixed file system completion for registry keys (repeating paths)
-+ Fixed completing members of variables in parentheses causing errors  ($test).<tab>
-+ Verb expansion when declaring functions:  function re<TAB>
-+ History uses '#' instead of 'h_':  #2<TAB>  or  #cd<TAB>
-+ Quote values that have spaces
-+ Variables sometimes need brackets:  ${foo.bar}
-+ ScriptBlock members:  { 1+1 }.inv<TAB>
-+ COM object names (PROGIDs)?
-+ Fix footer of console list getting longer than the width of the list (leaves some characters that don't get cleaned up)
-+ Fixed interop types not getting added to the database correctly
 - Support variables in path:  $test = "C:"; $test\<TAB>
 ~ Expand items in a list:  Get-Command -CommandType Cm<TAB>,Fun<TAB>
 - Assignment to strongly type variables:  $ErrorActionPreference = <TAB>
-- Support accelerators:  [str<TAB>
-$TypeAccelerators = [Type]::GetType("System.Management.Automation.TypeAccelerators")
-$TypeAccelerators::Get.GetEnumerator() | Where-Object {$_.Key -like "$Matched*"} | ForEach-Object {"[$($_.Key)]"} | Sort-Object
 - Alias and Variable replace:  ls^A  or  $test^A
 
+Just ideas:
 - DateTime formats:  ^D<TAB>  or  2008/01/20^D<TAB>
 - Paste clipboard:  ^V<TAB>
 - Cut line:  Get-Foo -Bar something^X<TAB>  -->  
 - Cut word:  Get-Foo -Bar something^Z<TAB>  -->  Get-Foo -Bar
 
-
 - handle group start tokens ('{', '(', etc.)
 ~ Not detecting possitional parameters bound from pipeline
-#>
-
-<#
-Token parsing examples.
-
-FileSystem
-$env:SystemDrive/pro<TAB>
-Variable/Operator/Command
-
 #>
