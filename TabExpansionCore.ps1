@@ -323,6 +323,25 @@ Function Invoke-TabExpansion {
                     $TabExpansionHasOutput = $true
                 } catch {}
             }
+        } elseif ($LastToken.Type -eq $_TokenTypes::GroupStart) {
+            ## Tab complete method signatures
+            $MethodTokens = @([System.Management.Automation.PSParser]::Tokenize($LastWord, [ref]$Errors))
+            if ($MethodTokens[-2].Type -eq $_TokenTypes::Member) {
+                $MethodObject = $LastWord.SubString(0, $MethodTokens[-1].Start)
+                $PossibleValues = Invoke-Expression "$MethodObject.OverloadDefinitions" | ForEach-Object {
+                    $Parameters = $_ -replace '^\S+ .+\((.+)?\)','$1'
+                    if ($Parameters) {
+                        $Parameters = foreach ($Parameter in ($Parameters -split ", ")) {
+                            $Type = ($Parameter -split " ")[0]
+                            $Name = ($Parameter -split " ")[1]
+                            '[{0}] ${1}' -f $Type,$Name
+                        }
+                        $Parameters = $Parameters -join ", "
+                    }
+                    "{0}{1})" -f $LastWord,$Parameters
+                }
+                $TabExpansionHasOutput = $true
+            }
         }
 
         if ($TabExpansionHasOutput) {
