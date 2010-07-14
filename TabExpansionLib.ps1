@@ -192,7 +192,8 @@ Function New-TabExpansionConfig {
     [CmdletBinding()]
     param(
         [Alias("FullName","Path")]
-        [Parameter(Position = 0, ValueFromPipelineByPropertyName = $true)]
+        [Parameter(Position = 0, ValueFromPipelineByValue = $true, ValueFromPipelineByPropertyName = $true)]
+        [ValidateNotNullOrEmpty()]
         [String]
         $LiteralPath = $PowerTabConfig.Setup.ConfigurationPath
     )
@@ -207,7 +208,8 @@ Function Import-TabExpansionDataBase {
     [CmdletBinding()]
     param(
         [Alias("FullName","Path")]
-        [Parameter(Position = 0, ValueFromPipelineByPropertyName = $true)]
+        [Parameter(Position = 0, ValueFromPipelineByValue = $true, ValueFromPipelineByPropertyName = $true)]
+        [ValidateNotNullOrEmpty()]
         [String]
         $LiteralPath = $PowerTabConfig.Setup.DatabasePath
     )
@@ -223,7 +225,8 @@ Function Export-TabExpansionDatabase {
     [CmdletBinding()]
     param(
         [Alias("FullName","Path")]
-        [Parameter(Position = 0, ValueFromPipelineByPropertyName = $true)]
+        [Parameter(Position = 0, ValueFromPipelineByValue = $true, ValueFromPipelineByPropertyName = $true)]
+        [ValidateNotNullOrEmpty()]
         [String]
         $LiteralPath = $PowerTabConfig.Setup.DatabasePath
     )
@@ -250,7 +253,8 @@ Function Import-TabExpansionConfig {
     [CmdletBinding()]
     param(
         [Alias("FullName","Path")]
-        [Parameter(Position = 0, ValueFromPipelineByPropertyName = $true)]
+        [Parameter(Position = 0, ValueFromPipelineByValue = $true, ValueFromPipelineByPropertyName = $true)]
+        [ValidateNotNullOrEmpty()]
         [String]
         $LiteralPath = $PowerTabConfig.Setup.ConfigurationPath
     )
@@ -266,7 +270,8 @@ Function Export-TabExpansionConfig {
     [CmdletBinding()]
     param(
         [Alias("FullName","Path")]
-        [Parameter(Position = 0, ValueFromPipelineByPropertyName = $true)]
+        [Parameter(Position = 0, ValueFromPipelineByValue = $true, ValueFromPipelineByPropertyName = $true)]
+        [ValidateNotNullOrEmpty()]
         [String]
         $LiteralPath = $PowerTabConfig.Setup.ConfigurationPath
     )
@@ -300,13 +305,13 @@ Function Export-TabExpansionConfig {
 Function Import-TabExpansionTheme {
     [CmdletBinding(DefaultParameterSetName = "Name")]
     param(
-        [Parameter(ParameterSetName = "Name", Position = 0)]
+        [Parameter(ParameterSetName = "Name", Position = 0, Mandatory = $true)]
         [ValidateNotNullOrEmpty()]
         [String]
         $Name
         ,
         [Alias("FullName","Path")]
-        [Parameter(ParameterSetName = "LiteralPath", ValueFromPipelineByPropertyName = $true)]
+        [Parameter(ParameterSetName = "LiteralPath", ValueFromPipelineByValue = $true, ValueFromPipelineByPropertyName = $true)]
         [ValidateNotNullOrEmpty()]
         [String]
         $LiteralPath
@@ -325,13 +330,13 @@ Function Import-TabExpansionTheme {
 Function Export-TabExpansionTheme {
     [CmdletBinding(DefaultParameterSetName = "Name")]
     param(
-        [Parameter(ParameterSetName = "Name", Position = 0)]
+        [Parameter(ParameterSetName = "Name", Position = 0, Mandatory = $true)]
         [ValidateNotNullOrEmpty()]
         [String]
         $Name
         ,
         [Alias("FullName","Path")]
-        [Parameter(ParameterSetName = "LiteralPath", ValueFromPipelineByPropertyName = $true)]
+        [Parameter(ParameterSetName = "LiteralPath", ValueFromPipelineByValue = $true, ValueFromPipelineByPropertyName = $true)]
         [ValidateNotNullOrEmpty()]
         [String]
         $LiteralPath
@@ -430,7 +435,7 @@ Function Update-TabExpansionType {
 Function Add-TabExpansionType {
 	[CmdletBinding()]
     param(
-		[Parameter(Position = 0, ValueFromPipeline = $true)]
+		[Parameter(Position = 0, Mandatory = $true, ValueFromPipeline = $true)]
         [ValidateNotNull()]
         [System.Reflection.Assembly]
         $Assembly
@@ -689,11 +694,13 @@ Set-Alias itee Invoke-TabExpansionEditor
 Function Register-TabExpansion {
 	[CmdletBinding()]
     param(
-		[Parameter(Mandatory = $true, Position = 0, ValueFromPipelineByPropertyName = $true)]
+		[Parameter(Position = 0, Mandatory = $true, ValueFromPipelineByPropertyName = $true)]
+        [ValidateNotNullOrEmpty()]
         [String]
         $Name
         ,
-		[Parameter(Mandatory = $true, Position = 1, ValueFromPipelineByPropertyName = $true)]
+		[Parameter(Position = 1, Mandatory = $true, ValueFromPipelineByPropertyName = $true)]
+        [ValidateNotNull()]
         [ScriptBlock]
         $Handler
         ,
@@ -982,6 +989,7 @@ Function InternalNewTabExpansionConfig {
 
 
 Function InternalImportTabExpansionDataBase {
+    [CmdletBinding()]
     param(
         [String]$LiteralPath
     )
@@ -1000,6 +1008,7 @@ Function InternalImportTabExpansionDataBase {
 
 
 Function InternalImportTabExpansionConfig {
+    [CmdletBinding()]
     param(
         [String]$LiteralPath
     )
@@ -1018,6 +1027,9 @@ Function InternalImportTabExpansionConfig {
 
 
 Function CreatePowerTabConfig {
+    [CmdletBinding()]
+    param()
+    
     $script:PowerTabConfig = New-Object System.Object
 
     Add-Member -InputObject $PowerTabConfig -MemberType NoteProperty -Name Version -Value $dsTabExpansionConfig.Tables['Config'].Select("Name = 'Version'")[0].Value
