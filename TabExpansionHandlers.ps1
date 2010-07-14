@@ -655,16 +655,26 @@ Register-TabExpansion "Out-Printer" -Type "Command" {
         }
     }.GetNewClosure()
     $ImportPSSessionHandler = {
-        param($Context, [ref]$TabExpansionHasOutput)
+        param($Context, [ref]$TabExpansionHasOutput, [ref]$QuoteSpaces)
         $Argument = $Context.Argument
         switch -exact ($Context.Parameter) {
             'CommandName' {
+                ## TODO:
+            }
+            'FormatTypeName' {
                 ## TODO:
             }
             'Module' {
                 ## TODO: Grab from session instead?
                 $TabExpansionHasOutput.Value = $true
                 (Get-Module -ListAvailable "$Argument*") + (Get-PSSnapin "$Argument*") | Select-Object -ExpandProperty Name | Sort-Object
+            }
+            'Session' {
+                if ($Argument -notlike '$*') {
+                    $TabExpansionHasOutput.Value = $true
+                    $QuoteSpaces.Value = $false
+                    Get-PSSession -Name "$Argument*" | ForEach-Object {'(Get-PSSession -Name "{0}")' -f $_.Name}
+                }
             }
         }
     }.GetNewClosure()
