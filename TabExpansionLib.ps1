@@ -782,7 +782,7 @@ Function Initialize-PowerTab {
 
     ## Load Configuration
     if ($ConfigurationPath -and ((Test-Path $ConfigurationPath) -or ($ConfigurationPath -eq "IsolatedStorage"))) {
-        $Config = InternalImportTabExpansionConfig $ConfigurationPath
+        $Config = InternalImportTabExpansionConfig (Convert-Path (Resolve-Path $ConfigurationPath))
     } else {
         ## TODO: Throw error or create new config?
         #$Config = InternalNewTabExpansionConfig $ConfigurationPath
@@ -800,7 +800,11 @@ Function Initialize-PowerTab {
     } else {
         $DatabasePath = $Config.Tables['Config'].select("Name = 'DatabasePath'")[0].Value
     }
-    $Database = InternalImportTabExpansionDataBase $DatabasePath
+    if(!(Split-Path $DatabasePath)) {
+      $DatabasePath = Join-Path $PSScriptRoot $DataBasePath
+    }
+    
+    $Database = InternalImportTabExpansionDataBase Convert-Path (Resolve-Path $DatabasePath)
 
     ## Upgrade if needed
     if ($Version -lt $CurVersion) {
