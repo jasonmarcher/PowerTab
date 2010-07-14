@@ -672,18 +672,6 @@ Function Invoke-TabExpansionEditor {
 }
 Set-Alias itee Invoke-TabExpansionEditor
 
-##########
-
-Function Show-TabExpansionCustom {
-    Write-Host -ForegroundColor Yellow "Current Custom Aliases:"
-    $dsTabExpansionDatabase.Tables['Custom'].Select("Type = 'Custom'") | Format-Table -Auto
-}
-
-Function Show-TabExpansionComputer {
-    Write-Host -ForegroundColor Yellow "Current Custom Computerlist:"
-    $dsTabExpansionDatabase.Tables['Custom'].Select("Type = 'Computer'") | Format-Table -Auto
-}
-
 ############
 
 Function Register-TabExpansion {
