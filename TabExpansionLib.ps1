@@ -194,7 +194,7 @@ Function New-TabExpansionConfig {
     [CmdletBinding()]
     param(
         [Alias("FullName","Path")]
-        [Parameter(Position = 0, ValueFromPipelineByValue = $true, ValueFromPipelineByPropertyName = $true)]
+        [Parameter(Position = 0, ValueFromPipeline = $true, ValueFromPipelineByPropertyName = $true)]
         [ValidateNotNullOrEmpty()]
         [String]
         $LiteralPath = $PowerTabConfig.Setup.ConfigurationPath
@@ -211,7 +211,7 @@ Function Import-TabExpansionDataBase {
     [CmdletBinding()]
     param(
         [Alias("FullName","Path")]
-        [Parameter(Position = 0, ValueFromPipelineByValue = $true, ValueFromPipelineByPropertyName = $true)]
+        [Parameter(Position = 0, ValueFromPipeline = $true, ValueFromPipelineByPropertyName = $true)]
         [ValidateNotNullOrEmpty()]
         [String]
         $LiteralPath = $PowerTabConfig.Setup.DatabasePath
@@ -229,7 +229,7 @@ Function Export-TabExpansionDatabase {
     [CmdletBinding()]
     param(
         [Alias("FullName","Path")]
-        [Parameter(Position = 0, ValueFromPipelineByValue = $true, ValueFromPipelineByPropertyName = $true)]
+        [Parameter(Position = 0, ValueFromPipeline = $true, ValueFromPipelineByPropertyName = $true)]
         [ValidateNotNullOrEmpty()]
         [String]
         $LiteralPath = $PowerTabConfig.Setup.DatabasePath
@@ -267,7 +267,7 @@ Function Import-TabExpansionConfig {
     [CmdletBinding()]
     param(
         [Alias("FullName","Path")]
-        [Parameter(Position = 0, ValueFromPipelineByValue = $true, ValueFromPipelineByPropertyName = $true)]
+        [Parameter(Position = 0, ValueFromPipeline = $true, ValueFromPipelineByPropertyName = $true)]
         [ValidateNotNullOrEmpty()]
         [String]
         $LiteralPath = $PowerTabConfig.Setup.ConfigurationPath
@@ -285,7 +285,7 @@ Function Export-TabExpansionConfig {
     [CmdletBinding()]
     param(
         [Alias("FullName","Path")]
-        [Parameter(Position = 0, ValueFromPipelineByValue = $true, ValueFromPipelineByPropertyName = $true)]
+        [Parameter(Position = 0, ValueFromPipeline = $true, ValueFromPipelineByPropertyName = $true)]
         [ValidateNotNullOrEmpty()]
         [String]
         $LiteralPath = $PowerTabConfig.Setup.ConfigurationPath
@@ -345,7 +345,7 @@ Function Import-TabExpansionTheme {
         $Name
         ,
         [Alias("FullName","Path")]
-        [Parameter(ParameterSetName = "LiteralPath", ValueFromPipelineByValue = $true, ValueFromPipelineByPropertyName = $true)]
+        [Parameter(ParameterSetName = "LiteralPath", ValueFromPipeline = $true, ValueFromPipelineByPropertyName = $true)]
         [ValidateNotNullOrEmpty()]
         [String]
         $LiteralPath
@@ -371,7 +371,7 @@ Function Export-TabExpansionTheme {
         $Name
         ,
         [Alias("FullName","Path")]
-        [Parameter(ParameterSetName = "LiteralPath", ValueFromPipelineByValue = $true, ValueFromPipelineByPropertyName = $true)]
+        [Parameter(ParameterSetName = "LiteralPath", ValueFromPipeline = $true, ValueFromPipelineByPropertyName = $true)]
         [ValidateNotNullOrEmpty()]
         [String]
         $LiteralPath
@@ -782,7 +782,7 @@ Function Initialize-PowerTab {
 
     ## Load Configuration
     if ($ConfigurationPath -and ((Test-Path $ConfigurationPath) -or ($ConfigurationPath -eq "IsolatedStorage"))) {
-        $Config = InternalImportTabExpansionConfig $ConfigurationPath
+        $Config = InternalImportTabExpansionConfig (Convert-Path (Resolve-Path $ConfigurationPath))
     } else {
         ## TODO: Throw error or create new config?
         #$Config = InternalNewTabExpansionConfig $ConfigurationPath
@@ -800,7 +800,11 @@ Function Initialize-PowerTab {
     } else {
         $DatabasePath = $Config.Tables['Config'].select("Name = 'DatabasePath'")[0].Value
     }
-    $Database = InternalImportTabExpansionDataBase $DatabasePath
+    if(!(Split-Path $DatabasePath)) {
+      $DatabasePath = Join-Path $PSScriptRoot $DataBasePath
+    }
+    
+    $Database = InternalImportTabExpansionDataBase (Convert-Path (Resolve-Path $DatabasePath))
 
     ## Upgrade if needed
     if ($Version -lt $CurVersion) {
@@ -1059,7 +1063,7 @@ Function CreatePowerTabConfig {
     [CmdletBinding()]
     param()
     
-    $script:PowerTabConfig = New-Object System.Object
+    $script:PowerTabConfig = New-Object PSObject
 
     Add-Member -InputObject $PowerTabConfig -MemberType NoteProperty -Name Version -Value $dsTabExpansionConfig.Tables['Config'].Select("Name = 'Version'")[0].Value
 
@@ -1083,13 +1087,13 @@ Function CreatePowerTabConfig {
             }") `
         -Force
 
-    Add-Member -InputObject $PowerTabConfig -MemberType NoteProperty -Name Colors -Value (New-Object System.Object)
+    Add-Member -InputObject $PowerTabConfig -MemberType NoteProperty -Name Colors -Value (New-Object PSObject)
     Add-Member -InputObject $PowerTabConfig.Colors -MemberType ScriptMethod -Name ToString -Value {"{PowerTab Color Configuration}"} -Force
 
-    Add-Member -InputObject $PowerTabConfig -MemberType NoteProperty -Name ShortcutChars -Value (New-Object System.Object)
+    Add-Member -InputObject $PowerTabConfig -MemberType NoteProperty -Name ShortcutChars -Value (New-Object PSObject)
     Add-Member -InputObject $PowerTabConfig.ShortcutChars -MemberType ScriptMethod -Name ToString -Value {"{PowerTab Shortcut Characters}"} -Force
 
-    Add-Member -InputObject $PowerTabConfig -MemberType NoteProperty -Name Setup -Value (New-Object System.Object)
+    Add-Member -InputObject $PowerTabConfig -MemberType NoteProperty -Name Setup -Value (New-Object PSObject)
     Add-Member -InputObject $PowerTabConfig.Setup -MemberType ScriptMethod -Name ToString -Value {"{PowerTab Setup Data}"} -Force
 
     ## Make global properties on config object
