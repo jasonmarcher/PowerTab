@@ -534,6 +534,23 @@ Function Invoke-PowerTab {
                 break
             }
 
+            ## Completion on Shares (commented lines without DLL but need admin rights )
+            '^\\\\([^\\]+)\\([^\\]*)$' {
+                #gwmi win32_share -computer $matches[1] -filter "name like '$($matches[2])%'" | Foreach-Object {"\\$($matches[1])\$($_.name)"}
+                #([adsi]"WinNT://$($matches[1])/LanmanServer,FileService" ).psbase.children |? {$_.name -like "$($matches[2])*"}  |% {$_.name}
+                [Trinet.Networking.ShareCollection]::GetShares($Matches[1]) | Where-Object {$_.NetName -like "$($Matches[2])*"} |
+                    Sort-Object NetName | ForEach-Object {"\\$($Matches[1])\$($_.NetName)"} |
+                    Invoke-TabItemSelector $LastWord -SelectionHandler $SelectionHandler
+                break
+            }
+
+            ## Completion on computers in database
+            '^\\\\([^\\]*)$' {
+                $dsTabExpansionDatabase.Tables['Custom'].Select("filter like '$($Matches[1])%' AND type = 'Computer' ", "text") |
+                    ForEach-Object {"\\$($_.Text)"} | Invoke-TabItemSelector $LastWord -SelectionHandler $SelectionHandler
+                break
+            }
+
             ## Variable "In-Place" expansion on \[tab]
             '.*(\$[^\\]+)\\$' {
                 $val = $ExecutionContext.InvokeCommand.ExpandString($Matches[1])
@@ -799,23 +816,6 @@ Function Invoke-PowerTab {
                     $dsTabExpansionDatabase.Tables['Custom'].Select("filter = '$($Matches[1])' AND type = 'Alias'") 
                         Select-Object -ExpandProperty Text | Invoke-TabItemSelector -SelectionHandler $SelectionHandler
                 }
-                break
-            }
-     
-            ## Completion on computers in database
-            '^\\\\([^\\]*)$' {
-                $dsTabExpansionDatabase.Tables['Custom'].Select("filter like '$($Matches[1])%' AND type = 'Computer' ", "text") |
-                    ForEach-Object {"\\$($_.Text)"} | Invoke-TabItemSelector $LastWord -SelectionHandler $SelectionHandler
-                break
-            }
-
-            ## Completion on Shares (commented lines without DLL but need admin rights )
-            '^\\\\([^\\]+)\\([^\\]*)$' { 
-                #gwmi win32_share -computer $matches[1] -filter "name like '$($matches[2])%'" | Foreach-Object {"\\$($matches[1])\$($_.name)"}
-                #([adsi]"WinNT://$($matches[1])/LanmanServer,FileService" ).psbase.children |? {$_.name -like "$($matches[2])*"}  |% {$_.name}
-                [Trinet.Networking.ShareCollection]::GetShares($Matches[1]) | Where-Object {$_.NetName -like "$($Matches[2])*"} |
-                    Sort-Object NetName | ForEach-Object {"\\$($Matches[1])\$($_.NetName)"} |
-                    Invoke-TabItemSelector $LastWord -SelectionHandler $SelectionHandler
                 break
             }
         } ## End of switch -regex $LastWord
