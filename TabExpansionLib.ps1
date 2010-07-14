@@ -525,15 +525,16 @@ Function Add-TabExpansionComputer {
 	[CmdletBinding(SupportsShouldProcess = $false, SupportsTransactions = $false,
 		ConfirmImpact = "None", DefaultParameterSetName = "")]
 	param(
-		[Parameter(ParameterSetName = "OUParams", Position = 0, ValueFromPipeline = $true)]
+		[Parameter(Position = 0, ValueFromPipeline = $true)]
         [ValidateNotNull()]
-        [Adsi]
+        [System.DirectoryServices.DirectoryEntry]
         $OU
     )
 
     process {
+        ## TODO: Localize progress messages
         $count = 0
-        if ($PSCmdlet.ParameterSetName -eq "OUParams") {
+        if ($OU) {
             $OU.PSBase.get_Children() | Select-Object @{e={$_.cn[0]};n='Name'} | ForEach-Object {
                 $count++; if ($count % 5 -eq 0) {Write-Progress "Adding computer names" $count}
                 Add-TabExpansion $_.Name $_.Name "Computer"
