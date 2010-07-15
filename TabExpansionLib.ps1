@@ -626,8 +626,8 @@ Function Get-TabExpansion {
     ## TODO: escape special characters?
 
     process {
-        $Filter = $Filter -replace "\*","%"
-        $Type = $Type -replace "\*","%"
+        #$Filter = $Filter -replace "\*","%" -replace "%+","%"
+        #$Type = $Type -replace "\*","%" -replace "%+","%"
 
         if ("Types","Wmi" -contains $Type){
             $dsTabExpansionDatabase.Tables[$Type].Select("Name LIKE '$Filter'")

@@ -501,7 +501,7 @@ Function Invoke-PowerTab {
             ## Handle inline type search, e.g. new-object .identityreference<tab> or .identityre<tab> (oisin) 
             '^(\[*?)\.(\w+)$' {
                 $TypeName = $Matches[2]
-                $dsTabExpansionDatabase.Tables["Types"].Select("name like '%.${TypeName}%'") | Select-Object -ExpandProperty Name |
+                $dsTabExpansionDatabase.Tables["Types"].Select("Name like '%.${TypeName}%'") | Select-Object -ExpandProperty Name |
                     Invoke-TabItemSelector $LastWord.Replace('[', '') -SelectionHandler $SelectionHandler |
                     ForEach-Object {if ($Matches[1] -eq '[') {"[$_]"}}
                 break
@@ -542,7 +542,7 @@ Function Invoke-PowerTab {
 
             ## Completion on computers in database
             '^\\\\([^\\]*)$' {
-                $dsTabExpansionDatabase.Tables['Custom'].Select("filter like '$($Matches[1])%' AND type = 'Computer' ", "text") |
+                Get-TabExpansion "$($Matches[1])*" "Computer" |
                     ForEach-Object {"\\$($_.Text)"} | Invoke-TabItemSelector $LastWord -SelectionHandler $SelectionHandler
                 break
             }
@@ -581,16 +581,16 @@ Function Invoke-PowerTab {
 
             ## DataGrid GUI Shortcuts
             '^a_(.*)' {Get-Help "about_$($Matches[1])*" | Select-Object Name,Synopsis,Length | Out-DataGridView Name | Foreach-Object {Get-Help $_}}
-            '^w_(.*)' {$dsTabExpansionDatabase.Tables['WMI'].Select("name like 'win32_$($Matches[1])%'", "name") | Out-DataGridView Name}
-            '^t_(.*)' {$dsTabExpansionDatabase.Tables['Types'].Select("name like '%$($Matches[1])%'", "name") | Out-DataGridView Name}
-            '^c_(.*)' {$dsTabExpansionDatabase.Tables['Custom'].Select("filter like '$($Matches[1])%'","text") | Out-DataGridView Text}
+            '^w_(.*)' {Get-TabExpansion "win32_$($Matches[1])*" "WMI" | Select-Object "Name" | Out-DataGridView Name}
+            '^t_(.*)' {Get-TabExpansion "*$($Matches[1])*" "Types" | Select-Object "Name" | Out-DataGridView Name}
+            '^c_(.*)' {Get-TabExpansion "$($Matches[1])*" | Select-Object "Text" | Out-DataGridView Text}
             '^f_' {Get-ChildItem function: | Select-Object Name | Out-DataGridView Name}
             '^d_' {Get-ChildItem | Select-Object Mode,LastWriteTime,Length,Name,FullName | Out-DataGridView FullName}
             '^h_' {Get-History -Count 100 | Out-DataGridView Commandline}
 
             ## WMI completion
             '(win32_.*|cim_.*|MSFT_.*)' {
-                $dsTabExpansionDatabase.Tables['WMI'].Select("name like '$($Matches[1])%'") | Select-Object -ExpandProperty Name |
+                Get-TabExpansion "$($Matches[1])*" "WMI" | Select-Object -ExpandProperty Name |
                     Invoke-TabItemSelector $LastWord -SelectionHandler $SelectionHandler
                 break
             }
@@ -702,7 +702,7 @@ Function Invoke-PowerTab {
                 $res += $dsTabExpansionDatabase.Tables['Types'].Select("ns like '$($Matched)%' and dc = $($Dots + 1)") |
                     Select-Object -Unique ns | ForEach-Object {"[$($_.ns)"}
                 if ($Dots -gt 0) {
-                    $res += $dsTabExpansionDatabase.Tables['Types'].Select("name like '$($Matched)%' and dc = $Dots") | ForEach-Object {"[$($_.Name)]"}
+                    $res += $dsTabExpansionDatabase.Tables['Types'].Select("Name like '$($Matched)%' and dc = $Dots") | ForEach-Object {"[$($_.Name)]"}
                 }
                 $res | Invoke-TabItemSelector $LastWord -SelectionHandler $SelectionHandler -ForceList:$ForceList
                 break
@@ -754,23 +754,21 @@ Function Invoke-PowerTab {
             "(.+)$([Regex]::Escape($PowerTabConfig.ShortcutChars.Alias))`$" {
                 & {
                     Get-Command -CommandType Alias -Name $Matches[1] | Select-Object -ExpandProperty Definition
-                    $dsTabExpansionDatabase.Tables['Custom'].Select("filter = '$($Matches[1])' AND type = 'Alias'") |
-                        Select-Object -ExpandProperty Text
+                    Get-TabExpansion $Matches[1] "Alias" | Select-Object -ExpandProperty Text
                 } | Invoke-TabItemSelector $Matches[1] -SelectionHandler $SelectionHandler
                 break
             }
 
             ## Custom
             "(.*)$([Regex]::Escape($PowerTabConfig.ShortcutChars.Custom))`$" {
-                $dsTabExpansionDatabase.Tables['Custom'].Select("filter like '$($Matches[1])*' AND type = 'Custom'") |
-                    Select-Object -ExpandProperty Text |
+                Get-TabExpansion "$($Matches[1])*" "Custom" | Select-Object -ExpandProperty Text |
                     Invoke-TabItemSelector $Matches[1] -SelectionHandler $SelectionHandler
                 break
             }
 
             ## Invoke
-            "(.+)$([Regex]::Escape($PowerTabConfig.ShortcutChars.Invoke))`$" { 
-                $dsTabExpansionDatabase.Tables['Custom'].Select("filter like '$($Matches[1])*' AND type = 'Invoke'") | ForEach-Object {
+            "(.+)$([Regex]::Escape($PowerTabConfig.ShortcutChars.Invoke))`$" {
+                Get-TabExpansion "$($Matches[1])*" "Invoke" | ForEach-Object {
                     $ExecutionContext.InvokeCommand.InvokeScript($_.Text)
                 } | Invoke-TabItemSelector $Matches[1] -SelectionHandler $SelectionHandler
                 break
@@ -805,12 +803,11 @@ Function Invoke-PowerTab {
                 if ($DoubleTab -or $PowerTabConfig.AliasQuickExpand) {
                     & {
                         Get-Command -CommandType Alias -Name $Matches[1] | Select-Object -ExpandProperty Definition
-                        $dsTabExpansionDatabase.Tables['Custom'].Select("filter = '$($Matches[1])' AND type = 'Alias'") |
-                            Select-Object -ExpandProperty Text
+                        Get-TabExpansion $Matches[1] "Alias" | Select-Object -ExpandProperty Text
                     } | Invoke-TabItemSelector $LastWord -SelectionHandler $SelectionHandler
                 } else {
-                    $dsTabExpansionDatabase.Tables['Custom'].Select("filter = '$($Matches[1])' AND type = 'Alias'") 
-                        Select-Object -ExpandProperty Text | Invoke-TabItemSelector -SelectionHandler $SelectionHandler
+                    Get-TabExpansion $Matches[1] "Alias" | Select-Object -ExpandProperty Text |
+                        Invoke-TabItemSelector -SelectionHandler $SelectionHandler
                 }
                 break
             }
