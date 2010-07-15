@@ -482,14 +482,10 @@ Function Invoke-PowerTab {
                     Resolve-Member -Object "($($Matches[2]))" -Pattern $Matches[3] |
                         Invoke-TabItemSelector $LastBlock -SelectionHandler $SelectionHandler | ForEach-Object {
                             $TabExpansionHasOutput = $true
-                            if ($_.IndexOf('"') -ge 0 ) {
-                                ([Regex]::Split($_,'"|'''))[-1].Trim()
+                            if ($_.IndexOf(' ') -ge 0 ) {
+                                ([Regex]::Split($_,' '))[-1].Trim()
                             } else {
-                                if ($_.IndexOf(' ') -ge 0 ) {
-                                    ([Regex]::Split($_,' '))[-1].Trim()
-                                } else {
-                                    $_
-                                }
+                                $_
                             }
                         }
                 }
@@ -497,24 +493,6 @@ Function Invoke-PowerTab {
                     ## Tab expansion handled, don't do anything more
                     return
                 }
-            }
-
-            'new-object(.*) (.*)$' {
-                $Matched = $Matches[2]
-
-                $Dots = $Matches[2].Split(".").Count - 1
-                $res = @()
-                $res += $dsTabExpansionDatabase.Tables['Types'].Select("ns like '$($Matched)%' and dc = $($Dots + 1)") |
-                    Select-Object -Unique ns | ForEach-Object {"[$($_.ns)"}
-
-                if ($Dots -gt 0) {
-                    $res += $dsTabExpansionDatabase.Tables['Types'].Select("name like '$($Matched)%' and dc = $Dots") | ForEach-Object {"[$($_.Name)]"}
-                }
-
-                $res | Where-Object {$_} | ForEach-Object {$_ -replace '\[*(.*)\]*','$1'} |
-                    Invoke-TabItemSelector $LastWord -SelectionHandler $SelectionHandler -ForceList:$ForceList
-                $TabExpansionHasOutput = $true
-                break
             }
         }
 
