@@ -17,15 +17,48 @@
     <command:syntax>
       <command:syntaxItem>
         <command:name>Add-TabExpansionComputer</command:name>
-        <command:parameter required="false" position="1">
+        <command:parameter required="true" position="1">
+          <maml:name>ComputerName</maml:name>
+          <maml:description/>
+          <command:parameterValue required="true">String</command:parameterValue>
+        </command:parameter>
+      </command:syntaxItem>
+    </command:syntax>
+      <command:syntaxItem>
+        <command:name>Add-TabExpansionComputer</command:name>
+        <command:parameter required="true" position="1">
           <maml:name>OU</maml:name>
           <maml:description/>
           <command:parameterValue required="true">DirectoryEntry</command:parameterValue>
         </command:parameter>
       </command:syntaxItem>
     </command:syntax>
+      <command:syntaxItem>
+        <command:name>Add-TabExpansionComputer</command:name>
+        <command:parameter required="false" position="named">
+          <maml:name>NetView</maml:name>
+          <maml:description/>
+        </command:parameter>
+      </command:syntaxItem>
+    </command:syntax>
     <command:parameters>
-      <command:parameter required="false" globbing="false" pipelineInput="true (ByValue)" position="1">
+      <command:parameter required="true" globbing="false" pipelineInput="true (ByValue)" position="1">
+        <maml:name>ComputerName</maml:name>
+        <maml:description>
+          <maml:para>TODO Add ComputerName Description</maml:para>
+        </maml:description>
+        <command:parameterValue required="true">String</command:parameterValue>
+        <dev:defaultValue />
+      </command:parameter>
+      <command:parameter required="false" globbing="false" pipelineInput="false" position="named">
+        <maml:name>NetView</maml:name>
+        <maml:description>
+          <maml:para>TODO Add NetView Description</maml:para>
+        </maml:description>
+        <command:parameterValue required="true">SwitchParameter</command:parameterValue>
+        <dev:defaultValue />
+      </command:parameter>
+      <command:parameter required="true" globbing="false" pipelineInput="true (ByValue)" position="1">
         <maml:name>OU</maml:name>
         <maml:description>
           <maml:para>TODO Add OU Description</maml:para>
@@ -70,14 +103,29 @@
         <maml:introduction>
           <maml:para>C:\PS&gt;</maml:para>
         </maml:introduction>
-        <dev:code>TODO Add Add-TabExpansionComputer Example code</dev:code>
+        <dev:code>Add-TabExpansionComputer -ComputerName "Server1"</dev:code>
         <dev:remarks>
           <maml:para>Description</maml:para>
           <maml:para>-----------</maml:para>
           <maml:para>TODO Add Add-TabExpansionComputer Example Comment</maml:para>
           <maml:para />
-          <maml:para />
-          <maml:para />
+        </dev:remarks>
+        <command:commandLines>
+          <command:commandLine>
+            <command:commandText />
+          </command:commandLine>
+        </command:commandLines>
+      </command:example>
+      <command:example>
+        <maml:title>-------------------------- EXAMPLE 2 --------------------------</maml:title>
+        <maml:introduction>
+          <maml:para>C:\PS&gt;</maml:para>
+        </maml:introduction>
+        <dev:code>Add-TabExpansionComputer -NetView</dev:code>
+        <dev:remarks>
+          <maml:para>Description</maml:para>
+          <maml:para>-----------</maml:para>
+          <maml:para>TODO Add Add-TabExpansionComputer Example Comment</maml:para>
           <maml:para />
         </dev:remarks>
         <command:commandLines>

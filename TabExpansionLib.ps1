@@ -417,7 +417,7 @@ Function Update-TabExpansionDataBase {
         if ($Force -or $PSCmdlet.ShouldProcess($Resources.update_tabexpansiondatabase_computer_conf_description,
             $Resources.update_tabexpansiondatabase_computer_conf_inquire, $Resources.update_tabexpansiondatabase_computer_conf_caption)) {
             Remove-TabExpansionComputer
-            Add-TabExpansionComputer
+            Add-TabExpansionComputer -NetView
         }
     }
 }
@@ -548,33 +548,49 @@ Function Update-TabExpansionWmi {
 # .ExternalHelp TabExpansionLib-Help.xml
 Function Add-TabExpansionComputer {
 	[CmdletBinding(SupportsShouldProcess = $false, SupportsTransactions = $false,
-		ConfirmImpact = "None", DefaultParameterSetName = "")]
+		ConfirmImpact = "None", DefaultParameterSetName = "Name")]
 	param(
-		[Parameter(Position = 0, ValueFromPipeline = $true)]
+        [Alias("Name")]
+		[Parameter(ParameterSetName = "Name", Position = 0, Mandatory = $true, ValueFromPipeline = $true, ValueFromPipelineByPropertyName = $true)]
+        [ValidateNotNullOrEmpty()]
+        [String]
+        $ComputerName
+        ,
+		[Parameter(ParameterSetName = "OU", Position = 0, Mandatory = $true, ValueFromPipeline = $true)]
         [ValidateNotNull()]
         [System.DirectoryServices.DirectoryEntry]
         $OU
+        ,
+		[Parameter(ParameterSetName = "NetView")]
+        [Switch]
+        $NetView
     )
 
     process {
         ## TODO: Localize progress messages
         $count = 0
-        if ($OU) {
+        if ($PSCmdlet.ParameterSetName -eq "Name") {
+            Add-TabExpansion $ComputerName $ComputerName "Computer"
+        } elseif ($PSCmdlet.ParameterSetName -eq "OU") {
             $OU.PSBase.get_Children() | Select-Object @{e={$_.cn[0]};n='Name'} | ForEach-Object {
                 $count++; if ($count % 5 -eq 0) {Write-Progress "Adding computer names" $count}
                 Add-TabExpansion $_.Name $_.Name "Computer"
             }
-        } else {
+        } elseif ($PSCmdlet.ParameterSetName -eq "NetView") {
             net view | ForEach-Object {if ($_ -match '\\\\(.*?) ') {$Matches[1]}} | ForEach-Object {
                 $count++; if ($count % 5 -eq 0) {Write-Progress "Adding computer names" $count}
                 Add-TabExpansion $_ $_ "Computer"
             }
         }
-        Write-Progress "Adding computer names" $count -Completed
+        if ($PSCmdlet.ParameterSetName -ne "Name") {
+            Write-Progress "Adding computer names" $count -Completed
+        }
 
         trap [System.Management.Automation.PipelineStoppedException] {
             ## Pipeline was stopped
-            Write-Progress "Adding computer names" $count -Completed
+            if ($PSCmdlet.ParameterSetName -ne "Name") {
+                Write-Progress "Adding computer names" $count -Completed
+            }
             break
         }
     }
