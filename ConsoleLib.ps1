@@ -246,7 +246,7 @@ Function Out-ConsoleList {
                 if (($PowerTabConfig.SpaceComplete -and -not ($Key.ControlKeyState -match 'CtrlPressed')) -or (-not $PowerTabConfig.SpaceComplete -and ($Key.ControlKeyState -match 'CtrlPressed'))) {
                     ## Expand with currently selected item
                     $Item = @($ListHandle.Items)[$ListHandle.SelectedItem].Trim()
-                    if ((-not $Item.Contains(' ')) -and ($PowerTabConfig.PowerTabFileSystemMode -ne $true)) {$Item += ' '}
+                    if ((-not $Item.Contains(' ')) -and ($PowerTabFileSystemMode -ne $true)) {$Item += ' '}
                     $Item
                     $Continue = $false
                     break
