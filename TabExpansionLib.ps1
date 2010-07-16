@@ -816,10 +816,10 @@ Function Initialize-PowerTab {
     } else {
         $DatabasePath = $Config.Tables['Config'].select("Name = 'DatabasePath'")[0].Value
     }
-    if(!(Split-Path $DatabasePath)) {
-      $DatabasePath = Join-Path $PSScriptRoot $DataBasePath
+    if (!(Split-Path $DatabasePath)) {
+        $DatabasePath = Join-Path $PSScriptRoot $DataBasePath
     }
-    
+
     $Database = InternalImportTabExpansionDataBase (Convert-Path (Resolve-Path $DatabasePath))
 
     ## Upgrade if needed
@@ -1081,12 +1081,17 @@ Function CreatePowerTabConfig {
     
     $script:PowerTabConfig = New-Object PSObject
 
-    Add-Member -InputObject $PowerTabConfig -MemberType NoteProperty -Name Version -Value $dsTabExpansionConfig.Tables['Config'].Select("Name = 'Version'")[0].Value
+    Add-Member -InputObject $PowerTabConfig -MemberType ScriptProperty -Name Version `
+        -Value $ExecutionContext.InvokeCommand.NewScriptBlock(
+            "`$dsTabExpansionConfig.Tables['Config'].Select(`"Name = 'Version'`")[0].Value") `
+        -SecondValue $ExecutionContext.InvokeCommand.NewScriptBlock(
+            "trap {Write-Warning `$_; continue}
+            `$dsTabExpansionConfig.Tables['Config'].Select(`"Name = 'Version'`")[0].Value = [String]`$args[0]")
 
     ## Add Enable ScriptProperty
     Add-Member -InputObject $PowerTabConfig -MemberType ScriptProperty -Name Enabled `
         -Value $ExecutionContext.InvokeCommand.NewScriptBlock(
-            "`$v = `$dsTabExpansionConfig.Tables['Config'].Select(""Name = 'Enabled'"")[0]
+            "`$v = `$dsTabExpansionConfig.Tables['Config'].Select(`"Name = 'Enabled'`")[0]
             if (`$v.Type -eq 'Bool') {
                 [Bool][Int]`$v.Value
             } else {
@@ -1095,9 +1100,9 @@ Function CreatePowerTabConfig {
         -SecondValue $ExecutionContext.InvokeCommand.NewScriptBlock(
             "trap {Write-Warning `$_; continue}
             [Int]`$val = [Bool]`$args[0]
-            `$dsTabExpansionConfig.Tables['Config'].Select(""Name = 'Enabled'"")[0].Value = `$val
+            `$dsTabExpansionConfig.Tables['Config'].Select(`"Name = 'Enabled'`")[0].Value = `$val
             if ([Bool]`$val) {
-                . ""`$PSScriptRoot\TabExpansion.ps1""
+                . `"`$PSScriptRoot\TabExpansion.ps1`"
             } else {
                 Set-Content Function:\TabExpansion -Value `$OldTabExpansion
             }") `
@@ -1116,7 +1121,7 @@ Function CreatePowerTabConfig {
     $dsTabExpansionConfig.Tables['Config'].Select("Category = 'Global'") | Where-Object {$_.Name -ne "Enabled"} | ForEach-Object {
             Add-Member -InputObject $PowerTabConfig -MemberType ScriptProperty -Name $_.Name `
                 -Value $ExecutionContext.InvokeCommand.NewScriptBlock(
-                    "`$v = `$dsTabExpansionConfig.Tables['Config'].Select(""Name = '$($_.Name)'"")[0]
+                    "`$v = `$dsTabExpansionConfig.Tables['Config'].Select(`"Name = '$($_.Name)'`")[0]
                     if (`$v.Type -eq 'Bool') {
                         [Bool][Int]`$v.Value
                     } else {
@@ -1126,7 +1131,7 @@ Function CreatePowerTabConfig {
                     "trap {Write-Warning `$_; continue}
                     `$val = [$($_.Type)]`$args[0]
                      if ('$($_.Type)' -eq 'bool') {`$val = [Int]`$val}
-                    `$dsTabExpansionConfig.Tables['Config'].Select(""Name = '$($_.Name)'"")[0].Value = `$val") `
+                    `$dsTabExpansionConfig.Tables['Config'].Select(`"Name = '$($_.Name)'`")[0].Value = `$val") `
                 -Force
         }
 
@@ -1134,10 +1139,10 @@ Function CreatePowerTabConfig {
     $dsTabExpansionConfig.Tables['Config'].Select("Category = 'Colors'") | Foreach-Object {
             Add-Member -InputObject $PowerTabConfig.Colors -MemberType ScriptProperty -Name $_.Name `
                 -Value $ExecutionContext.InvokeCommand.NewScriptBlock(
-                 "`$dsTabExpansionConfig.Tables['Config'].Select(""Name = '$($_.Name)'"")[0].Value") `
+                 "`$dsTabExpansionConfig.Tables['Config'].Select(`"Name = '$($_.Name)'`")[0].Value") `
                 -SecondValue $ExecutionContext.InvokeCommand.NewScriptBlock(
                     "trap {Write-Warning `$_; continue}
-                    `$dsTabExpansionConfig.Tables['Config'].Select(""Name = '$($_.Name)'"")[0].Value = [ConsoleColor]`$args[0]") `
+                    `$dsTabExpansionConfig.Tables['Config'].Select(`"Name = '$($_.Name)'`")[0].Value = [ConsoleColor]`$args[0]") `
                 -Force
         }
 
@@ -1145,10 +1150,10 @@ Function CreatePowerTabConfig {
     $dsTabExpansionConfig.Tables['Config'].Select("Category = 'ShortcutChars'") | Foreach-Object {
             Add-Member -InputObject $PowerTabConfig.ShortcutChars -MemberType ScriptProperty -Name $_.Name `
                 -Value $ExecutionContext.InvokeCommand.NewScriptBlock(
-                 "`$dsTabExpansionConfig.Tables['Config'].Select(""Name = '$($_.Name)'"")[0].Value") `
+                    "`$dsTabExpansionConfig.Tables['Config'].Select(`"Name = '$($_.Name)'`")[0].Value") `
                 -SecondValue $ExecutionContext.InvokeCommand.NewScriptBlock(
                     "trap {Write-Warning `$_; continue}
-                    `$dsTabExpansionConfig.Tables['Config'].Select(""Name = '$($_.Name)'"")[0].Value = `$args[0]") `
+                    `$dsTabExpansionConfig.Tables['Config'].Select(`"Name = '$($_.Name)'`")[0].Value = `$args[0]") `
                 -Force
         }
 
@@ -1156,7 +1161,7 @@ Function CreatePowerTabConfig {
     $dsTabExpansionConfig.Tables['Config'].Select("Category = 'Setup'") | Foreach-Object {
             Add-Member -InputObject $PowerTabConfig.Setup -MemberType ScriptProperty -Name $_.Name `
                 -Value $ExecutionContext.InvokeCommand.NewScriptBlock(
-                    "`$v = `$dsTabExpansionConfig.Tables['Config'].Select(""Name = '$($_.Name)'"")[0]
+                    "`$v = `$dsTabExpansionConfig.Tables['Config'].Select(`"Name = '$($_.Name)'`")[0]
                     if (`$v.Type -eq 'Bool') {
                         [Bool][Int]`$v.Value
                     } else {
@@ -1166,7 +1171,7 @@ Function CreatePowerTabConfig {
                     "trap {Write-Warning `$_; continue}
                     `$val = [$($_.Type)]`$args[0]
                      if ('$($_.Type)' -eq 'bool') {`$val = [Int]`$val}
-                    `$dsTabExpansionConfig.Tables['Config'].Select(""Name = '$($_.Name)'"")[0].Value = `$val") `
+                    `$dsTabExpansionConfig.Tables['Config'].Select(`"Name = '$($_.Name)'`")[0].Value = `$val") `
                 -Force
         }
 }
