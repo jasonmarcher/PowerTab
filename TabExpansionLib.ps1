@@ -181,7 +181,7 @@ Function New-TabExpansionDatabase {
         $dtWmi = New-Object System.Data.DataTable
         [Void]($dtWmi.Columns.Add('Name', [String]))
         [Void]($dtWmi.Columns.Add('Description', [String]))
-        $dtWmi.TableName = 'Wmi'
+        $dtWmi.TableName = 'WMI'
         $dsTabExpansionDatabase.Tables.Add($dtWmi)
 
         . (Join-Path $PSScriptRoot "TabExpansionCustomLib.ps1")
@@ -1052,6 +1052,31 @@ Function InternalImportTabExpansionDataBase {
     } else {
         [Void]$Database.ReadXml($LiteralPath)
     }
+
+    if (!$Database.Tables["Custom"]) {
+        $dtCustom = New-Object System.Data.DataTable
+        [Void]($dtCustom.Columns.Add('Filter', [String]))
+        [Void]($dtCustom.Columns.Add('Text', [String]))
+        [Void]($dtCustom.Columns.Add('Type', [String]))
+        $dtCustom.TableName = 'Custom'
+        $Database.Tables.Add($dtCustom)
+    }
+    if (!$Database.Tables["Types"]) {
+        $dtTypes = New-Object System.Data.DataTable
+        [Void]($dtTypes.Columns.Add('Name', [String]))
+        [Void]($dtTypes.Columns.Add('DC', [String]))
+        [Void]($dtTypes.Columns.Add('NS', [String]))
+        $dtTypes.TableName = 'Types'
+        $Database.Tables.Add($dtTypes)
+    }
+    if (!$Database.Tables["WMI"]) {
+        $dtWmi = New-Object System.Data.DataTable
+        [Void]($dtWmi.Columns.Add('Name', [String]))
+        [Void]($dtWmi.Columns.Add('Description', [String]))
+        $dtWmi.TableName = 'WMI'
+        $Database.Tables.Add($dtWmi)
+    }
+
     $Database
 }
 
