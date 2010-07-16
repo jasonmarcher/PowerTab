@@ -7,11 +7,11 @@
 Function Invoke-TabExpansion {
 	[CmdletBinding()]
     param(
-        [Parameter(Position = 0, Mandatory = $true)]
+        [Parameter(Position = 0)]
         [String]
         $Line
         ,
-        [Parameter(Position = 1, Mandatory = $true)]
+        [Parameter(Position = 1)]
         [String]
         $LastWord
         ,
