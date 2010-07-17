@@ -512,7 +512,7 @@ Register-TabExpansion "Out-Printer" -Type "Command" {
             }
             'Name' {
                 $TabExpansionHasOutput.Value = $true
-                Get-Process -Name "$Argument*" | Select-Object -ExpandProperty Name -Unique
+                Get-Process -Name "$Argument*" | Get-Unique | New-TabItem -Value {$_.Name} -Text {$_.Name} -Type "Process"
             }
         }
     }.GetNewClosure()
@@ -552,7 +552,7 @@ Register-TabExpansion "Out-Printer" -Type "Command" {
                         $Parameters["ComputerName"] = $Context.OtherParameters["ComputerName"]
                     }
                 }
-                Get-Process -Name "$Argument*" @Parameters | Select-Object -ExpandProperty Name -Unique
+                Get-Process -Name "$Argument*" @Parameters | Get-Unique | New-TabItem -Value {$_.Name} -Text {$_.Name} -Type "Process"
             }
         }
     }.GetNewClosure()
