@@ -242,8 +242,8 @@ Function Invoke-TabExpansion {
             $InternalCommandName = ""#$CurrentContext.Command
         }
 
-        $TabExpansionHasOutput = $false
-        $QuoteSpaces = $true
+        [Bool]$TabExpansionHasOutput = $false
+        [Bool]$QuoteSpaces = $true
         $PossibleValues = @()
         if ($CurrentContext.isParameterValue) {
             ## Tab complete parameter value
@@ -347,11 +347,20 @@ Function Invoke-TabExpansion {
 
         if ($TabExpansionHasOutput) {
             $PossibleValues | Invoke-TabItemSelector $LastWord -SelectionHandler $SelectionHandler | ForEach-Object {
-                if ($QuoteSpaces -and ($_ -match " ") -and ($_ -notmatch "^[`"'].*[`"']`$") -and
-                    (($LastToken.Type -eq $_TokenTypes::CommandArgument) -or ($LastWord -eq ""))) {
-                    "`"$_`""
+                if ($_ -is [String]) {
+                    if ($QuoteSpaces -and ($_ -match " ") -and ($_ -notmatch "^[`"'].*[`"']`$") -and
+                        (($LastToken.Type -eq $_TokenTypes::CommandArgument) -or ($LastWord -eq ""))) {
+                        '"' + $_ + '"'
+                    } else {
+                        $_
+                    }
                 } else {
-                    $_
+                    if ($QuoteSpaces -and ($_.Value -match " ") -and ($_.Value -notmatch "^[`"'].*[`"']`$") -and
+                        (($LastToken.Type -eq $_TokenTypes::CommandArgument) -or ($LastWord -eq ""))) {
+                        $_.Value = '"' + $_.Value + '"'
+                    } else {
+                        $_
+                    }
                 }
             }
             if ($PossibleValues.Count -lt 1) {

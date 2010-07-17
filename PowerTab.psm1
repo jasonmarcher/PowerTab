@@ -94,7 +94,8 @@ if ($ConfigurationPathParam) {
         Initialize-PowerTab (Join-Path $PSScriptRoot $ConfigurationPathParam)
     } else {
         ## Config specified, but does not exist
-        Write-Warning "Configuration File does not exist: '$ConfigurationPathParam'"
+        Write-Warning "Configuration File does not exist: '$ConfigurationPathParam'"  ## TODO: localize
+
         ## Create config and database
         New-TabExpansionConfig $ConfigurationPathParam
         CreatePowerTabConfig
@@ -209,13 +210,14 @@ if ($PowerTabConfig.ShowBanner) {
     $CurVersion = (Get-Module -ListAvailable "PowerTab").Version
     Write-Host -ForegroundColor 'Yellow' "PowerTab version ${CurVersion} PowerShell TabExpansion Library"
     Write-Host -ForegroundColor 'Yellow' "Technology Preview"
+    Write-Host -ForegroundColor 'Yellow' "Host: $($Host.Name)"
     Write-Host -ForegroundColor 'Yellow' "PowerTab Enabled: $($PowerTabConfig.Enabled)"
 }
 
 
 ## Exported functions, variables, etc.
 $ExcludedFuctions = @("Initialize-TabExpansion")
-$Functions = Get-Command "*-TabExpansion*" | Where-Object {$ExcludedFuctions -notcontains $_.Name}
+$Functions = Get-Command "*-TabExpansion*","New-TabItem" | Where-Object {$ExcludedFuctions -notcontains $_.Name}
 #$Functions = Get-Command "*-*" | Where-Object {$ExcludedFuctions -notcontains $_.Name}
 Export-ModuleMember -Function $Functions -Variable PowerTabConfig -Alias *
 

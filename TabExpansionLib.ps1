@@ -66,7 +66,7 @@ Function Invoke-TabItemSelector {
         [String]
         $LastWord
         ,
-        [ValidateSet("ConsoleList","Intellisense","Dynamic","Default")]
+        [ValidateSet("ConsoleList","Intellisense","Dynamic","Default","ObjectDefault")]
         [String]
         $SelectionHandler = "Default"
         ,
@@ -77,7 +77,7 @@ Function Invoke-TabItemSelector {
         [String[]]
         $Value
         ,
-        [Parameter(ParameterSetName = "Objects")]
+        [Parameter(ParameterSetName = "Objects", ValueFromPipeline = $true)]
         [Object[]]
         $Object
         ,
@@ -87,7 +87,7 @@ Function Invoke-TabItemSelector {
 
     begin {
         [String[]]$Values = @()
-        [String[]]$Objects = @()
+        [Object[]]$Objects = @()
     }
 
     process {
@@ -104,20 +104,30 @@ Function Invoke-TabItemSelector {
     }
 
     end {
+        Write-Debug "Invoke-TabItemSelector parameter set: $($PSCmdlet.ParameterSetName)"
+
         ## If dynamic, select an appropriate handler based on the current host
         if ($SelectionHandler -eq "Dynamic") {
             switch -exact ($Host.Name) {
-                'ConsoleHost' {
+                'ConsoleHost' {  ## PowerShell.exe
                     $SelectionHandler = "ConsoleList"
+                    break
                 }
-                'Windows PowerShell ISE Host' {
-                    $SelectionHandler = "Default"
+                'PoshConsole' {
+                    $SelectionHandler = "ObjectDefault"
+                    break
                 }
                 'PowerShellPlus Host' {
                     $SelectionHandler = "ConsoleList"
+                    break
+                }
+                'Windows PowerShell ISE Host' {
+                    $SelectionHandler = "Default"
+                    break
                 }
                 default {
                     $SelectionHandler = "Default"
+                    break
                 }
             }
         }
@@ -126,31 +136,74 @@ Function Invoke-TabItemSelector {
         ## Example, ConsoleList and Intellisense won't work in PowerShell ISE
         [String[]]$IncompatibleHandlers = @()
         switch -exact ($Host.Name) {
-            'Windows PowerShell ISE Host' {
-                $IncompatibleHandlers = "ConsoleList","Intellisense"
+            'ConsoleHost' {  ## PowerShell.exe
+                $IncompatibleHandlers = @()
+                break
             }
             'PoshConsole' {
                 $IncompatibleHandlers = "ConsoleList","Intellisense"
+                break
+            }
+            'PowerGUIHost' {
+                $IncompatibleHandlers = "ConsoleList","Intellisense"
+                break
+            }
+            'PowerGUIScriptEditorHost' {
+                $IncompatibleHandlers = "ConsoleList","Intellisense"
+                break
+            }
+            'PowerShellPlus Host' {
+                $IncompatibleHandlers = @()
+                break
+            }
+            'Windows PowerShell ISE Host' {
+                $IncompatibleHandlers = "ConsoleList","Intellisense"
+                break
             }
         }
         if ($IncompatibleHandlers -contains $SelectionHandler) {$SelectionHandler = "Default"}
 
         ## List of selection handlers that can handle objects
-        <# TODO: Upgrade ConsoleList
-        $ObjectHandlers = @("ConsoleList")
+        ## TODO: Upgrade ConsoleList
+        #$ObjectHandlers = @("ConsoleList")
+        $ObjectHandlers = @("ObjectDefault")
 
         if (($ObjectHandlers -contains $SelectionHandler) -and ($PSCmdlet.ParameterSetName -eq "Values")) {
-            $Objects = $Values | ForEach-Object {@{"Text"=$_;"Value"=$_}}
+            $Objects = $Values | ForEach-Object {@{"Text"=$_;"Value"=$_;"Type"="Unknown"}}
         } elseif (($ObjectHandlers -notcontains $SelectionHandler) -and ($PSCmdlet.ParameterSetName -eq "Objects")) {
             $Values = $Objects | ForEach-Object {$_.Value}
         }
-        #>
 
         switch -exact ($SelectionHandler) {
             'ConsoleList' {$Values | Out-ConsoleList $LastWord $ReturnWord -ForceList:$ForceList}
             'Intellisense' {$Values | Invoke-Intellisense $LastWord}
+            'ObjectDefault' {$Objects}
             'Default' {$Values}
         }
+    }
+}
+
+
+Function New-TabItem {
+    [CmdletBinding()]
+    param(
+        [Parameter(Position = 0, Mandatory = $true, ValueFromPipeline = $true)]
+        [ValidateNotNullOrEmpty()]
+        [String]
+        $Value
+        ,
+        [Parameter(Position = 1, ValueFromPipeline = $true)]
+        [ValidateNotNullOrEmpty()]
+        [String]
+        $Text = $Value
+        ,
+        [ValidateNotNullOrEmpty()]
+        [String]
+        $Type = "Unknown"
+    )
+
+    process {
+        New-Object PSObject -Property @{"Text"=$Text;"Value"=$Value;"Type"=$Type}
     }
 }
 

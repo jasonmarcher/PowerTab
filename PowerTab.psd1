@@ -15,7 +15,7 @@
 	
 	## Public Interface
 	CmdletsToExport    = ''
-	FunctionsToExport  = @('*-TabExpansion*')
+	FunctionsToExport  = @('*-*')
 	VariablesToExport  = @('PowerTabConfig')
 	AliasesToExport    = '*'
 	
