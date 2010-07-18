@@ -51,6 +51,8 @@ CREDITS
     Jacques
     http://janel.spaces.live.com/blog/
 
+    Igor Dvorkin
+
     Aaron Lerch / Invoke-Intellisense / Lerch.PowerShell.dll
     http://www.aaronlerch.com/
 
