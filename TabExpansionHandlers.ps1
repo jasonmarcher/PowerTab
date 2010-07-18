@@ -365,10 +365,10 @@ Register-TabExpansion "Get-Module" -Type "Command" {
             if ($Context.OtherParameters["ListAvailable"]) {
                 $Parameters["ListAvailable"] = $true
             }
-            [Object[]]$Modules = Get-Module "$Argument*" @Parameters | Select-Object -ExpandProperty Name | Sort-Object
+            $Modules = @(Get-Module "$Argument*" @Parameters | Sort-Object Name)
             if ($Modules.Count -gt 0) {
                 $TabExpansionHasOutput.Value = $true
-                $Modules
+                $Modules | New-TabItem -Value {$_.Name} -Text {$_.Name} -Type "Module"
             }
         }
     }
@@ -380,10 +380,10 @@ Register-TabExpansion "Import-Module" -Type "Command" {
     $Argument = $Context.Argument
     switch -exact ($Context.Parameter) {
         'Name' {
-            [Object[]]$Modules = Get-Module -ListAvailable "$Argument*" | Select-Object -ExpandProperty Name | Sort-Object
+            $Modules = @(Get-Module -ListAvailable "$Argument*" | Sort-Object Name)
             if ($Modules.Count -gt 0) {
                 $TabExpansionHasOutput.Value = $true
-                $Modules
+                $Modules | New-TabItem -Value {$_.Name} -Text {$_.Name} -Type "Module"
             }
         }
     }
