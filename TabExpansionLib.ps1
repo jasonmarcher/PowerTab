@@ -114,7 +114,7 @@ Function Invoke-TabItemSelector {
                     break
                 }
                 'PoshConsole' {
-                    $SelectionHandler = "ObjectDefault"
+                    $SelectionHandler = "Default"
                     break
                 }
                 'PowerShellPlus Host' {
