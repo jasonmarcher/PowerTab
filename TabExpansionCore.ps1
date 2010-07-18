@@ -846,20 +846,36 @@ Function Invoke-PowerTab {
             ## Fixes paths for registry keys and certificates
             $Item = $_
             $Child = switch ($Item.GetType().FullName) {
-                "System.Security.Cryptography.X509Certificates.X509Certificate2" {$Item.Thumbprint}
-                "Microsoft.Powershell.Commands.X509StoreLocation" {$Item.Location}
-                "Microsoft.Win32.RegistryKey" {$Item.Name.Split("\")[-1]}
+                "System.Security.Cryptography.X509Certificates.X509Certificate2" {$Item.Thumbprint;break}
+                "Microsoft.Powershell.Commands.X509StoreLocation" {$Item.Location;break}
+                "Microsoft.Win32.RegistryKey" {$Item.Name.Split("\")[-1];break}
                 default {$Item.Name}
             }
-            "$Container\$Child"
-        } | Invoke-TabItemSelector $LastPath -SelectionHandler $SelectionHandler -Return $LastWord -ForceList:$ForceList | ForEach-Object {
-            $Quote = ''
-            $Invoke = ''
-            if (($_.IndexOf(' ') -ge 0) -and ($_.IndexOf('"') -lt 0) ) {
-                if (-not (@([Char[]]$LastBlock | Where-Object {$_ -match '"|'''}).Count % 2)) {$Quote = '"'}
-                if (($LastBlock.Trim() -eq $LastWord)) {$Invoke = '& '}
+            $Type = switch ($Item.GetType().FullName) {
+                "System.IO.DirectoryInfo" {"Directory";break}
+                "System.IO.FileInfo" {"File";break}
+                "System.Management.Automation.AliasInfo" {"Alias";break}
+                "System.Management.Automation.FilterInfo" {"Filter";break}
+                "System.Management.Automation.FunctionInfo" {"Function";break}
+                "System.Security.Cryptography.X509Certificates.X509Certificate2" {"Certificate";break}
+                "Microsoft.Powershell.Commands.X509StoreLocation" {"CertificateStore";break}
+                "Microsoft.Win32.RegistryKey" {"RegistryKey";break}
+                default {$_}
             }
-            "$Invoke$Quote$_$Quote"
+            New-TabItem "$Container\$Child" "$Container\$Child" -Type $Type
+        } | Invoke-TabItemSelector $LastPath -SelectionHandler $SelectionHandler -Return $LastWord -ForceList:$ForceList | ForEach-Object {
+            if ($_ -is [String]) {
+                $Quote = ''
+                $Invoke = ''
+                if (($_.IndexOf(' ') -ge 0) -and ($_.IndexOf('"') -lt 0) ) {
+                    if (-not (@([Char[]]$LastBlock | Where-Object {$_ -match '"|'''}).Count % 2)) {$Quote = '"'}
+                    if (($LastBlock.Trim() -eq $LastWord)) {$Invoke = '& '}
+                }
+                "$Invoke$Quote$_$Quote"
+            } else {
+                ## TODO: Implement quoting
+                $_
+            }
         }
     }
 
