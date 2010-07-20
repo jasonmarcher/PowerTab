@@ -1,8 +1,7 @@
-
-
 param()
 
 $ConfigurationPathParam = ""
+$ConfigFileName = "PowerTabConfig.xml"
 
 . {
 	[CmdletBinding(SupportsShouldProcess = $false,
@@ -19,6 +18,8 @@ $ConfigurationPathParam = ""
         $script:ConfigurationPathParam = $ConfigurationPath
     } elseif ($PrivateData = (Get-Module -ListAvailable $PSCmdlet.MyInvocation.MyCommand.Module.Name).PrivateData) {
         $script:ConfigurationPathParam = $PrivateData
+    } elseif ((Test-Path (Join-Path $PSScriptRoot $ConfigFileName)) -or (Test-Path (Join-Path (Split-Path $Profile) $ConfigFileName))){
+        $script:ConfigurationPathParam = $ConfigFileName
     }
 } @args
 
@@ -88,10 +89,12 @@ Get-ChildItem (Join-Path $PSScriptRoot "Handlers\*.ps1") | ForEach-Object {. $_.
 
 if ($ConfigurationPathParam) {
     if ((Test-Path $ConfigurationPathParam) -or (
-            ($ConfigurationPathParam -eq "IsolatedStorage") -and (Test-IsolatedStoragePath "PowerTab\PowerTabConfig.xml"))) {
+            ($ConfigurationPathParam -eq "IsolatedStorage") -and (Test-IsolatedStoragePath "PowerTab\$ConfigFileName"))) {
         Initialize-PowerTab $ConfigurationPathParam
     } elseif (Test-Path (Join-Path $PSScriptRoot $ConfigurationPathParam)) {
         Initialize-PowerTab (Join-Path $PSScriptRoot $ConfigurationPathParam)
+    } elseif (Test-Path (Join-Path (Split-Path $Profile) $ConfigurationPathParam)) {
+        Initialize-PowerTab (Join-Path (Split-Path $Profile) $ConfigurationPathParam)
     } else {
         ## Config specified, but does not exist
         Write-Warning "Configuration File does not exist: '$ConfigurationPathParam'"  ## TODO: localize
@@ -145,7 +148,7 @@ if ($ConfigurationPathParam) {
         if ($SetupConfigurationPath -eq "IsolatedStorage") {
             New-TabExpansionConfig $SetupConfigurationPath
         } else {
-            New-TabExpansionConfig (Join-Path $SetupConfigurationPath "PowerTabConfig.xml")
+            New-TabExpansionConfig (Join-Path $SetupConfigurationPath $ConfigFileName)
         }
         CreatePowerTabConfig
 
@@ -158,7 +161,7 @@ if ($ConfigurationPathParam) {
     Import other modules after this, they may contain PowerTab integration.
 #>
 
-Import-Module "PowerTab" -ArgumentList "$(Join-Path $SetupConfigurationPath "PowerTabConfig.xml")"
+Import-Module "PowerTab" -ArgumentList "$(Join-Path $SetupConfigurationPath $ConfigFileName)"
 ################ End of PowerTab Initialization Code ##########################
 
 "@
