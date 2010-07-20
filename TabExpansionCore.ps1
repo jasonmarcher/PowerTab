@@ -298,6 +298,12 @@ Function Invoke-TabExpansion {
                     }
                 } catch {}
             }
+
+            ## Ensure that variables get handled
+            if ($PossibleValues -eq $null) {$PossibleValues = @()}
+            if ($TabExpansionHasOutput -and ($PossibleValues.Count -eq 0) -and ($LastWord -match '^[@\$]')) {
+                $TabExpansionHasOutput = $false
+            }
         } elseif (($LastWord -match "^-") -and $CurrentContext.isCommandMode) {
             ## Tab complete parameter name
 
@@ -512,7 +518,7 @@ Function Invoke-PowerTab {
             ## Handle inline type search, e.g. new-object .identityreference<tab> or .identityre<tab> (oisin) 
             '^(\[*?)\.(\w+)$' {
                 $TypeName = $Matches[2]
-                $dsTabExpansionDatabase.Tables["Types"].Select("Name like '%.${TypeName}%'") | Select-Object -ExpandProperty Name |
+                Get-TabExpansion "%.${TypeName}%" "Types" | Select-Object -ExpandProperty Name |
                     Invoke-TabItemSelector $LastWord.Replace('[', '') -SelectionHandler $SelectionHandler |
                     ForEach-Object {if ($Matches[1] -eq '[') {"[$_]"}}
                 break
