@@ -212,7 +212,6 @@ if ($PowerTabConfig.Enabled) {
 if ($PowerTabConfig.ShowBanner) {
     $CurVersion = (Get-Module -ListAvailable "PowerTab").Version
     Write-Host -ForegroundColor 'Yellow' "PowerTab version ${CurVersion} PowerShell TabExpansion Library"
-    Write-Host -ForegroundColor 'Yellow' "Technology Preview"
     Write-Host -ForegroundColor 'Yellow' "Host: $($Host.Name)"
     Write-Host -ForegroundColor 'Yellow' "PowerTab Enabled: $($PowerTabConfig.Enabled)"
 }
