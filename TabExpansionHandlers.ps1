@@ -163,9 +163,11 @@ Register-TabExpansion "Reset-ComputerMachinePassword" -Type "Command" {
         $Argument = $Context.Argument
         switch -exact ($Context.Parameter) {
             'SourceIdentifier' {
+                $TabExpansionHasOutput.Value = $true
                 Get-Event "$Argument*" | Select-Object -ExpandProperty SourceIdentifier | Sort-Object
             }
             'EventIdentifier' {
+                $TabExpansionHasOutput.Value = $true
                 Get-Event | Select-Object -ExpandProperty EventIdentifier
             }
         }
@@ -174,6 +176,39 @@ Register-TabExpansion "Reset-ComputerMachinePassword" -Type "Command" {
         param($Context, [ref]$TabExpansionHasOutput)
         $Argument = $Context.Argument
         switch -exact ($Context.Parameter) {
+            'Class' {
+                $TabExpansionHasOutput.Value = $true
+                ## TODO: escape special characters?
+                Get-TabExpansion "$Argument%" "WMI" | Select-Object -ExpandProperty Name
+            }
+            'EventName' {
+                if ($Context.OtherParameters["InputObject"]) {
+                    $TabExpansionHasOutput.Value = $true
+                    Invoke-Expression $Context.OtherParameters["InputObject"] | Get-Member | 
+                        Where-Object {$_.MemberType -eq "Event" -and $_.Name -like "$Argument*"} | Select-Object -ExpandProperty Name
+                }
+            }
+            'Namespace' {
+                $TabExpansionHasOutput.Value = $true
+                if ($Argument -notlike "ROOT\*") {
+                    $Argument = "ROOT\$Argument"
+                }
+                if ($Context.OtherParameters["ComputerName"]) {
+                    ## TODO: Needs work
+                    if ($Context.OtherParameters["ComputerName"] -match '\$') {
+                        $ComputerName = [String](Invoke-Expression $Context.OtherParameters["ComputerName"])
+                    } else {
+                        $ComputerName = $Context.OtherParameters["ComputerName"]
+                    }
+                } else {
+                    $ComputerName = "."
+                }
+                
+                $ParentNamespace = $Argument -replace '\\[^\\]*$'
+                $Namespaces = New-Object System.Management.ManagementClass "\\$ComputerName\${ParentNamespace}:__NAMESPACE"
+                $Namespaces.PSBase.GetInstances() | ForEach-Object {"{0}\{1}" -f $_.__NameSpace,$_.Name} |
+                    Where-Object {$_ -like "$Argument*"} | Sort-Object
+            }
             'SourceIdentifier' {
                 ## TODO:
             }
