@@ -60,6 +60,7 @@ Register-TabExpansion "Get-Command" -Type "Command" {
         }
         'Noun' {
             ## TODO
+            ## TODO: [workitem:9]
         }
         'Verb' {
             $TabExpansionHasOutput.Value = $true
@@ -103,6 +104,7 @@ Register-TabExpansion "Reset-ComputerMachinePassword" -Type "Command" {
                 $TabExpansionHasOutput.Value = $true
                 $QuoteSpaces.Value = $false
                 ## TODO: Display more info
+                ## TODO: [workitem:10]
                 try {
                     Get-ComputerRestorePoint | ForEach-Object {"{0} <# {1} #>" -f ([String]$_.SequenceNumber),$_.CreationTime}
                 } catch {}
@@ -211,6 +213,7 @@ Register-TabExpansion "Reset-ComputerMachinePassword" -Type "Command" {
             }
             'SourceIdentifier' {
                 ## TODO:
+                ## TODO: [workitem:11]
             }
         }
     }.GetNewClosure()
@@ -364,7 +367,8 @@ Register-TabExpansion "Get-HotFix" -Type "Command" {
                 Get-Job | Select-Object -ExpandProperty InstanceId
             }
             'Location' {
-                ## TODO:
+                ## TODO: Receive-Job
+                ## TODO: [workitem:12]
             }
             'Name' {
                 $TabExpansionHasOutput.Value = $true
@@ -458,6 +462,7 @@ Register-TabExpansion "New-Object" -Type "Command" {
     switch -exact ($Context.Parameter) {
         'ComObject' {
             ## TODO: Maybe cache these like we do with .NET types and WMI object names?
+            ## TODO: [workitem:13]
             $TabExpansionHasOutput.Value = $true
             if (($env:Processor_Architecture -eq "amd64") -and ([IntPtr]::Size -eq 4)) {
                 $Path = "REGISTRY::HKEY_CLASSES_ROOT\Wow6432Node\CLSID"
@@ -524,6 +529,7 @@ Register-TabExpansion "Out-Printer" -Type "Command" {
     switch -exact ($Context.Parameter) {
         'Name' {
             ## TODO: support printers that are not installed using paths \\server\printer
+            ## TODO: [workitem:14]
             $TabExpansionHasOutput.Value = $true
             Get-WMIObject Win32_Printer -Filter "Name LIKE '$Argument%'" | Select-Object -ExpandProperty Name
         }
@@ -606,9 +612,11 @@ Register-TabExpansion "Out-Printer" -Type "Command" {
         switch -exact ($Context.Parameter) {
             'Breakpoint' {
                 ## TODO:
+                ## TODO: [workitem:15]
             }
             'Command' {
                 ## TODO:
+                ## TODO: [workitem:15]
             }
             'Id' {
                 ## TODO:
@@ -616,6 +624,7 @@ Register-TabExpansion "Out-Printer" -Type "Command" {
             }
             'Line' {
                 ## TODO:
+                ## TODO: [workitem:15]
             }
             'Script' {
                 ## TODO: Display relative paths
@@ -697,9 +706,11 @@ Register-TabExpansion "Out-Printer" -Type "Command" {
         switch -exact ($Context.Parameter) {
             'CommandName' {
                 ## TODO:
+                ## TODO: [workitem:16]
             }
             'FormatTypeName' {
                 ## TODO:
+                ## TODO: [workitem:16]
             }
             'Module' {
                 ## TODO: Grab from session instead?
@@ -990,6 +1001,7 @@ Register-TabExpansion "Get-WinEvent" -Type "Command" {
             }
             'Name' {
                 ## TODO: ??? (Method Name)
+                ## TODO: [workitem:17]
             }
             'Namespace' {
                 $TabExpansionHasOutput.Value = $true
@@ -1014,9 +1026,11 @@ Register-TabExpansion "Get-WinEvent" -Type "Command" {
             }
             'Path' {
                 ## TODO: ???
+                ## TODO: [workitem:17]
             }
             'Property' {
                 ## TODO: ???
+                ## TODO: [workitem:17]
             }
         }
     }.GetNewClosure()
@@ -1030,7 +1044,7 @@ Register-TabExpansion "Get-WinEvent" -Type "Command" {
 
 ## WSMan & WSManInstance & WSManAction
 & {
-    ## TODO: 
+    ## TODO: [workitem:18]
 }
 
 ## Format-Custom
@@ -1056,6 +1070,7 @@ Register-TabExpansion "Format-Custom" -Type "Command" {
         }
         'View' {
             ## TODO: Need to figure out what type of object will be coming in
+            ## TODO: [workitem:19]
         }
     }
 }.GetNewClosure()
@@ -1083,6 +1098,7 @@ Register-TabExpansion "Format-List" -Type "Command" {
         }
         'View' {
             ## TODO: Need to figure out what type of object will be coming in
+            ## TODO: [workitem:19]
         }
     }
 }.GetNewClosure()
@@ -1114,6 +1130,7 @@ Register-TabExpansion "Format-Table" -Type "Command" {
         }
         'View' {
             ## TODO: Need to figure out what type of object will be coming in
+            ## TODO: [workitem:19]
         }
     }
 }.GetNewClosure()
@@ -1141,6 +1158,7 @@ Register-TabExpansion "Format-Wide" -Type "Command" {
         }
         'View' {
             ## TODO: Need to figure out what type of object will be coming in
+            ## TODO: [workitem:19]
         }
     }
 }.GetNewClosure()
