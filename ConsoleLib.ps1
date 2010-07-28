@@ -87,12 +87,20 @@ Function Out-ConsoleList {
         $HasChild = $false
         switch ($Key.VirtualKeyCode) {
             9 { ## Tab
-                if ($Shift -match 'ShiftPressed') {
-                    Move-Selection -1  ## Up
+                ## In Visual Studio, Tab acts like Enter
+                if ($PowerTabConfig.VisualStudioTabBehavior) {
+                    ## Expand with currently selected item
+                    @($ListHandle.Items)[$ListHandle.SelectedItem].Trim()
+                    $Continue = $false
+                    break
                 } else {
-                    Move-Selection 1  ## Down
+                    if ($Shift -match 'ShiftPressed') {
+                        Move-Selection -1  ## Up
+                    } else {
+                        Move-Selection 1  ## Down
+                    }
+                    break
                 }
-                break
             }
             38 { ## Up Arrow
                 if ($Shift -match 'ShiftPressed') {

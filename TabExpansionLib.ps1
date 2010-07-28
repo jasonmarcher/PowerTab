@@ -966,6 +966,13 @@ Function UpgradePowerTab993 {
     )
 
     $Config.Value.Tables['Config'].Select("Name = 'SpaceCompleteFileSystem'") | ForEach-Object {$_.Delete()}
+    ## Add VisualStudioTabBehavior
+    $row = $Config.Value.Tables['Config'].NewRow()
+    $row.Name = 'VisualStudioTabBehavior'
+    $row.Type = 'Bool'
+    $row.Category = 'Global'
+    $row.Value = [Int]($False)
+    $Config.Value.Tables['Config'].Rows.Add($row)
 }
 
 
@@ -1087,6 +1094,7 @@ Function InternalNewTabExpansionConfig {
             AutoExpandOnBackSlash = $True
             CustomComplete = $True
             SpaceComplete = $True
+            VisualStudioTabBehavior = $False
         }
     $Options.GetEnumerator() | Foreach-Object {
             $row = $dtConfig.NewRow()
