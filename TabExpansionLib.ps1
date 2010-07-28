@@ -884,7 +884,7 @@ Function Initialize-PowerTab {
     ## Upgrade if needed
     if ($Version -lt $CurVersion) {
         ## Upgrade config and database
-        UpgradeTabExpansionDatabase ([Ref]$Config) ([Ref]$Database)
+        UpgradeTabExpansionDatabase ([Ref]$Config) ([Ref]$Database) $Version
     } elseif ($Version -gt $CurVersion) {
         ## TODO: config is from a later version
     }
