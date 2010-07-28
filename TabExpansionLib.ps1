@@ -301,6 +301,9 @@ Function Export-TabExpansionDatabase {
                 $IsoFile = Open-IsolatedStorageFile "PowerTab\TabExpansion.xml" -Writable
                 $dsTabExpansionDatabase.WriteXml($IsoFile)
             } else {
+                if (-not Test-Path (Split-Path $LiteralPath)) {
+                    New-Item (Split-Path $LiteralPath) -ItemType Directory > $null
+                }
                 $dsTabExpansionDatabase.WriteXml($LiteralPath)
             }
 
@@ -367,6 +370,9 @@ Function Export-TabExpansionConfig {
                 $IsoFile = Open-IsolatedStorageFile "PowerTab\PowerTabConfig.xml" -Writable
                 $dsTabExpansionConfig.Tables['Config'].WriteXml($IsoFile)
             } else {
+                if (-not Test-Path (Split-Path $LiteralPath)) {
+                    New-Item (Split-Path $LiteralPath) -ItemType Directory > $null
+                }
                 $dsTabExpansionConfig.Tables['Config'].WriteXml($LiteralPath)
             }
 
