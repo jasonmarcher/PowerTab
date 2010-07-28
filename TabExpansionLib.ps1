@@ -918,9 +918,15 @@ Function UpgradeTabExpansionDatabase {
 
     if ($Version -lt [System.Version]'0.99.3.0') {
         ## Upgrade versions from the first version of PowerTab
-        Write-Host "Upgrading from version 0.99.X.0"
+        Write-Host "Upgrading from version $Version"
         UpgradePowerTab99 $Config $Database
         $Version = '0.99.3.0'
+    }
+    if ($Version -lt [System.Version]'0.99.5.0') {
+        ## Upgrade versions from the first version of PowerTab
+        Write-Host "Upgrading from version $Version"
+        UpgradePowerTab993 $Config $Database
+        $Version = '0.99.5.0'
     }
 }
 
@@ -933,14 +939,14 @@ Function UpgradePowerTab99 {
         [Ref]$Database
     )
 
-    $Config.Value.Tables['Config'].Select("Name LIKE 'InstallPath' AND Category = 'Setup'") | ForEach-Object {$_.Delete()}
+    $Config.Value.Tables['Config'].Select("Name = 'InstallPath' AND Category = 'Setup'") | ForEach-Object {$_.Delete()}
     if ($Database.Value.Tables['Config']) {
         $Database.Value.Tables.Remove('Config')
-        trap{continue}
+        trap {continue}
     }
     if ($Database.Value.Tables['Cache']) {
         $Database.Value.Tables.Remove('Cache')
-        trap{continue}
+        trap {continue}
     }
     $ConfigurationPath = $Config.Value.Tables['Config'].Select("Name = 'ConfigurationPath'")[0].Value
     $Config.Value.Tables['Config'].Select("Name = 'ConfigurationPath'")[0].Value = Join-Path $ConfigurationPath "PowerTabConfig.xml"
@@ -948,6 +954,18 @@ Function UpgradePowerTab99 {
     $DatabaseName = $Config.Value.Tables['Config'].Select("Name = 'DatabaseName'")[0].Value
     $Config.Value.Tables['Config'].Select("Name = 'DatabasePath'")[0].Value = Join-Path $DatabasePath $DatabaseName
     $Config.Value.Tables['Config'].Select("Name = 'DatabaseName' AND Category = 'Setup'") | ForEach-Object {$_.Delete()}
+}
+
+
+Function UpgradePowerTab993 {
+    [CmdletBinding()]
+    param(
+        [Ref]$Config
+        ,
+        [Ref]$Database
+    )
+
+    $Config.Value.Tables['Config'].Select("Name = 'SpaceCompleteFileSystem'") | ForEach-Object {$_.Delete()}
 }
 
 
@@ -1053,22 +1071,22 @@ Function InternalNewTabExpansionConfig {
             Enabled = $True
             ShowBanner = $True
             TabActivityIndicator = $True
-            AliasQuickExpand = $False
-            FileSystemExpand = $True
-            DoubleBorder = $True
             DoubleTabEnabled = $False
             DoubleTabLock = $False
-            CloseListOnEmptyFilter = $True
-            SpaceComplete = $True
-            SpaceCompleteFileSystem = $True
-            DotComplete = $True
-            BackSlashComplete = $True
-            CustomComplete = $True
-            AutoExpandOnDot = $True
-            AutoExpandOnBackSlash = $True
+            AliasQuickExpand = $False
+            FileSystemExpand = $True
+            ShowAccessorMethods = $True
+            DoubleBorder = $True
             CustomFunctionEnabled = $False
             IgnoreConfirmPreference = $False
-            ShowAccessorMethods = $True
+            ## ConsoleList
+            CloseListOnEmptyFilter = $True
+            DotComplete = $True
+            AutoExpandOnDot = $True
+            BackSlashComplete = $True
+            AutoExpandOnBackSlash = $True
+            CustomComplete = $True
+            SpaceComplete = $True
         }
     $Options.GetEnumerator() | Foreach-Object {
             $row = $dtConfig.NewRow()
@@ -1080,6 +1098,7 @@ Function InternalNewTabExpansionConfig {
         }
 
     @{
+        ## ConsoleList
         MinimumListItems   = '2'
         FastScrollItemcount = '10'
     }.GetEnumerator() | ForEach-Object {
