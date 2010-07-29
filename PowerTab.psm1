@@ -16,7 +16,7 @@ $ConfigFileName = "PowerTabConfig.xml"
 
     if ($ConfigurationPath) {
         $script:ConfigurationPathParam = $ConfigurationPath
-    } elseif ($PrivateData = (Get-Module -ListAvailable $PSCmdlet.MyInvocation.MyCommand.Module.Name).PrivateData) {
+    } elseif ($PrivateData = (Parse-Manifest).PrivateData) {
         $script:ConfigurationPathParam = $PrivateData
     } elseif ((Test-Path (Join-Path $PSScriptRoot $ConfigFileName)) -or (Test-Path (Join-Path (Split-Path $Profile) $ConfigFileName))){
         $script:ConfigurationPathParam = $ConfigFileName
@@ -210,7 +210,7 @@ if ($PowerTabConfig.Enabled) {
 }
 
 if ($PowerTabConfig.ShowBanner) {
-    $CurVersion = (Get-Module -ListAvailable "PowerTab").Version
+    $CurVersion = (Parse-Manifest).ModuleVersion
     Write-Host -ForegroundColor 'Yellow' "PowerTab version ${CurVersion} PowerShell TabExpansion Library"
     Write-Host -ForegroundColor 'Yellow' "Host: $($Host.Name)"
     Write-Host -ForegroundColor 'Yellow' "PowerTab Enabled: $($PowerTabConfig.Enabled)"
