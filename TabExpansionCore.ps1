@@ -803,7 +803,7 @@ Function Invoke-PowerTab {
 
             ## Partial functions or cmdlets
             "(.*)$([Regex]::Escape($PowerTabConfig.ShortcutChars.Partial))`$" {
-                Get-Command -CommandType Function,Filter,Cmdlet -Name "$($Matches[1])*" | Select-Object -ExpandProperty Name |
+                Get-Command -CommandType Function,ExternalScript,Filter,Cmdlet -Name "$($Matches[1])*" | Select-Object -ExpandProperty Name |
                     Invoke-TabItemSelector $Matches[1] -SelectionHandler $SelectionHandler
                 break
             }
