@@ -129,10 +129,7 @@ Function Resolve-Command {
         }
 
         if ($Command.CommandType -eq "Alias") {
-            ## Resolve alias which may lead to another alias
-            do {
-                $Command = Get-Command $Command.Definition -CommandType Alias,Application,Function,Filter,Cmdlet,ExternalScript,Script
-            } while ($Command.CommandType -eq "Alias")
+            $Command = $Command.ResolvedCommand	
         }
 
         ## Return result
