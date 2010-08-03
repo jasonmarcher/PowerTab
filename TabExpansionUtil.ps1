@@ -40,7 +40,7 @@ Function Out-DataGridView {
                     $dt.Columns.Add($col)
                 }
                 if ($_.Value -eq $null) {
-                    $er.Item($_.Name) = "[empty]"
+                    $dr.Item($_.Name) = "[empty]"
                 } elseif ($_.IsArray) {
                     $dr.Item($_.Name) =[String]::Join($_.Value ,";")
                 } else {
