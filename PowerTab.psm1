@@ -1,28 +1,5 @@
 param()
 
-$ConfigurationPathParam = ""
-$ConfigFileName = "PowerTabConfig.xml"
-
-. {
-	[CmdletBinding(SupportsShouldProcess = $false,
-		SupportsTransactions = $false,
-		ConfirmImpact = "None",
-		DefaultParameterSetName = "")]
-    param(
-		[Parameter(Position = 0)]
-        [String]
-        $ConfigurationPath = ""
-    )
-
-    if ($ConfigurationPath) {
-        $script:ConfigurationPathParam = $ConfigurationPath
-    } elseif ($PrivateData = (Parse-Manifest).PrivateData) {
-        $script:ConfigurationPathParam = $PrivateData
-    } elseif ((Test-Path (Join-Path $PSScriptRoot $ConfigFileName)) -or (Test-Path (Join-Path (Split-Path $Profile) $ConfigFileName))){
-        $script:ConfigurationPathParam = $ConfigFileName
-    }
-} @args
-
 ## Load forms library when not loaded 
 if (-not ([AppDomain]::CurrentDomain.GetAssemblies() | Where-Object {$_.ManifestModule -like "System.Windows.Forms*"})) {
     [Void][System.Reflection.Assembly]::LoadWithPartialName("System.Windows.Forms")
@@ -60,6 +37,8 @@ $TabExpansionCommandInfoRegistry = @{}
 
 $TabExpansionParameterNameRegistry = @{}
 
+$ConfigFileName = "PowerTabConfig.xml"
+
 
 #########################
 ## Public properties
@@ -86,6 +65,28 @@ Get-ChildItem (Join-Path $PSScriptRoot "Handlers\*.ps1") | ForEach-Object {. $_.
 #########################
 ## Initialization code
 #########################
+
+$ConfigurationPathParam = ""
+
+. {
+	[CmdletBinding(SupportsShouldProcess = $false,
+		SupportsTransactions = $false,
+		ConfirmImpact = "None",
+		DefaultParameterSetName = "")]
+    param(
+		[Parameter(Position = 0)]
+        [String]
+        $ConfigurationPath = ""
+    )
+
+    if ($ConfigurationPath) {
+        $script:ConfigurationPathParam = $ConfigurationPath
+    } elseif ($PrivateData = (Parse-Manifest).PrivateData) {
+        $script:ConfigurationPathParam = $PrivateData
+    } elseif ((Test-Path (Join-Path $PSScriptRoot $ConfigFileName)) -or (Test-Path (Join-Path (Split-Path $Profile) $ConfigFileName))){
+        $script:ConfigurationPathParam = $ConfigFileName
+    }
+} @args
 
 if ($ConfigurationPathParam) {
     if ((Test-Path $ConfigurationPathParam) -or (
