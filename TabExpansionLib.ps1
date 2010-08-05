@@ -857,7 +857,7 @@ Function Initialize-PowerTab {
 
     ## Load Configuration
     if ($ConfigurationPath -and ((Test-Path $ConfigurationPath) -or ($ConfigurationPath -eq "IsolatedStorage"))) {
-        $Config = InternalImportTabExpansionConfig (Convert-Path (Resolve-Path $ConfigurationPath))
+        $Config = InternalImportTabExpansionConfig $ConfigurationPath
     } else {
         ## TODO: Throw error or create new config?
         #$Config = InternalNewTabExpansionConfig $ConfigurationPath
@@ -879,7 +879,7 @@ Function Initialize-PowerTab {
         $DatabasePath = Join-Path $PSScriptRoot $DataBasePath
     }
 
-    $Database = InternalImportTabExpansionDataBase (Convert-Path (Resolve-Path $DatabasePath))
+    $Database = InternalImportTabExpansionDataBase $DatabasePath
 
     ## Upgrade if needed
     if ($Version -lt $CurVersion) {
@@ -1130,12 +1130,15 @@ Function InternalImportTabExpansionDataBase {
     )
 
     $Database = New-Object System.Data.DataSet
-    if ($LiteralPath -eq "IsolatedStorage") {
+    if (($LiteralPath -eq "IsolatedStorage") -and (Test-IsolatedStoragePath "PowerTab\TabExpansion.xml")) {
         $UserIsoStorage = [System.IO.IsolatedStorage.IsolatedStorageFile]::GetUserStoreForAssembly()
         $IsoFile = New-Object System.IO.IsolatedStorage.IsolatedStorageFileStream("PowerTab\TabExpansion.xml",
             [System.IO.FileMode]::Open, $UserIsoStorage)
         [Void]$Database.ReadXml($IsoFile)
-    } else {
+    } elseif (Test-Path $LiteralPath) {
+        if (![System.IO.Path]::IsPathRooted($_)) {
+            $LiteralPath = Resolve-Path $LiteralPath
+        }
         [Void]$Database.ReadXml($LiteralPath)
     }
 
@@ -1179,8 +1182,13 @@ Function InternalImportTabExpansionConfig {
         $IsoFile = New-Object System.IO.IsolatedStorage.IsolatedStorageFileStream("PowerTab\PowerTabConfig.xml",
             [System.IO.FileMode]::Open, $UserIsoStorage)
         [Void]$Config.ReadXml($IsoFile, 'InferSchema')
-    } else {
+    } elseif (Test-Path $LiteralPath) {
+        if (![System.IO.Path]::IsPathRooted($_)) {
+            $LiteralPath = Resolve-Path $LiteralPath
+        }
         [Void]$Config.ReadXml($LiteralPath, 'InferSchema')
+    } else {
+        $Config = InternalNewTabExpansionConfig $LiteralPath
     }
     $Config
 }

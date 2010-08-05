@@ -83,8 +83,10 @@ $ConfigurationPathParam = ""
         $script:ConfigurationPathParam = $ConfigurationPath
     } elseif ($PrivateData = (Parse-Manifest).PrivateData) {
         $script:ConfigurationPathParam = $PrivateData
-    } elseif ((Test-Path (Join-Path $PSScriptRoot $ConfigFileName)) -or (Test-Path (Join-Path (Split-Path $Profile) $ConfigFileName))){
-        $script:ConfigurationPathParam = $ConfigFileName
+    } elseif (Test-Path (Join-Path (Split-Path $Profile) $ConfigFileName)) {
+        $script:ConfigurationPathParam = (Join-Path (Split-Path $Profile) $ConfigFileName)
+    } elseif (Test-Path (Join-Path $PSScriptRoot $ConfigFileName)) {
+        $script:ConfigurationPathParam = (Join-Path $PSScriptRoot $ConfigFileName)
     }
 } @args
 
@@ -92,10 +94,6 @@ if ($ConfigurationPathParam) {
     if ((Test-Path $ConfigurationPathParam) -or (
             ($ConfigurationPathParam -eq "IsolatedStorage") -and (Test-IsolatedStoragePath "PowerTab\$ConfigFileName"))) {
         Initialize-PowerTab $ConfigurationPathParam
-    } elseif (Test-Path (Join-Path $PSScriptRoot $ConfigurationPathParam)) {
-        Initialize-PowerTab (Join-Path $PSScriptRoot $ConfigurationPathParam)
-    } elseif (Test-Path (Join-Path (Split-Path $Profile) $ConfigurationPathParam)) {
-        Initialize-PowerTab (Join-Path (Split-Path $Profile) $ConfigurationPathParam)
     } else {
         ## Config specified, but does not exist
         Write-Warning "Configuration File does not exist: '$ConfigurationPathParam'"  ## TODO: localize
