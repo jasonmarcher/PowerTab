@@ -486,7 +486,7 @@ Function Invoke-PowerTab {
 
         ## If a variable name contains any of these characters it needs to be in braces
         $_varsRequiringQuotes = ('-`&@''#{}()$,;|<> .\/' + "`t").ToCharArray()
-        if ($Name.IndexOfAny($_varsRequiringQuotes) -ge -0) {
+        if ($Name.IndexOfAny($_varsRequiringQuotes) -ge 0) {
             "{$Name}"
         } else {
             $Name
@@ -877,16 +877,30 @@ Function Invoke-PowerTab {
             }
             New-TabItem "$Container\$Child" "$Container\$Child" -Type $Type
         } | Invoke-TabItemSelector $LastPath -SelectionHandler $SelectionHandler -Return $LastWord -ForceList:$ForceList | ForEach-Object {
+            ## If a path contains any of these characters it needs to be in quotes
+            $_charsRequiringQuotes = ('`&@''#{}()$,; ' + "`t").ToCharArray()
+        } {
+            $Quote = ''
+            $Invoke = ''
+
             if ($_ -is [String]) {
-                $Quote = ''
-                $Invoke = ''
-                if (($_.IndexOf(' ') -ge 0) -and ($_.IndexOf('"') -lt 0) ) {
-                    if (-not (@([Char[]]$LastBlock | Where-Object {$_ -match '"|'''}).Count % 2)) {$Quote = '"'}
+                ## Escape certain characters
+                $_ = $_ -replace '([\$"`])','`$1'
+
+                if ($_.IndexOfAny($_charsRequiringQuotes) -ge 0) {
+                    $Quote = '"'
                     if (($LastBlock.Trim() -eq $LastWord)) {$Invoke = '& '}
                 }
                 "$Invoke$Quote$_$Quote"
             } else {
-                ## TODO: Implement quoting
+                ## Escape certain characters
+                $_.Value = $_.Value -replace '([\$"`])','`$1'
+
+                if ($_.Value.IndexOfAny($_charsRequiringQuotes) -ge 0) {
+                    $Quote = '"'
+                    if (($LastBlock.Trim() -eq $LastWord)) {$Invoke = '& '}
+                }
+                $_.Value = "$Invoke$Quote$($_.Value)$Quote"
                 $_
             }
         }
