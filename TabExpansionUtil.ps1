@@ -179,6 +179,8 @@ Function Resolve-Parameter {
         ## Get command info
 		if ($PSCmdlet.ParameterSetName -eq "Command") {
             $CommandInfo = Resolve-Command $Command -CommandInfo
+        } else {
+            if ($CommandInfo -ne $null) {return}
         }
 
         ## Check if this is a real parameter name and not an alias
@@ -221,8 +223,10 @@ Function Resolve-PositionalParameter {
             $ScriptBlock = $TabExpansionCommandInfoRegistry[$Context.Command]
             $CommandInfo = & $ScriptBlock $Context
             if (-not $CommandInfo) {throw "foo"} ## TODO
+        } elseif ($Context.CommandInfo) {
+            $CommandInfo = $Context.CommandInfo
         } else {
-            $CommandInfo = @(Get-Command $Context.Command -ErrorAction SilentlyContinue)[0]
+            return $Context
         }
 
         foreach ($ParameterSet in $CommandInfo.ParameterSets) {

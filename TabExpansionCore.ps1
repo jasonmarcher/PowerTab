@@ -34,7 +34,12 @@ Function Invoke-TabExpansion {
     ## TODO: Save all values from a list for a parameter
     foreach ($Token in $Tokens) {
         if (($Token.Type -eq $_TokenTypes::Command) -and !($CurrentContext.Command)) {
-            $CurrentContext.Command = try {Resolve-Command $Token.Content -ErrorAction "Stop"} catch {$Token.Content}
+            $CurrentContext.CommandInfo = try {Resolve-Command $Token.Content -CommandInfo -ErrorAction "Stop"} catch {}
+            if ($CurrentContext.CommandInfo) {
+                $CurrentContext.Command = $CurrentContext.CommandInfo.Name
+            } else {
+                $CurrentContext.Command = $Token.Content
+            }
             $CurrentContext.isCommandMode = $true
         } elseif (($Token.Type -eq $_TokenTypes::Keyword) -and !($CurrentContext.Command) -and
                 (@("function") -contains $Token.Content)) {
@@ -56,10 +61,10 @@ Function Invoke-TabExpansion {
                     if ($CommandInfo) {
                         Resolve-Parameter $CommandInfo $Token.Content
                     } else {
-                        Resolve-Parameter $CurrentContext.Command $Token.Content
+                        Resolve-Parameter $CurrentContext.CommandInfo $Token.Content
                     }
                 } else {
-                    Resolve-Parameter $CurrentContext.Command $Token.Content
+                    Resolve-Parameter $CurrentContext.CommandInfo $Token.Content
                 }
             } catch {$Token.Content -replace '^-'}
             if (-not $CurrentContext.Parameter) {$CurrentContext.Parameter = $Token.Content -replace '^-'}
@@ -78,7 +83,7 @@ Function Invoke-TabExpansion {
                         throw "foo"
                     }
                 } else {
-                    $Parameter = Resolve-Parameter $CurrentContext.Command $CurrentContext.Parameter -ParameterInfo
+                    $Parameter = Resolve-Parameter $CurrentContext.CommandInfo $CurrentContext.Parameter -ParameterInfo
                 }
                 if ($Parameter.ParameterType -eq [System.Management.Automation.SwitchParameter]) {
                     $CurrentContext.OtherParameters[$CurrentContext.Parameter] = $true
@@ -235,13 +240,13 @@ Function Invoke-TabExpansion {
         ## Resolve internal (no prefix) and fully qualified command names
         $FullCommandName = ""
         try {
-            $InternalCommand = Resolve-InternalCommandName $CurrentContext.Command
+            $InternalCommand = Resolve-InternalCommandName $CurrentContext.CommandInfo
             $InternalCommandName = $InternalCommand.InternalName
             if ($InternalCommand.Module) {
                 $FullCommandName = $InternalCommand.Module.Name + "\" + $InternalCommand.InternalName
             }
         } catch {
-            $InternalCommandName = ""#$CurrentContext.Command
+            $InternalCommandName = $CurrentContext.Command
         }
 
         [Bool]$TabExpansionHasOutput = $false
@@ -276,10 +281,10 @@ Function Invoke-TabExpansion {
                         if ($CommandInfo) {
                             $ParameterInfo = Resolve-Parameter $CommandInfo $CurrentContext.Parameter -ParameterInfo
                         } else {
-                            $ParameterInfo = Resolve-Parameter $CurrentContext.Command $CurrentContext.Parameter -ParameterInfo
+                            $ParameterInfo = Resolve-Parameter $CurrentContext.CommandInfo $CurrentContext.Parameter -ParameterInfo
                         }
                     } else {
-                        $ParameterInfo = Resolve-Parameter $CurrentContext.Command $CurrentContext.Parameter -ParameterInfo
+                        $ParameterInfo = Resolve-Parameter $CurrentContext.CommandInfo $CurrentContext.Parameter -ParameterInfo
                     }
 
                     ## Enum
@@ -325,12 +330,11 @@ Function Invoke-TabExpansion {
 
             ## Command info
             if (-not $TabExpansionHasOutput) {
-                try {
-                    $CommandInfo = Resolve-Command $CurrentContext.Command -CommandInfo
+                if ($CurrentContext.CommandInfo) {
                     $Parameter = $LastWord -replace "^-"
-                    $PossibleValues = $CommandInfo.Parameters.Values | Where-Object {$_.Name -like "$Parameter*"} | ForEach-Object {"-" + $_.Name}
+                    $PossibleValues = $CurrentContext.CommandInfo.Parameters.Values | Where-Object {$_.Name -like "$Parameter*"} | ForEach-Object {"-" + $_.Name}
                     $TabExpansionHasOutput = $true
-                } catch {}
+                }
             }
         } elseif ($LastToken.Type -eq $_TokenTypes::GroupStart) {
             ## Tab complete method signatures
@@ -396,6 +400,7 @@ Function Invoke-TabExpansion {
 Function New-TabContext {
     $Properties = @{
             "Command" = ""
+            "CommandInfo" = $null
             "Parameter" = ""
             "Argument" = $null
             "ArgumentList" = @()
