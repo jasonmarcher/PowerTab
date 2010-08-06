@@ -179,8 +179,8 @@ Function Resolve-Parameter {
         ## Get command info
 		if ($PSCmdlet.ParameterSetName -eq "Command") {
             $CommandInfo = Resolve-Command $Command -CommandInfo
-        } else {
-            if ($CommandInfo -ne $null) {return}
+        } elseif ($PSCmdlet.ParameterSetName -eq "CommandInfo") {
+            if ($CommandInfo -eq $null) {return}
         }
 
         ## Check if this is a real parameter name and not an alias
