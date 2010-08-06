@@ -864,7 +864,7 @@ Function Initialize-PowerTab {
     }
 
     ## Load Version
-    [System.Version]$CurVersion = (Parse-Manifest).ModuleVersion
+    [System.Version]$CurVersion = (Test-ModuleManifest (Join-Path $PSScriptRoot "PowerTab.psd1")).Version
     $Version = $Config.Tables['Config'].Select("Name = 'Version'")[0].Value -as [System.Version]
     if ($Version -eq $null) {$Version = [System.Version]'0.99.0.0'}
 

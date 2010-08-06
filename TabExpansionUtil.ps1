@@ -517,12 +517,3 @@ Function New-IsolatedStorageDirectory {
 
 Function Get-IsolatedStorage {
 }
-
-############
-# Here there be hacks
-############
-
-Function Parse-Manifest {
-    $ModuleManifest = "Data {`n" + (Get-Content "$PSScriptRoot\PowerTab.psd1" -Delimiter `0) + "`n}"
-    $ExecutionContext.SessionState.InvokeCommand.NewScriptBlock($ModuleManifest).Invoke()[0]
-}
