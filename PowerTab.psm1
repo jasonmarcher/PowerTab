@@ -59,7 +59,8 @@ Import-LocalizedData -BindingVariable "Resources" -FileName "Resources"
 . (Join-Path $PSScriptRoot "TabExpansionUtil.ps1")
 . (Join-Path $PSScriptRoot "TabExpansionHandlers.ps1")
 . (Join-Path $PSScriptRoot "ConsoleLib.ps1")
-Get-ChildItem (Join-Path $PSScriptRoot "Handlers\*.ps1") | ForEach-Object {. $_.FullName}
+. (Join-Path $PSScriptRoot "Handlers\PSClientManager.ps1")
+. (Join-Path $PSScriptRoot "Handlers\Robocopy.ps1")
 
 
 #########################
