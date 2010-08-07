@@ -726,7 +726,7 @@ Function Invoke-PowerTab {
                 if ($Dots -gt 0) {
                     $res += $dsTabExpansionDatabase.Tables['Types'].Select("Name like '$($Matched)%' and dc = $Dots") | ForEach-Object {"[$($_.Name)]"}
                 }
-                $res | Invoke-TabItemSelector $LastWord -SelectionHandler $SelectionHandler -ForceList:$ForceList
+                $res | Where-Object {$_} | Invoke-TabItemSelector $LastWord -SelectionHandler $SelectionHandler -ForceList:$ForceList
                 break
             }
 
