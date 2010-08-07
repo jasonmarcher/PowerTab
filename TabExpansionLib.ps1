@@ -765,9 +765,9 @@ Set-Alias rte Remove-TabExpansion
 Function Invoke-TabExpansionEditor {
 	[CmdletBinding()]
     param()
-    
+
     end {
-        [System.Version]$CurVersion = (Get-Module -ListAvailable $PSCmdlet.MyInvocation.MyCommand.Module.Name).Version
+        [System.Version]$CurVersion = (Test-ModuleManifest (Join-Path $PSScriptRoot "PowerTab.psd1")).Version
 
         $Form = New-Object System.Windows.Forms.Form
         $Form.Size = New-Object System.Drawing.Size @(500,300)
@@ -1001,7 +1001,7 @@ Function InternalNewTabExpansionConfig {
 
     ## Add global configuration
     @{
-        Version = (Get-Module -ListAvailable $PSCmdlet.MyInvocation.MyCommand.Module.Name).Version
+        Version = (Test-ModuleManifest (Join-Path $PSScriptRoot "PowerTab.psd1")).Version
         DefaultHandler = 'Dynamic'
         AlternateHandler = 'Dynamic'
         CustomUserFunction = 'Write-Warning'
