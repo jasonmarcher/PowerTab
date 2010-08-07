@@ -21,6 +21,11 @@ Function Invoke-TabExpansion {
         $ForceList
     )
 
+    if ($PowerTabConfig -eq $null) {
+        ## Something happened to the PowerTabConfig object, recreate it
+        CreatePowerTabConfig
+    }
+
     $null = [System.Management.Automation.PSParser]::Tokenize('', [ref]$null)
     $Errors = New-Object System.Collections.ObjectModel.Collection``1[System.Management.Automation.PSParseError]
     $Tokens = [System.Management.Automation.PSParser]::Tokenize($Line, [ref]$Errors)
@@ -355,6 +360,11 @@ Function Invoke-TabExpansion {
                 }
                 $TabExpansionHasOutput = $true
             }
+        }
+
+        if ($PowerTabConfig -eq $null) {
+            ## Something happened to the PowerTabConfig object, recreate it
+            CreatePowerTabConfig
         }
 
         if ($TabExpansionHasOutput) {
