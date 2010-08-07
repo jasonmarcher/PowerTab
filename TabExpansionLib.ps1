@@ -292,7 +292,7 @@ Function Export-TabExpansionDatabase {
         try {
             if (-not $PowerTabConfig.Setup.DatabasePath) {
                 $BlankDatabasePath = $true
-                Write-Debug "Setting DatabasePath to $LiteralPath"  ## TODO: localize
+                Write-Verbose "Setting DatabasePath to $LiteralPath"  ## TODO: localize
                 $PowerTabConfig.Setup.DatabasePath = $LiteralPath
             }
 
@@ -310,7 +310,7 @@ Function Export-TabExpansionDatabase {
             Write-Verbose ($Resources.export_tabexpansiondatabase_ver_success -f $LiteralPath)
         } finally {
             if ($BlankDatabasePath) {
-                Write-Debug "Reverting DatabasePath"  ## TODO: localize
+                Write-Verbose "Reverting DatabasePath"  ## TODO: localize
                 $PowerTabConfig.Setup.DatabasePath = ""
             }
         }
@@ -351,7 +351,7 @@ Function Export-TabExpansionConfig {
         try {
             if (-not $PowerTabConfig.Setup.ConfigurationPath) {
                 $BlankConfigurationPath = $true
-                Write-Debug "Setting ConfigurationPath to $LiteralPath"  ## TODO: localize
+                Write-Verbose "Setting ConfigurationPath to $LiteralPath"  ## TODO: localize
                 $PowerTabConfig.Setup.ConfigurationPath = $LiteralPath
             }
             if (-not $PowerTabConfig.Setup.DatabasePath) {
@@ -361,7 +361,7 @@ Function Export-TabExpansionConfig {
                 } else {
                     $DatabasePath = Join-Path (Split-Path $LiteralPath) TabExpansion.xml
                 }
-                Write-Debug "Setting DatabasePath to $DatabasePath"  ## TODO: localize
+                Write-Verbose "Setting DatabasePath to $DatabasePath"  ## TODO: localize
                 $PowerTabConfig.Setup.DatabasePath = $DatabasePath
             }
 
@@ -379,11 +379,11 @@ Function Export-TabExpansionConfig {
             Write-Verbose ($Resources.export_tabexpansionconfig_ver_success -f $LiteralPath)
         } finally {
             if ($BlankConfigurationPath) {
-                Write-Debug "Reverting ConfigurationPath"  ## TODO: localize
+                Write-Verbose "Reverting ConfigurationPath"  ## TODO: localize
                 $PowerTabConfig.Setup.ConfigurationPath = ""
             }
             if ($BlankDatabasePath) {
-                Write-Debug "Reverting DatabasePath"  ## TODO: localize
+                Write-Verbose "Reverting DatabasePath"  ## TODO: localize
                 $PowerTabConfig.Setup.DatabasePath = ""
             }
             if ($IsoFile) {
