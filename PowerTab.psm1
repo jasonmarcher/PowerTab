@@ -44,7 +44,7 @@ $ConfigFileName = "PowerTabConfig.xml"
 ## Public properties
 #########################
 
-$PowerTabConfig = New-Object PSObject
+$PowerTabConfig = New-Object System.Management.Automation.PSObject
 
 
 #########################
