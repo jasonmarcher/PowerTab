@@ -767,7 +767,7 @@ Function Invoke-TabExpansionEditor {
     param()
 
     end {
-        [System.Version]$CurVersion = (Test-ModuleManifest (Join-Path $PSScriptRoot "PowerTab.psd1")).Version
+        [System.Version]$CurVersion = (Parse-Manifest).ModuleVersion
 
         $Form = New-Object System.Windows.Forms.Form
         $Form.Size = New-Object System.Drawing.Size @(500,300)
@@ -864,7 +864,7 @@ Function Initialize-PowerTab {
     }
 
     ## Load Version
-    [System.Version]$CurVersion = (Test-ModuleManifest (Join-Path $PSScriptRoot "PowerTab.psd1")).Version
+    [System.Version]$CurVersion = (Parse-Manifest).ModuleVersion
     $Version = $Config.Tables['Config'].Select("Name = 'Version'")[0].Value -as [System.Version]
     if ($Version -eq $null) {$Version = [System.Version]'0.99.0.0'}
 
@@ -1001,7 +1001,7 @@ Function InternalNewTabExpansionConfig {
 
     ## Add global configuration
     @{
-        Version = (Test-ModuleManifest (Join-Path $PSScriptRoot "PowerTab.psd1")).Version
+        Version = (Parse-Manifest).ModuleVersion
         DefaultHandler = 'Dynamic'
         AlternateHandler = 'Dynamic'
         CustomUserFunction = 'Write-Warning'

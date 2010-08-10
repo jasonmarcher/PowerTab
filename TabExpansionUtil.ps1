@@ -517,3 +517,45 @@ Function New-IsolatedStorageDirectory {
 
 Function Get-IsolatedStorage {
 }
+
+
+##########
+# Here there be hacks (from Jaykul)
+##########
+
+Function Parse-Manifest {
+    $Manifest = Get-Content "$PSScriptRoot\PowerTab.psd1" | Where-Object {$_ -notmatch '^\s*#'}
+    $ModuleManifest = "Data {`n" + ($Manifest -join "`r`n") + "`n}"
+    $ExecutionContext.SessionState.InvokeCommand.NewScriptBlock($ModuleManifest).Invoke()[0]
+}
+
+Function Find-Module {
+    [CmdletBinding()]
+    param(
+        [String[]]$Name = "*"
+        ,
+        [Switch]$All
+    )
+
+    foreach ($n in $Name) {
+        $folder = [System.IO.Path]::GetDirectoryName($n)
+        $n = [System.IO.Path]::GetFileName($n)
+        $ModulePaths = Get-ModulePath
+
+        if ($folder) {
+            $ModulePaths = Join-Path $ModulePaths $folder
+        }
+
+        ## Note: the order of these is important. They need to be in the order they'd be loaded by the system
+        $Files = @(Get-ChildItem -Path $ModulePaths -Recurse -Filter "$n.ps?1" -EA 0; Get-ChildItem -Path $ModulePaths -Recurse -Filter "$n.dll" -EA 0)
+        $Files | Where-Object {
+                $parent = [System.IO.Path]::GetFileName( $_.PSParentPath )
+                return $all -or ($parent -eq $_.BaseName) -or ($folder -and ($parent -eq ([System.IO.Path]::GetFileName($folder))) -and ($n -eq $_.BaseName))
+            } | Group-Object PSParentPath | ForEach-Object {@($_.Group)[0]}
+    }
+}
+
+# | Sort-Object {switch ($_.Extension) {".psd1"{1} ".psm1"{2}}})
+Function Get-ModulePath {
+    $Env:PSModulePath -split ";" | ForEach-Object {"{0}\" -f $_.Trim('\','/')} | Select-Object -Unique | Where-Object {Test-Path $_}
+}

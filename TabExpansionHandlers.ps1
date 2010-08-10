@@ -419,14 +419,14 @@ Register-TabExpansion "Import-Module" -Type "Command" {
     $Argument = $Context.Argument
     switch -exact ($Context.Parameter) {
         'Name' {
-            $Modules = @(Get-Module -ListAvailable "$Argument*" | Sort-Object Name)
+            $Modules = @(Find-Module "$Argument*" | Sort-Object BaseName)
             if ($Modules.Count -gt 0) {
                 $TabExpansionHasOutput.Value = $true
-                $Modules | New-TabItem -Value {$_.Name} -Text {$_.Name} -Type "Module"
+                $Modules | New-TabItem -Value {$_.BaseName} -Text {$_.BaseName} -Type "Module"
             }
         }
     }
-}.GetNewClosure()
+}
 
 ## Remove-Module
 Register-TabExpansion "Remove-Module" -Type "Command" {
@@ -435,7 +435,8 @@ Register-TabExpansion "Remove-Module" -Type "Command" {
     switch -exact ($Context.Parameter) {
         'Name' {
             $TabExpansionHasOutput.Value = $true
-            Get-Module "$Argument*" | Select-Object -ExpandProperty Name | Sort-Object
+            Get-Module "$Argument*" | Select-Object -ExpandProperty Name | Sort-Object |
+                New-TabItem -Value {$_.Name} -Text {$_.Name} -Type "Module"
         }
     }
 }.GetNewClosure()
