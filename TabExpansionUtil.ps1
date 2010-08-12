@@ -557,5 +557,5 @@ Function Find-Module {
 
 # | Sort-Object {switch ($_.Extension) {".psd1"{1} ".psm1"{2}}})
 Function Get-ModulePath {
-    $Env:PSModulePath -split ";" | ForEach-Object {"{0}\" -f $_.Trim('\','/')} | Select-Object -Unique | Where-Object {Test-Path $_}
+    $Env:PSModulePath -split ";" | ForEach-Object {"{0}\" -f $_.TrimEnd('\','/')} | Select-Object -Unique | Where-Object {Test-Path $_}
 }
