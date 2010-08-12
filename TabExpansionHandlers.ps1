@@ -479,13 +479,17 @@ Register-TabExpansion "New-Object" -Type "Command" {
                 $TabExpansionHasOutput.Value = $true
                 $Dots = $Argument.Split(".").Count - 1
                 $res = @()
-                $res += $dsTabExpansionDatabase.Tables['Types'].Select("ns like '$Argument%' and dc = $($Dots + 1)") |
-                    Select-Object -Unique -ExpandProperty ns
+                $res += $dsTabExpansionDatabase.Tables['Types'].Select("NS like '$Argument%' and DC = $($Dots + 1)") |
+                    Select-Object -Unique -ExpandProperty NS
+                $res += $dsTabExpansionDatabase.Tables['Types'].Select("NS like 'System.$Argument%' and DC = $($Dots + 2)") |
+                    Select-Object -Unique -ExpandProperty NS
                 if ($Dots -gt 0) {
-                    $res += $dsTabExpansionDatabase.Tables['Types'].Select("name like '$Argument%' and dc = $Dots") |
+                    $res += $dsTabExpansionDatabase.Tables['Types'].Select("Name like '$Argument%' and DC = $Dots") |
+                        Select-Object -ExpandProperty Name
+                    $res += $dsTabExpansionDatabase.Tables['Types'].Select("Name like 'System.$Argument%' and DC = $($Dots + 1)") |
                         Select-Object -ExpandProperty Name
                 }
-                $res
+                $res | Where-Object {$_}
             }
         }
     }

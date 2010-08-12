@@ -731,10 +731,13 @@ Function Invoke-PowerTab {
                 $Matched = $Matches[1]
                 $Dots = $Matches[1].Split(".").Count - 1
                 $res = @()
-                $res += $dsTabExpansionDatabase.Tables['Types'].Select("ns like '$($Matched)%' and dc = $($Dots + 1)") |
-                    Select-Object -Unique ns | ForEach-Object {"[$($_.ns)"}
+                $res += $dsTabExpansionDatabase.Tables['Types'].Select("NS like '$($Matched)%' and DC = $($Dots + 1)") |
+                    Select-Object -Unique NS | ForEach-Object {"[$($_.NS)"}
+                $res += $dsTabExpansionDatabase.Tables['Types'].Select("NS like 'System.$($Matched)%' and DC = $($Dots + 2)") |
+                    Select-Object -Unique NS | ForEach-Object {"[$($_.NS)"}
                 if ($Dots -gt 0) {
-                    $res += $dsTabExpansionDatabase.Tables['Types'].Select("Name like '$($Matched)%' and dc = $Dots") | ForEach-Object {"[$($_.Name)]"}
+                    $res += $dsTabExpansionDatabase.Tables['Types'].Select("Name like '$($Matched)%' and DC = $Dots") | ForEach-Object {"[$($_.Name)]"}
+                    $res += $dsTabExpansionDatabase.Tables['Types'].Select("Name like 'System.$($Matched)%' and DC = $($Dots + 1)") | ForEach-Object {"[$($_.Name)]"}
                 }
                 $res | Where-Object {$_} | Invoke-TabItemSelector $LastWord -SelectionHandler $SelectionHandler -ForceList:$ForceList
                 break
