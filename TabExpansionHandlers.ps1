@@ -73,7 +73,7 @@ Register-TabExpansion "Reset-ComputerMachinePassword" -Type "Command" {
         'Server' {
             if ($Argument -match "^\w") {
                 $TabExpansionHasOutput.Value = $true
-                Get-TabExpansion "$Argument*" "Computer" | Select-Object -ExpandProperty "Text"
+                Get-TabExpansion "$Argument*" Computer | Select-Object -ExpandProperty "Text"
             }
         }
     }
@@ -930,7 +930,7 @@ Register-TabExpansion "Get-WinEvent" -Type "Command" {
             'Class' {
                 $TabExpansionHasOutput.Value = $true
                 ## TODO: escape special characters?
-                Get-TabExpansion "$Argument*" "WMI" | Select-Object -ExpandProperty Name
+                Get-TabExpansion "$Argument*" WMI | Select-Object -ExpandProperty Name
             }
             'Locale' {
                 $TabExpansionHasOutput.Value = $true
@@ -1120,7 +1120,7 @@ Register-TabExpansion "ComputerName" -Type "Parameter" {
     param($Argument, [ref]$TabExpansionHasOutput)
     if ($Argument -notmatch '^\$') {
         $TabExpansionHasOutput.Value = $true
-        Get-TabExpansion "$Argument*" "Computer" | Select-Object -ExpandProperty "Text"
+        Get-TabExpansion "$Argument*" Computer | Select-Object -ExpandProperty "Text"
     }
 }.GetNewClosure()
 
