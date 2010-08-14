@@ -734,13 +734,35 @@ Function Get-TabExpansion {
     ## TODO: escape special characters?
 
     process {
-        #$Filter = $Filter -replace "\*","%" -replace "%+","%"
-        #$Type = $Type -replace "\*","%" -replace "%+","%"
+        ## Split filter on internal wildcards as DataTables do not support them
+        $Filters = @($Filter -split '(?<=.)[\*%](?=.)')
+        if ($Filters.Count -gt 1) {
+            $Filters[0] = $Filters[0] + "*"  ## First item
+            $Filters[-1] = "*" + $Filters[-1]  ## Last item
 
+            if ($Filters.Count -gt 2) {
+                foreach ($Index in 1..($Filters.Count - 2)) {
+                    $Filters[$Index] = "*" + $Filters[$Index] + "*"
+                }
+            }
+        }
+
+        ## Run query
         if ("COM","Types","WMI" -contains $Type){
-            $dsTabExpansionDatabase.Tables[$Type].Select("Name LIKE '$Filter'")
+            ## Construct query from multiple filters
+            $Query = "Name LIKE '$($Filters[0])'"
+            foreach ($Filter in $Filters[1..($Filters.Count - 1)]) {
+                $Query += " AND Name LIKE '$Filter'"
+            }
+            write-host "`n$Query"
+            $dsTabExpansionDatabase.Tables[$Type].Select($Query)
         } else {
-            $dsTabExpansionDatabase.Tables["Custom"].Select("Filter LIKE '$Filter' AND Type LIKE '$Type'")
+            ## Construct query from multiple filters
+            $Query = "Filter LIKE '$($Filters[0])'"
+            foreach ($Filter in $Filters[1..($Filters.Count - 1)]) {
+                $Query += " AND Filter LIKE 'Filter'"
+            }
+            $dsTabExpansionDatabase.Tables["Custom"].Select("$Query AND Type LIKE '$Type'")
         }
 
         trap [System.Management.Automation.PipelineStoppedException] {

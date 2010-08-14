@@ -73,7 +73,7 @@ Register-TabExpansion "Reset-ComputerMachinePassword" -Type "Command" {
         'Server' {
             if ($Argument -match "^\w") {
                 $TabExpansionHasOutput.Value = $true
-                Get-TabExpansion "$Argument%" "Computer" | Select-Object -ExpandProperty "Text"
+                Get-TabExpansion "$Argument*" "Computer" | Select-Object -ExpandProperty "Text"
             }
         }
     }
@@ -167,7 +167,7 @@ Register-TabExpansion "Reset-ComputerMachinePassword" -Type "Command" {
             'Class' {
                 $TabExpansionHasOutput.Value = $true
                 ## TODO: escape special characters?
-                Get-TabExpansion "$Argument%" "WMI" | Select-Object -ExpandProperty Name
+                Get-TabExpansion "$Argument*" WMI | Select-Object -ExpandProperty Name
             }
             'EventName' {
                 if ($Context.OtherParameters["InputObject"]) {
@@ -444,14 +444,14 @@ Register-TabExpansion "New-Object" -Type "Command" {
                 $TabExpansionHasOutput.Value = $true
                 $Dots = $Argument.Split(".").Count - 1
                 $res = @()
-                $res += $dsTabExpansionDatabase.Tables['Types'].Select("NS like '$Argument%' and DC = $($Dots + 1)") |
+                $res += $dsTabExpansionDatabase.Tables['Types'].Select("NS like '$Argument*' and DC = $($Dots + 1)") |
                     Select-Object -Unique -ExpandProperty NS
-                $res += $dsTabExpansionDatabase.Tables['Types'].Select("NS like 'System.$Argument%' and DC = $($Dots + 2)") |
+                $res += $dsTabExpansionDatabase.Tables['Types'].Select("NS like 'System.$Argument*' and DC = $($Dots + 2)") |
                     Select-Object -Unique -ExpandProperty NS
                 if ($Dots -gt 0) {
-                    $res += $dsTabExpansionDatabase.Tables['Types'].Select("Name like '$Argument%' and DC = $Dots") |
+                    $res += $dsTabExpansionDatabase.Tables['Types'].Select("Name like '$Argument*' and DC = $Dots") |
                         Select-Object -ExpandProperty Name
-                    $res += $dsTabExpansionDatabase.Tables['Types'].Select("Name like 'System.$Argument%' and DC = $($Dots + 1)") |
+                    $res += $dsTabExpansionDatabase.Tables['Types'].Select("Name like 'System.$Argument*' and DC = $($Dots + 1)") |
                         Select-Object -ExpandProperty Name
                 }
                 $res | Where-Object {$_}
@@ -501,7 +501,7 @@ Register-TabExpansion "Out-Printer" -Type "Command" {
             ## TODO: support printers that are not installed using paths \\server\printer
             ## TODO: [workitem:14]
             $TabExpansionHasOutput.Value = $true
-            Get-WMIObject Win32_Printer -Filter "Name LIKE '$Argument%'" | Select-Object -ExpandProperty Name
+            Get-WMIObject Win32_Printer -Filter "Name LIKE '$Argument*'" | Select-Object -ExpandProperty Name
         }
     }
 }.GetNewClosure()
@@ -706,10 +706,10 @@ Register-TabExpansion "Out-Printer" -Type "Command" {
                 $TabExpansionHasOutput.Value = $true
                 $Dots = $Argument.Split(".").Count - 1
                 $res = @()
-                $res += $dsTabExpansionDatabase.Tables['Types'].Select("ns like '$Argument%' and dc = $($Dots + 1)") |
+                $res += $dsTabExpansionDatabase.Tables['Types'].Select("ns like '$Argument*' and dc = $($Dots + 1)") |
                     Select-Object -Unique -ExpandProperty ns
                 if ($Dots -gt 0) {
-                    $res += $dsTabExpansionDatabase.Tables['Types'].Select("name like '$Argument%' and dc = $Dots") |
+                    $res += $dsTabExpansionDatabase.Tables['Types'].Select("name like '$Argument*' and dc = $Dots") |
                         Select-Object -ExpandProperty Name
                 }
                 $res
@@ -930,7 +930,7 @@ Register-TabExpansion "Get-WinEvent" -Type "Command" {
             'Class' {
                 $TabExpansionHasOutput.Value = $true
                 ## TODO: escape special characters?
-                Get-TabExpansion "$Argument%" "WMI" | Select-Object -ExpandProperty Name
+                Get-TabExpansion "$Argument*" "WMI" | Select-Object -ExpandProperty Name
             }
             'Locale' {
                 $TabExpansionHasOutput.Value = $true
@@ -1120,7 +1120,7 @@ Register-TabExpansion "ComputerName" -Type "Parameter" {
     param($Argument, [ref]$TabExpansionHasOutput)
     if ($Argument -notmatch '^\$') {
         $TabExpansionHasOutput.Value = $true
-        Get-TabExpansion "$Argument%" "Computer" | Select-Object -ExpandProperty "Text"
+        Get-TabExpansion "$Argument*" "Computer" | Select-Object -ExpandProperty "Text"
     }
 }.GetNewClosure()
 
