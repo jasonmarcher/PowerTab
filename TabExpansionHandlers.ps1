@@ -45,14 +45,10 @@ Register-TabExpansion "Get-Command" -Type "Command" {
             $TabExpansionHasOutput.Value = $true
             $Parameters = @{}
             if ($Context.OtherParameters["Module"]) {
-                if ($Context.OtherParameters["Module"] -match '\$') {
-                    $Parameters["Module"] = [String](Invoke-Expression $Context.OtherParameters["Module"])
-                } else {
-                    $Parameters["Module"] = $Context.OtherParameters["Module"]
-                }
+                $Parameters["Module"] = ResolveParameterValue $Context.OtherParameters["Module"]
             }
             if ($Context.OtherParameters["CommandType"]) {
-                $Parameters["CommandType"] = $Context.OtherParameters["CommandType"]
+                $Parameters["CommandType"] = ResolveParameterValue $Context.OtherParameters["CommandType"]
             } else {
                 $Parameters["CommandType"] = "Alias","Function","Filter","Cmdlet"
             }
@@ -128,12 +124,7 @@ Register-TabExpansion "Reset-ComputerMachinePassword" -Type "Command" {
                 $TabExpansionHasOutput.Value = $true
                 $Parameters = @{}
                 if ($Context.OtherParameters["ComputerName"]) {
-                    ## TODO: Needs work
-                    if ($Context.OtherParameters["ComputerName"] -match '\$') {
-                        $Parameters["ComputerName"] = [String](Invoke-Expression $Context.OtherParameters["ComputerName"])
-                    } else {
-                        $Parameters["ComputerName"] = $Context.OtherParameters["ComputerName"]
-                    }
+                    $Parameters["ComputerName"] = ResolveParameterValue $Context.OtherParameters["ComputerName"]
                 }
                 Get-Counter -ListSet * @Parameters | Select-Object -ExpandProperty PathsWithInstances | 
                     Where-Object {$_ -like "*$Argument*"} | Sort-Object
@@ -142,12 +133,7 @@ Register-TabExpansion "Reset-ComputerMachinePassword" -Type "Command" {
                 $TabExpansionHasOutput.Value = $true
                 $Parameters = @{}
                 if ($Context.OtherParameters["ComputerName"]) {
-                    ## TODO: Needs work
-                    if ($Context.OtherParameters["ComputerName"] -match '\$') {
-                        $Parameters["ComputerName"] = [String](Invoke-Expression $Context.OtherParameters["ComputerName"])
-                    } else {
-                        $Parameters["ComputerName"] = $Context.OtherParameters["ComputerName"]
-                    }
+                    $Parameters["ComputerName"] = ResolveParameterValue $Context.OtherParameters["ComputerName"]
                 }
                 Get-Counter -ListSet "$Argument*" @Parameters | Select-Object -ExpandProperty CounterSetName
             }
@@ -196,12 +182,7 @@ Register-TabExpansion "Reset-ComputerMachinePassword" -Type "Command" {
                     $Argument = "ROOT\$Argument"
                 }
                 if ($Context.OtherParameters["ComputerName"]) {
-                    ## TODO: Needs work
-                    if ($Context.OtherParameters["ComputerName"] -match '\$') {
-                        $ComputerName = [String](Invoke-Expression $Context.OtherParameters["ComputerName"])
-                    } else {
-                        $ComputerName = $Context.OtherParameters["ComputerName"]
-                    }
+                    $ComputerName = ResolveParameterValue $Context.OtherParameters["ComputerName"]
                 } else {
                     $ComputerName = "."
                 }
@@ -255,12 +236,7 @@ Register-TabExpansion "Reset-ComputerMachinePassword" -Type "Command" {
                 $TabExpansionHasOutput.Value = $true
                 $Parameters = @{}
                 if ($Context.OtherParameters["ComputerName"]) {
-                    ## TODO: Needs work
-                    if ($Context.OtherParameters["ComputerName"] -match '\$') {
-                        $Parameters["ComputerName"] = [String](Invoke-Expression $Context.OtherParameters["ComputerName"])
-                    } else {
-                        $Parameters["ComputerName"] = $Context.OtherParameters["ComputerName"]
-                    }
+                    $Parameters["ComputerName"] = ResolveParameterValue $Context.OtherParameters["ComputerName"]
                 }
                 Get-EventLog -List -AsString @Parameters | Where-Object {$_ -like "$Argument*"}
             }
@@ -311,12 +287,7 @@ Register-TabExpansion "Get-HotFix" -Type "Command" {
             $TabExpansionHasOutput.Value = $true
             $Parameters = @{}
             if ($Context.OtherParameters["ComputerName"]) {
-                ## TODO: Needs work
-                if ($Context.OtherParameters["ComputerName"] -match '\$') {
-                    $Parameters["ComputerName"] = [String](Invoke-Expression $Context.OtherParameters["ComputerName"])
-                } else {
-                    $Parameters["ComputerName"] = $Context.OtherParameters["ComputerName"]
-                }
+                $Parameters["ComputerName"] = ResolveParameterValue $Context.OtherParameters["ComputerName"]
             }
             Get-HotFix @Parameters | Where-Object {$_.HotFixID -like "$Argument*"} | Select-Object -ExpandProperty HotFixID
         }
@@ -333,7 +304,7 @@ Register-TabExpansion "Get-HotFix" -Type "Command" {
                 $TabExpansionHasOutput.Value = $true
                 $Path = "."
                 if ($Context.OtherParameters["Path"]) {
-                    $Path = $Context.OtherParameters["Path"]
+                    $Path = ResolveParameterValue $Context.OtherParameters["Path"]
                 }
                 Get-ItemProperty -Path $Path -Name "$Argument*" | Get-Member | Where-Object {
                     (("Property","NoteProperty") -contains $_.MemberType) -and
@@ -566,12 +537,7 @@ Register-TabExpansion "Out-Printer" -Type "Command" {
                 $QuoteSpaces.Value = $false
                 $Parameters = @{}
                 if ($Context.OtherParameters["ComputerName"]) {
-                    ## TODO: Needs work
-                    if ($Context.OtherParameters["ComputerName"] -match '\$') {
-                        $Parameters["ComputerName"] = [String](Invoke-Expression $Context.OtherParameters["ComputerName"])
-                    } else {
-                        $Parameters["ComputerName"] = $Context.OtherParameters["ComputerName"]
-                    }
+                    $Parameters["ComputerName"] = ResolveParameterValue $Context.OtherParameters["ComputerName"]
                 }
                 if ($Argument -match '^[0-9]+$') {
                     Get-Process @Parameters | Where-Object {$_.Id.ToString() -like "$Argument*"} |
@@ -585,12 +551,7 @@ Register-TabExpansion "Out-Printer" -Type "Command" {
                 $TabExpansionHasOutput.Value = $true
                 $Parameters = @{}
                 if ($Context.OtherParameters["ComputerName"]) {
-                    ## TODO: Needs work
-                    if ($Context.OtherParameters["ComputerName"] -match '\$') {
-                        $Parameters["ComputerName"] = [String](Invoke-Expression $Context.OtherParameters["ComputerName"])
-                    } else {
-                        $Parameters["ComputerName"] = $Context.OtherParameters["ComputerName"]
-                    }
+                    $Parameters["ComputerName"] = ResolveParameterValue $Context.OtherParameters["ComputerName"]
                 }
                 Get-Process -Name "$Argument*" @Parameters | Get-Unique | New-TabItem -Value {$_.Name} -Text {$_.Name} -Type "Process"
             }
@@ -823,12 +784,7 @@ Register-TabExpansion "Get-PSSnapin" -Type "Command" {
                 $TabExpansionHasOutput.Value = $true
                 $Parameters = @{}
                 if ($Context.OtherParameters["ComputerName"]) {
-                    ## TODO: Needs work
-                    if ($Context.OtherParameters["ComputerName"] -match '\$') {
-                        $Parameters["ComputerName"] = [String](Invoke-Expression $Context.OtherParameters["ComputerName"])
-                    } else {
-                        $Parameters["ComputerName"] = $Context.OtherParameters["ComputerName"]
-                    }
+                    $Parameters["ComputerName"] = ResolveParameterValue $Context.OtherParameters["ComputerName"]
                 }
                 Get-Service -DisplayName "*$Argument*" @Parameters | Select-Object -ExpandProperty DisplayName
             }
@@ -836,12 +792,7 @@ Register-TabExpansion "Get-PSSnapin" -Type "Command" {
                 $TabExpansionHasOutput.Value = $true
                 $Parameters = @{}
                 if ($Context.OtherParameters["ComputerName"]) {
-                    ## TODO: Needs work
-                    if ($Context.OtherParameters["ComputerName"] -match '\$') {
-                        $Parameters["ComputerName"] = [String](Invoke-Expression $Context.OtherParameters["ComputerName"])
-                    } else {
-                        $Parameters["ComputerName"] = $Context.OtherParameters["ComputerName"]
-                    }
+                    $Parameters["ComputerName"] = ResolveParameterValue $Context.OtherParameters["ComputerName"]
                 }
                 Get-Service -Name "$Argument*" @Parameters | Select-Object -ExpandProperty Name
             }
@@ -856,12 +807,7 @@ Register-TabExpansion "Get-PSSnapin" -Type "Command" {
                 $TabExpansionHasOutput.Value = $true
                 $Parameters = @{}
                 if ($Context.OtherParameters["ComputerName"]) {
-                    ## TODO: Needs work
-                    if ($Context.OtherParameters["ComputerName"] -match '\$') {
-                        $Parameters["ComputerName"] = [String](Invoke-Expression $Context.OtherParameters["ComputerName"])
-                    } else {
-                        $Parameters["ComputerName"] = $Context.OtherParameters["ComputerName"]
-                    }
+                    $Parameters["ComputerName"] = ResolveParameterValue $Context.OtherParameters["ComputerName"]
                 }
                 Get-Service -Name "$Argument*" @Parameters | Select-Object -ExpandProperty Name
             }
@@ -942,12 +888,7 @@ Register-TabExpansion "Get-WinEvent" -Type "Command" {
     $Argument = $Context.Argument
     $Parameters = @{"ErrorAction" = "SilentlyContinue"}
     if ($Context.OtherParameters["ComputerName"]) {
-        ## TODO: Needs work
-        if ($Context.OtherParameters["ComputerName"] -match '\$') {
-            $Parameters["ComputerName"] = [String](Invoke-Expression $Context.OtherParameters["ComputerName"])
-        } else {
-            $Parameters["ComputerName"] = $Context.OtherParameters["ComputerName"]
-        }
+        $Parameters["ComputerName"] = ResolveParameterValue $Context.OtherParameters["ComputerName"]
     }
     switch -exact ($Context.Parameter) {
         'FilterHashTable' {
@@ -1008,12 +949,7 @@ Register-TabExpansion "Get-WinEvent" -Type "Command" {
                     $Argument = "ROOT\$Argument"
                 }
                 if ($Context.OtherParameters["ComputerName"]) {
-                    ## TODO: Needs work
-                    if ($Context.OtherParameters["ComputerName"] -match '\$') {
-                        $ComputerName = [String](Invoke-Expression $Context.OtherParameters["ComputerName"])
-                    } else {
-                        $ComputerName = $Context.OtherParameters["ComputerName"]
-                    }
+                    $ComputerName = ResolveParameterValue $Context.OtherParameters["ComputerName"]
                 } else {
                     $ComputerName = "."
                 }
@@ -1192,7 +1128,7 @@ Register-TabExpansion "ComputerName" -Type "Parameter" {
 & {
     $VariableHandler = {
         param($Argument, [ref]$TabExpansionHasOutput)
-        if ($Argument -notlike '$*') {
+        if ($Argument -notlike '^\$') {
             $TabExpansionHasOutput.Value = $true
             Get-Variable "$Argument*" -Scope "Global" | Select-Object -ExpandProperty "Name"
         }
@@ -1208,9 +1144,11 @@ Register-TabExpansion "ComputerName" -Type "Parameter" {
 & {
     $CultureHandler = {
         param($Argument, [ref]$TabExpansionHasOutput)
-        $TabExpansionHasOutput.Value = $true
-        [System.Globalization.CultureInfo]::GetCultures([System.Globalization.CultureTypes]::InstalledWin32Cultures) |
-            Where-Object {$_.Name -like "$Argument*"} | Select-Object -ExpandProperty "Name" | Sort-Object
+        if ($Argument -notlike '^\$') {
+            $TabExpansionHasOutput.Value = $true
+            [System.Globalization.CultureInfo]::GetCultures([System.Globalization.CultureTypes]::InstalledWin32Cultures) |
+                Where-Object {$_.Name -like "$Argument*"} | Select-Object -ExpandProperty "Name" | Sort-Object
+        }
     }.GetNewClosure()
     
     Register-TabExpansion "Culture" $CultureHandler -Type "Parameter"
@@ -1220,15 +1158,19 @@ Register-TabExpansion "ComputerName" -Type "Parameter" {
 ## -PSDrive
 Register-TabExpansion "PSDrive" -Type "Parameter" {
     param($Argument, [ref]$TabExpansionHasOutput)
-    $TabExpansionHasOutput.Value = $true
-    Get-PSDrive "$Argument*" | Select-Object -ExpandProperty "Name"
+    if ($Argument -notlike '^\$') {
+        $TabExpansionHasOutput.Value = $true
+        Get-PSDrive "$Argument*" | Select-Object -ExpandProperty "Name"
+    }
 }.GetNewClosure()
 
 ## -PSProvider
 Register-TabExpansion "PSProvider" -Type "Parameter" {
     param($Argument, [ref]$TabExpansionHasOutput)
-    $TabExpansionHasOutput.Value = $true
-    Get-PSProvider "$Argument*" | Select-Object -ExpandProperty "Name"
+    if ($Argument -notlike '^\$') {
+        $TabExpansionHasOutput.Value = $true
+        Get-PSProvider "$Argument*" | Select-Object -ExpandProperty "Name"
+    }
 }.GetNewClosure()
 
 

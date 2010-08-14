@@ -1353,3 +1353,22 @@ Function CreatePowerTabConfig {
                 -Force
         }
 }
+
+
+Function ResolveParameterValue {
+    param(
+        [String]$Value
+    )
+
+    switch -regex ($Value) {
+        '^\$' {
+            [String](Invoke-Expression $_)
+            break
+        }
+        '^\(.*\)$' {
+            [String](Invoke-Expression $_)
+            break
+        }
+        Default {$Value}
+    }
+}
