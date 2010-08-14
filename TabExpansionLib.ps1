@@ -330,7 +330,25 @@ Function Import-TabExpansionConfig {
     )
 
     end {
-        $script:dsTabExpansionConfig = InternalImportTabExpansionConfig $LiteralPath
+        $Config = InternalImportTabExpansionConfig $LiteralPath
+
+        ## Load Version
+        [System.Version]$CurVersion = (Parse-Manifest).ModuleVersion
+        $Version = $Config.Tables['Config'].Select("Name = 'Version'")[0].Value -as [System.Version]
+
+        ## Upgrade if needed
+        if ($Version -lt $CurVersion) {
+            ## Upgrade config and database
+            UpgradeTabExpansionDatabase ([Ref]$Config) ([Ref](New-Object System.Data.DataSet)) $Version
+        } elseif ($Version -gt $CurVersion) {
+            ## TODO: config is from a later version
+        }
+
+        $script:dsTabExpansionConfig = $Config
+
+        ## Set version
+        $PowerTabConfig.Version = $CurVersion
+
         Write-Verbose ($Resources.import_tabexpansionconfig_ver_success -f $LiteralPath)
     }
 }
@@ -866,7 +884,6 @@ Function Initialize-PowerTab {
     ## Load Version
     [System.Version]$CurVersion = (Parse-Manifest).ModuleVersion
     $Version = $Config.Tables['Config'].Select("Name = 'Version'")[0].Value -as [System.Version]
-    if ($Version -eq $null) {$Version = [System.Version]'0.99.0.0'}
 
     ## Load Database
     if ($Version -lt ([System.Version]'0.99.3.0')) {
@@ -1190,6 +1207,10 @@ Function InternalImportTabExpansionConfig {
     } else {
         $Config = InternalNewTabExpansionConfig $LiteralPath
     }
+
+    $Version = $Config.Tables['Config'].Select("Name = 'Version'")[0].Value -as [System.Version]
+    if ($Version -eq $null) {$Config.Tables['Config'].Select("Name = 'Version'")[0].Value = '0.99.0.0'}
+
     $Config
 }
 
