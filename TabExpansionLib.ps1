@@ -217,6 +217,12 @@ Function New-TabExpansionDatabase {
     end {
         $script:dsTabExpansionDatabase = New-Object System.Data.DataSet
 
+        $dtCom = New-Object System.Data.DataTable
+        [Void]($dtCom.Columns.Add('Name', [String]))
+        [Void]($dtCom.Columns.Add('Description', [String]))
+        $dtCom.TableName = 'COM'
+        $dsTabExpansionDatabase.Tables.Add($dtCom)
+
         $dtCustom = New-Object System.Data.DataTable
         [Void]($dtCustom.Columns.Add('Filter', [String]))
         [Void]($dtCustom.Columns.Add('Text', [String]))
@@ -491,6 +497,10 @@ Function Update-TabExpansionDataBase {
             $Resources.update_tabexpansiondatabase_wmi_conf_inquire, $Resources.update_tabexpansiondatabase_wmi_conf_caption)) {
             Update-TabExpansionWmi
         }
+        if ($Force -or $PSCmdlet.ShouldProcess($Resources.update_tabexpansiondatabase_com_conf_description,
+            $Resources.update_tabexpansiondatabase_com_conf_inquire, $Resources.update_tabexpansiondatabase_com_conf_caption)) {
+            Update-TabExpansionCom
+        }
         if ($Force -or $PSCmdlet.ShouldProcess($Resources.update_tabexpansiondatabase_computer_conf_description,
             $Resources.update_tabexpansiondatabase_computer_conf_inquire, $Resources.update_tabexpansiondatabase_computer_conf_caption)) {
             Remove-TabExpansionComputer
@@ -623,6 +633,24 @@ Function Update-TabExpansionWmi {
 
 
 # .ExternalHelp TabExpansionLib-Help.xml
+Function Update-TabExpansionCom {
+	[CmdletBinding()]
+    param()
+
+    end {
+        $dsTabExpansionDatabase.Tables['COM'].Clear()
+
+        $i = 0 ; Write-Progress $Resources.update_tabexpansiondatabase_com_activity $i
+        foreach ($Class in (Get-WmiObject Win32_ClassicCOMClassSetting -Filter "VersionIndependentProgId LIKE '%'" | Sort-Object VersionIndependentProgId)) {
+            $i++ ; if ($i % 10 -eq 0) {Write-Progress $Resources.update_tabexpansiondatabase_com_activity $i}
+            [Void]$dsTabExpansionDatabase.Tables['COM'].Rows.Add($Class.VersionIndependentProgId, $Class.Description)
+        }
+        Write-Progress $Resources.update_tabexpansiondatabase_com_activity $i -Completed
+    }
+}
+
+
+# .ExternalHelp TabExpansionLib-Help.xml
 Function Add-TabExpansionComputer {
 	[CmdletBinding(SupportsShouldProcess = $false, SupportsTransactions = $false,
 		ConfirmImpact = "None", DefaultParameterSetName = "Name")]
@@ -706,7 +734,7 @@ Function Get-TabExpansion {
         #$Filter = $Filter -replace "\*","%" -replace "%+","%"
         #$Type = $Type -replace "\*","%" -replace "%+","%"
 
-        if ("Types","Wmi" -contains $Type){
+        if ("COM","Types","WMI" -contains $Type){
             $dsTabExpansionDatabase.Tables[$Type].Select("Name LIKE '$Filter'")
         } else {
             $dsTabExpansionDatabase.Tables["Custom"].Select("Filter LIKE '$Filter' AND Type LIKE '$Type'")
@@ -1159,6 +1187,13 @@ Function InternalImportTabExpansionDataBase {
         [Void]$Database.ReadXml($LiteralPath)
     }
 
+    if (!$Database.Tables["COM"]) {
+        $dtCom = New-Object System.Data.DataTable
+        [Void]($dtCom.Columns.Add('Name', [String]))
+        [Void]($dtCom.Columns.Add('Description', [String]))
+        $dtCom.TableName = 'COM'
+        $Database.Tables.Add($dtCom)
+    }
     if (!$Database.Tables["Custom"]) {
         $dtCustom = New-Object System.Data.DataTable
         [Void]($dtCustom.Columns.Add('Filter', [String]))

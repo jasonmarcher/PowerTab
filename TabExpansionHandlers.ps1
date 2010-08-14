@@ -465,13 +465,7 @@ Register-TabExpansion "New-Object" -Type "Command" {
             ## TODO: Maybe cache these like we do with .NET types and WMI object names?
             ## TODO: [workitem:13]
             $TabExpansionHasOutput.Value = $true
-            if (($env:Processor_Architecture -eq "amd64") -and ([IntPtr]::Size -eq 4)) {
-                $Path = "REGISTRY::HKEY_CLASSES_ROOT\Wow6432Node\CLSID"
-            } else {
-                $Path = "REGISTRY::HKEY_CLASSES_ROOT\CLSID"
-            }
-            Get-ChildItem $Path -Include VersionIndependentPROGID -Recurse | ForEach-Object {$_.GetValue("")} |
-                Where-Object {$_ -like "$Argument*"} | Sort-Object
+            Get-TabExpansion "$Argument*" COM | Select-Object -ExpandProperty Name
         }
         'TypeName' {
             if ($Argument -notmatch '^\.') {
