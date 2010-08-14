@@ -533,7 +533,7 @@ Function Invoke-PowerTab {
             ## Handle inline type search, e.g. new-object .identityreference<tab> or .identityre<tab> (oisin) 
             '^(\[*?)\.(\w+)$' {
                 $TypeName = $Matches[2]
-                Get-TabExpansion "%.${TypeName}%" "Types" | Select-Object -ExpandProperty Name |
+                Get-TabExpansion "%.${TypeName}%" Types | Select-Object -ExpandProperty Name |
                     Invoke-TabItemSelector $LastWord.Replace('[', '') -SelectionHandler $SelectionHandler |
                     ForEach-Object {if ($Matches[1] -eq '[') {"[$_]"} else {$_}}
                 break
@@ -574,7 +574,7 @@ Function Invoke-PowerTab {
 
             ## Completion on computers in database
             '^\\\\([^\\]*)$' {
-                Get-TabExpansion "$($Matches[1])*" "Computer" |
+                Get-TabExpansion "$($Matches[1])*" Computer |
                     ForEach-Object {"\\$($_.Text)"} | Invoke-TabItemSelector $LastWord -SelectionHandler $SelectionHandler
                 break
             }
@@ -613,8 +613,8 @@ Function Invoke-PowerTab {
 
             ## DataGrid GUI Shortcuts
             '^a_(.*)' {Get-Help "about_$($Matches[1])*" | Select-Object Name,Synopsis,Length | Out-DataGridView Name | Foreach-Object {Get-Help $_}}
-            '^w_(.*)' {Get-TabExpansion "win32_$($Matches[1])*" "WMI" | Select-Object "Name" | Out-DataGridView Name}
-            '^t_(.*)' {Get-TabExpansion "*$($Matches[1])*" "Types" | Select-Object "Name" | Out-DataGridView Name}
+            '^w_(.*)' {Get-TabExpansion "win32_$($Matches[1])*" WMI | Select-Object "Name" | Out-DataGridView Name}
+            '^t_(.*)' {Get-TabExpansion "*$($Matches[1])*" Types | Select-Object "Name" | Out-DataGridView Name}
             '^c_(.*)' {Get-TabExpansion "$($Matches[1])*" | Select-Object "Text" | Out-DataGridView Text}
             '^f_' {Get-ChildItem function: | Select-Object Name | Out-DataGridView Name}
             '^d_' {Get-ChildItem | Select-Object Mode,LastWriteTime,Length,Name,FullName | Out-DataGridView FullName}
@@ -622,7 +622,7 @@ Function Invoke-PowerTab {
 
             ## WMI completion
             '(win32_.*|cim_.*|MSFT_.*)' {
-                Get-TabExpansion "$($Matches[1])*" "WMI" | Select-Object -ExpandProperty Name |
+                Get-TabExpansion "$($Matches[1])*" WMI | Select-Object -ExpandProperty Name |
                     Invoke-TabItemSelector $LastWord -SelectionHandler $SelectionHandler
                 break
             }
@@ -789,21 +789,21 @@ Function Invoke-PowerTab {
             "(.+)$([Regex]::Escape($PowerTabConfig.ShortcutChars.Alias))`$" {
                 & {
                     Get-Command -CommandType Alias -Name $Matches[1] | Select-Object -ExpandProperty Definition
-                    Get-TabExpansion $Matches[1] "Alias" | Select-Object -ExpandProperty Text
+                    Get-TabExpansion $Matches[1] Alias | Select-Object -ExpandProperty Text
                 } | Invoke-TabItemSelector $Matches[1] -SelectionHandler $SelectionHandler
                 break
             }
 
             ## Custom
             "(.*)$([Regex]::Escape($PowerTabConfig.ShortcutChars.Custom))`$" {
-                Get-TabExpansion "$($Matches[1])*" "Custom" | Select-Object -ExpandProperty Text |
+                Get-TabExpansion "$($Matches[1])*" Custom | Select-Object -ExpandProperty Text |
                     Invoke-TabItemSelector $Matches[1] -SelectionHandler $SelectionHandler
                 break
             }
 
             ## Invoke
             "(.+)$([Regex]::Escape($PowerTabConfig.ShortcutChars.Invoke))`$" {
-                Get-TabExpansion "$($Matches[1])*" "Invoke" | ForEach-Object {
+                Get-TabExpansion "$($Matches[1])*" Invoke | ForEach-Object {
                     $ExecutionContext.InvokeCommand.InvokeScript($_.Text)
                 } | Invoke-TabItemSelector $Matches[1] -SelectionHandler $SelectionHandler
                 break
@@ -838,10 +838,10 @@ Function Invoke-PowerTab {
                 if ($DoubleTab -or $PowerTabConfig.AliasQuickExpand) {
                     & {
                         Get-Command -CommandType Alias -Name $Matches[1] | Select-Object -ExpandProperty Definition
-                        Get-TabExpansion $Matches[1] "Alias" | Select-Object -ExpandProperty Text
+                        Get-TabExpansion $Matches[1] Alias | Select-Object -ExpandProperty Text
                     } | Invoke-TabItemSelector $LastWord -SelectionHandler $SelectionHandler
                 } else {
-                    Get-TabExpansion $Matches[1] "Alias" | Select-Object -ExpandProperty Text |
+                    Get-TabExpansion $Matches[1] Alias | Select-Object -ExpandProperty Text |
                         Invoke-TabItemSelector -SelectionHandler $SelectionHandler
                 }
                 break
