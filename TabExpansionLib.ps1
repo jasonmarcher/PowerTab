@@ -621,13 +621,14 @@ Function Update-TabExpansionWmi {
         $Options.EnumerateDeep = $true
         $Options.UseAmendedQualifiers = $true
 
-        $i = 0 ; Write-Progress "Adding WMI Classes" $i
-        ([WmiClass]'').PSBase.GetSubclasses($Options) | ForEach-Object {
-            $i++ ; if ($i % 10 -eq 0) {Write-Progress "Adding WMI Classes" $i}
+        $i = 0 ; Write-Progress $Resources.update_tabexpansiondatabase_wmi_activity $i
+        foreach ($Class in (([WmiClass]'').PSBase.GetSubclasses($Options))) {
+            $i++ ; if ($i % 10 -eq 0) {Write-Progress $Resources.update_tabexpansiondatabase_wmi_activity $i}
+            ## TODO: Is there a better way to get the description that is faster?
             [Void]$dsTabExpansionDatabase.Tables['WMI'].Rows.Add($_.Name, ($_.PSbase.Qualifiers |
                 Where-Object {$_.Name -eq 'Description'} | ForEach-Object {$_.Value}))
         }
-        Write-Progress "Adding WMI Classes" $i -Completed
+        Write-Progress $Resources.update_tabexpansiondatabase_wmi_activity $i -Completed
     }
 }
 
@@ -672,29 +673,31 @@ Function Add-TabExpansionComputer {
     )
 
     process {
-        ## TODO: Localize progress messages
         $count = 0
         if ($PSCmdlet.ParameterSetName -eq "Name") {
             Add-TabExpansion $ComputerName $ComputerName "Computer"
         } elseif ($PSCmdlet.ParameterSetName -eq "OU") {
-            $OU.PSBase.get_Children() | Select-Object @{e={$_.cn[0]};n='Name'} | ForEach-Object {
-                $count++; if ($count % 5 -eq 0) {Write-Progress "Adding computer names" $count}
-                Add-TabExpansion $_.Name $_.Name "Computer"
+            foreach ($Computer in ($OU.PSBase.get_Children() | Select-Object @{Name='Name';Expression={$_.cn[0]}})) {
+                $count++; if ($count % 5 -eq 0) {Write-Progress $Resources.update_tabexpansiondatabase_computer_activity $count}
+                Add-TabExpansion $Computer.Name $Computer.Name Computer
             }
         } elseif ($PSCmdlet.ParameterSetName -eq "NetView") {
-            net view | ForEach-Object {if ($_ -match '\\\\(.*?) ') {$Matches[1]}} | ForEach-Object {
-                $count++; if ($count % 5 -eq 0) {Write-Progress "Adding computer names" $count}
-                Add-TabExpansion $_ $_ "Computer"
+            foreach ($Line in (net view)) {
+                if ($Line -match '\\\\(.*?) ') {
+                    $Computer = $Matches[1]
+                    $count++; if ($count % 5 -eq 0) {Write-Progress $Resources.update_tabexpansiondatabase_computer_activity $count}
+                    Add-TabExpansion $Computer $Computer Computer
+                }
             }
         }
         if ($PSCmdlet.ParameterSetName -ne "Name") {
-            Write-Progress "Adding computer names" $count -Completed
+            Write-Progress $Resources.update_tabexpansiondatabase_computer_activity $count -Completed
         }
 
         trap [System.Management.Automation.PipelineStoppedException] {
             ## Pipeline was stopped
             if ($PSCmdlet.ParameterSetName -ne "Name") {
-                Write-Progress "Adding computer names" $count -Completed
+                Write-Progress $Resources.update_tabexpansiondatabase_computer_activity $count -Completed
             }
             break
         }
