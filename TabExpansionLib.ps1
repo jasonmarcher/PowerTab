@@ -754,7 +754,6 @@ Function Get-TabExpansion {
             foreach ($Filter in $Filters[1..($Filters.Count - 1)]) {
                 $Query += " AND Name LIKE '$Filter'"
             }
-            write-host "`n$Query"
             $dsTabExpansionDatabase.Tables[$Type].Select($Query)
         } else {
             ## Construct query from multiple filters
