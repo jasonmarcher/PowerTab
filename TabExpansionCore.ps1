@@ -535,7 +535,7 @@ Function Invoke-PowerTab {
                 $TypeName = $Matches[2]
                 Get-TabExpansion "%.${TypeName}%" "Types" | Select-Object -ExpandProperty Name |
                     Invoke-TabItemSelector $LastWord.Replace('[', '') -SelectionHandler $SelectionHandler |
-                    ForEach-Object {if ($Matches[1] -eq '[') {"[$_]"}}
+                    ForEach-Object {if ($Matches[1] -eq '[') {"[$_]"} else {$_}}
                 break
             }
 
