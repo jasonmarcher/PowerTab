@@ -759,7 +759,7 @@ Function Get-TabExpansion {
             ## Construct query from multiple filters
             $Query = "Filter LIKE '$($Filters[0])'"
             foreach ($Filter in $Filters[1..($Filters.Count - 1)]) {
-                $Query += " AND Filter LIKE 'Filter'"
+                $Query += " AND Filter LIKE '$Filter'"
             }
             $dsTabExpansionDatabase.Tables["Custom"].Select("$Query AND Type LIKE '$Type'")
         }
