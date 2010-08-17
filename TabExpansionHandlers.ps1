@@ -102,7 +102,7 @@ Register-TabExpansion "Reset-ComputerMachinePassword" -Type "Command" {
                 ## TODO: Display more info
                 ## TODO: [workitem:10]
                 try {
-                    Get-ComputerRestorePoint | ForEach-Object {"{0} <# {1} #>" -f ([String]$_.SequenceNumber),$_.CreationTime}
+                    foreach ($Point in Get-ComputerRestorePoint) {"{0} <# {1} #>" -f ([String]$Point.SequenceNumber),$Point.CreationTime}
                 } catch {}
             }
         }
@@ -189,8 +189,8 @@ Register-TabExpansion "Reset-ComputerMachinePassword" -Type "Command" {
                 
                 $ParentNamespace = $Argument -replace '\\[^\\]*$'
                 $Namespaces = New-Object System.Management.ManagementClass "\\$ComputerName\${ParentNamespace}:__NAMESPACE"
-                $Namespaces.PSBase.GetInstances() | ForEach-Object {"{0}\{1}" -f $_.__NameSpace,$_.Name} |
-                    Where-Object {$_ -like "$Argument*"} | Sort-Object
+                $Namespaces = foreach ($Namespace in $Namespaces.PSBase.GetInstances()) {"{0}\{1}" -f $Namespace.__NameSpace,$Namespace.Name}
+                $Namespaces | Where-Object {$_ -like "$Argument*"} | Sort-Object
             }
             'SourceIdentifier' {
                 ## TODO:
@@ -230,7 +230,9 @@ Register-TabExpansion "Reset-ComputerMachinePassword" -Type "Command" {
                     @{'Id'='6';'Name'='System Event'},
                     @{'Id'='7';'Name'='Network'}
                 )
-                $Categories | Where-Object {$_.Name -like "$Argument*"} | ForEach-Object {"{0} <#{1}#>" -f ([String]$_.Id),$_.Name}
+                foreach ($Category in $Categories | Where-Object {$_.Name -like "$Argument*"}) {
+                    "{0} <#{1}#>" -f ([String]$Category.Id),$Category.Name
+                }
             }
             'LogName' {
                 $TabExpansionHasOutput.Value = $true
@@ -349,7 +351,7 @@ Register-TabExpansion "Get-HotFix" -Type "Command" {
                 if ($Argument -notlike '$*') {
                     $TabExpansionHasOutput.Value = $true
                     $QuoteSpaces.Value = $false
-                    Get-Job -Name "$Argument*" | ForEach-Object {'(Get-Job "{0}")' -f $_.Name}
+                    foreach ($Job in Get-Job -Name "$Argument*") {'(Get-Job "{0}")' -f $Job.Name}
                 }
             }
         }
@@ -956,8 +958,8 @@ Register-TabExpansion "Get-WinEvent" -Type "Command" {
                 
                 $ParentNamespace = $Argument -replace '\\[^\\]*$'
                 $Namespaces = New-Object System.Management.ManagementClass "\\$ComputerName\${ParentNamespace}:__NAMESPACE"
-                $Namespaces.PSBase.GetInstances() | ForEach-Object {"{0}\{1}" -f $_.__NameSpace,$_.Name} |
-                    Where-Object {$_ -like "$Argument*"} | Sort-Object
+                $Namespaces = foreach ($Namespace in $Namespaces.PSBase.GetInstances()) {"{0}\{1}" -f $Namespace.__NameSpace,$Namespace.Name}
+                $Namespaces | Where-Object {$_ -like "$Argument*"} | Sort-Object
             }
             'Path' {
                 ## TODO: ???

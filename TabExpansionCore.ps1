@@ -337,7 +337,11 @@ Function Invoke-TabExpansion {
             if (-not $TabExpansionHasOutput) {
                 if ($CurrentContext.CommandInfo) {
                     $Parameter = $LastWord -replace "^-"
-                    $PossibleValues = $CurrentContext.CommandInfo.Parameters.Values | Where-Object {$_.Name -like "$Parameter*"} | ForEach-Object {"-" + $_.Name}
+                    $PossibleValues = foreach ($Parameter in $CurrentContext.CommandInfo.Parameters.Values) {
+                        if ($Parameter.Name -like "$Parameter*") {
+                            "-" + $Parameter.Name
+                        }
+                    }
                     $TabExpansionHasOutput = $true
                 }
             }
@@ -346,8 +350,8 @@ Function Invoke-TabExpansion {
             $MethodTokens = @([System.Management.Automation.PSParser]::Tokenize($LastWord, [ref]$Errors))
             if ($MethodTokens[-2].Type -eq $_TokenTypes::Member) {
                 $MethodObject = $LastWord.SubString(0, $MethodTokens[-1].Start)
-                $PossibleValues = Invoke-Expression "$MethodObject.OverloadDefinitions" | ForEach-Object {
-                    $Parameters = $_ -replace '^\S+ .+\((.+)?\)','$1'
+                $PossibleValues = foreach ($Overload in Invoke-Expression "$MethodObject.OverloadDefinitions") {
+                    $Parameters = $Overload -replace '^\S+ .+\((.+)?\)','$1'
                     if ($Parameters) {
                         $Parameters = foreach ($Parameter in ($Parameters -split ", ")) {
                             $Type = ($Parameter -split " ")[0]
@@ -566,16 +570,20 @@ Function Invoke-PowerTab {
             '^\\\\([^\\]+)\\([^\\]*)$' {
                 #gwmi win32_share -computer $matches[1] -filter "name like '$($matches[2])%'" | Foreach-Object {"\\$($matches[1])\$($_.name)"}
                 #([adsi]"WinNT://$($matches[1])/LanmanServer,FileService" ).psbase.children |? {$_.name -like "$($matches[2])*"}  |% {$_.name}
-                [Trinet.Networking.ShareCollection]::GetShares($Matches[1]) | Where-Object {$_.NetName -like "$($Matches[2])*"} |
-                    Sort-Object NetName | ForEach-Object {"\\$($Matches[1])\$($_.NetName)"} |
+                $ComputerName = $Matches[1]
+                $ShareName = $Matches[2]
+                [Trinet.Networking.ShareCollection]::GetShares($ComputerName) | Where-Object {$_.NetName -like "$ShareName*"} |
+                    Sort-Object NetName | ForEach-Object {"\\$ComputerName\" + $_.NetName} |
                     Invoke-TabItemSelector $LastWord -SelectionHandler $SelectionHandler
                 break
             }
 
             ## Completion on computers in database
             '^\\\\([^\\]*)$' {
-                Get-TabExpansion "$($Matches[1])*" Computer |
-                    ForEach-Object {"\\$($_.Text)"} | Invoke-TabItemSelector $LastWord -SelectionHandler $SelectionHandler
+                $Computers = foreach ($Computer in Get-TabExpansion "$($Matches[1])*" Computer) {
+                    "\\" + $Computer.Text
+                }
+                $Computers | Invoke-TabItemSelector $LastWord -SelectionHandler $SelectionHandler
                 break
             }
 
@@ -596,17 +604,17 @@ Function Invoke-PowerTab {
             '^#(\w*)' {
                 $Pattern = $Matches[1]
                 if ($Pattern -match '^[0-9]+$') {
-                    Get-History -Id $Pattern -ErrorAction SilentlyContinue | ForEach-Object {$_.CommandLine}
+                    @(Get-History -Id $Pattern -ErrorAction SilentlyContinue)[0].CommandLine
                 } else {
                     Get-History -Count 32767 | Where-Object {$_.CommandLine -like "$Pattern*"} | Sort-Object -Descending Id |
-                        ForEach-Object {$_.CommandLine} | Invoke-TabItemSelector $Pattern -SelectionHandler $SelectionHandler
+                        Select-Object -ExpandProperty CommandLine | Invoke-TabItemSelector $Pattern -SelectionHandler $SelectionHandler
                 }
                 break
             }
 
             ## About Topics completion
             'about_(.*)' {
-                Get-Help "about_$($Matches[1])*" | ForEach-Object {$_.Name} |
+                Get-Help "about_$($Matches[1])*" | Select-Object -ExpandProperty Name |
                     Invoke-TabItemSelector $LastWord -SelectionHandler $SelectionHandler
                 break
             }
@@ -652,7 +660,7 @@ Function Invoke-PowerTab {
                 } else {
                     $Pattern = $Matches[2].Split('.')[($Level -1)] + '*'
                     Invoke-Expression "$($Matches[1]) | Get-Member -Static" | Where-Object {
-                        $n = $_.Name; $n -like $Pattern -and $n -notmatch '^[ge]et_'} | ForEach-Object {
+                        $_.Name -like $Pattern -and $_.Name -notmatch '^[ge]et_'} | ForEach-Object {
                             if ($_.MemberType -band $_Method) {
                                 "${LastType}::$($_.Name)" + '('
                             } else {
@@ -677,7 +685,7 @@ Function Invoke-PowerTab {
                 } else {
                     $Pattern = $Matches[2].Split('.')[($Level -1)] + '*'
                     Invoke-Expression "$($Matches[1]) | Get-Member -Static" | Where-Object {
-                        $n = $_.Name; $n -like $Pattern -and $n -notmatch '^[ge]et_'} | ForEach-Object {
+                        $_.Name -like $Pattern -and $_.Name -notmatch '^[ge]et_'} | ForEach-Object {
                             if ($_.MemberType -band $_Method) {
                                 "${LastType}${gt}::$($_.Name)" + '('
                             } else {
@@ -699,7 +707,9 @@ Function Invoke-PowerTab {
                     } else {
                         $Constructors = Invoke-Expression "$LastType.GetConstructors()" | ForEach-Object {
                             $Regex = New-Object Regex('\((.*)\)')
-                            $ParamTypes = $Regex.Match($_).Groups[1].Value.Split(',') | ForEach-Object {"[$($_.Trim())]"}
+                            $ParamTypes = foreach ($Type in $Regex.Match($_).Groups[1].Value.Split(',')) {
+                                "[$($Type.Trim())]"
+                            }
                             $Param = [String]::Join(' , ',$ParamTypes)
                             "New-Object $($LastType.Trim('[]'))($Param)".Replace('([])','()')
                         }
@@ -731,13 +741,21 @@ Function Invoke-PowerTab {
                 $Matched = $Matches[1]
                 $Dots = $Matches[1].Split(".").Count - 1
                 $res = @()
-                $res += $dsTabExpansionDatabase.Tables['Types'].Select("NS like '$($Matched)%' and DC = $($Dots + 1)") |
-                    Select-Object -Unique NS | ForEach-Object {"[$($_.NS)"}
-                $res += $dsTabExpansionDatabase.Tables['Types'].Select("NS like 'System.$($Matched)%' and DC = $($Dots + 2)") |
-                    Select-Object -Unique NS | ForEach-Object {"[$($_.NS)"}
+                $res += foreach ($Namespace in $dsTabExpansionDatabase.Tables['Types'].Select("NS like '$($Matched)%' and DC = $($Dots + 1)") |
+                        Select-Object -Unique NS) {
+                    "[$($Namespace.NS)"
+                }
+                $res += foreach ($Namespace in $dsTabExpansionDatabase.Tables['Types'].Select("NS like 'System.$($Matched)%' and DC = $($Dots + 2)") |
+                        Select-Object -Unique NS) {
+                    "[$($Namespace.NS)"
+                }
                 if ($Dots -gt 0) {
-                    $res += $dsTabExpansionDatabase.Tables['Types'].Select("Name like '$($Matched)%' and DC = $Dots") | ForEach-Object {"[$($_.Name)]"}
-                    $res += $dsTabExpansionDatabase.Tables['Types'].Select("Name like 'System.$($Matched)%' and DC = $($Dots + 1)") | ForEach-Object {"[$($_.Name)]"}
+                    $res += foreach ($Type in $dsTabExpansionDatabase.Tables['Types'].Select("Name like '$($Matched)%' and DC = $Dots")) {
+                        "[$($Type.Name)]"
+                    }
+                    $res += foreach ($Type in $dsTabExpansionDatabase.Tables['Types'].Select("Name like 'System.$($Matched)%' and DC = $($Dots + 1)")) {
+                        "[$($Type.Name)]"
+                    }
                 }
                 $res | Where-Object {$_} | Invoke-TabItemSelector $LastWord -SelectionHandler $SelectionHandler -ForceList:$ForceList
                 break
@@ -751,15 +769,15 @@ Function Invoke-PowerTab {
                 if ($_ScopeNames -contains $Type) {
                     # Scope variable name expansion ($global:, $script:, etc.)
                     $Variables = foreach ($ScopeVariable in (Get-Variable "$TypeName*" -Scope $Type)) {
-                        $Type + ":" + $ScopeVariable.Name
+                        '$' + (QuoteVariable ($Type + ":" + $ScopeVariable.Name))
                     }
                 } else {
                     # Type variable name expansion ($function:, $variable:, $env:, etc.)
                     $Variables = foreach ($t in (Get-ChildItem ($Type + ":" + $TypeName + '*') | Sort-Object Name)) {
-                        $Type + ":" + $t.Name
+                        '$' + (QuoteVariable ($Type + ":" + $t.Name))
                     }
                 }
-                $Variables | ForEach-Object {'$' + (QuoteVariable $_)} | Invoke-TabItemSelector $LastWord -SelectionHandler $SelectionHandler
+                $Variables | Invoke-TabItemSelector $LastWord -SelectionHandler $SelectionHandler
                 break
             }
 
@@ -767,8 +785,10 @@ Function Invoke-PowerTab {
             '^([\$@])(\w*)$' {
                 ## TODO: This could be simplified
                 $VarName = $Matches[2]
-                Get-Variable "$VarName*" -Scope Global | Select-Object -ExpandProperty Name |
-                    ForEach-Object {$Matches[1] + (QuoteVariable $_)} | Invoke-TabItemSelector $LastWord -SelectionHandler $SelectionHandler
+                $Variables = foreach ($Variable in Get-Variable "$VarName*" -Scope Global) {
+                    $Matches[1] + (QuoteVariable $Variable.Name)
+                }
+                $Variables | Invoke-TabItemSelector $LastWord -SelectionHandler $SelectionHandler
                 break
             }
 
@@ -867,10 +887,9 @@ Function Invoke-PowerTab {
 
         $LastPath = $Container + "\$([Regex]::Split($LastWord,'\\|/|:')[-1])"
 
-        $ChildItems | ForEach-Object {
-            ## Improved fix for a problem identified by idvorkin (http://poshcode.org/1586)
-            ## Fixes paths for registry keys and certificates
-            $Item = $_
+        ## Fixes paths for registry keys, certificates and other unusual paths
+        ## Improved fix for a problem identified by idvorkin (http://poshcode.org/1586)
+        $ChildItems = foreach ($Item in $ChildItems) {
             $Child = switch ($Item.GetType().FullName) {
                 "System.Security.Cryptography.X509Certificates.X509Certificate2" {$Item.Thumbprint;break}
                 "Microsoft.Powershell.Commands.X509StoreLocation" {$Item.Location;break}
@@ -889,7 +908,8 @@ Function Invoke-PowerTab {
                 default {$_}
             }
             New-TabItem "$Container\$Child" "$Container\$Child" -Type $Type
-        } | Invoke-TabItemSelector $LastPath -SelectionHandler $SelectionHandler -Return $LastWord -ForceList:$ForceList | ForEach-Object {
+        }
+        $ChildItems | Invoke-TabItemSelector $LastPath -SelectionHandler $SelectionHandler -Return $LastWord -ForceList:$ForceList | ForEach-Object {
             ## If a path contains any of these characters it needs to be in quotes
             $_charsRequiringQuotes = ('`&@''#{}()$,; ' + "`t").ToCharArray()
         } {

@@ -169,9 +169,9 @@ Function Invoke-TabItemSelector {
         $ObjectHandlers = @("ObjectDefault")
 
         if (($ObjectHandlers -contains $SelectionHandler) -and ($PSCmdlet.ParameterSetName -eq "Values")) {
-            $Objects = $Values | ForEach-Object {@{"Text"=$_;"Value"=$_;"Type"="Unknown"}}
+            $Objects = foreach ($Value in $Values) {@{"Text"=$Value; "Value"=$Value; "Type"="Unknown"}}
         } elseif (($ObjectHandlers -notcontains $SelectionHandler) -and ($PSCmdlet.ParameterSetName -eq "Objects")) {
-            $Values = $Objects | ForEach-Object {$_.Value}
+            $Values = foreach ($Object in $Objects) {$Object.Value}
         }
 
         switch -exact ($SelectionHandler) {
@@ -711,7 +711,9 @@ Function Remove-TabExpansionComputer {
     param()
 
     end {
-        $dsTabExpansionDatabase.Tables['Custom'].Select("Type LIKE 'Computer'") | ForEach-Object {$_.Delete()}
+        foreach ($Computer in $dsTabExpansionDatabase.Tables['Custom'].Select("Type LIKE 'Computer'")) {
+            $Computer.Delete()
+        }
     }
 }
 
@@ -820,7 +822,9 @@ Function Remove-TabExpansion {
     process {
         $Filter = $Filter -replace "\*","%"
 
-        $dsTabExpansionDatabase.Tables['Custom'].Select("Filter LIKE '$Filter'") | ForEach-Object {$_.Delete()}
+        foreach ($Item in $dsTabExpansionDatabase.Tables['Custom'].Select("Filter LIKE '$Filter'")) {
+            $Item.Delete()
+        }
 
         trap [System.Management.Automation.PipelineStoppedException] {
             ## Pipeline was stopped
