@@ -918,20 +918,30 @@ Function Invoke-PowerTab {
             $Invoke = ''
 
             if ($_ -is [String]) {
+                ## Remove quotes from beginning and end of string
+                $_ = $_ -replace '^"|"$'
                 ## Escape certain characters
                 $_ = $_ -replace '([\$"`])','`$1'
 
                 if ($_.IndexOfAny($_charsRequiringQuotes) -ge 0) {
-                    $Quote = '"'
+                    ## Check for quotes in the last block of the input line,
+                    ## if they exist, PowerShell will add them to this output
+                    ## if not, then quotes can safely be added
+                    if (-not (@([Char[]]$LastBlock | Where-Object {$_ -match '"|'''}).Count % 2)) {$Quote = '"'}
                     if (($LastBlock.Trim() -eq $LastWord)) {$Invoke = '& '}
                 }
                 "$Invoke$Quote$_$Quote"
             } else {
+                ## Remove quotes from beginning and end of string
+                $_.Value = $_.Value -replace '^"|"$'
                 ## Escape certain characters
                 $_.Value = $_.Value -replace '([\$"`])','`$1'
 
                 if ($_.Value.IndexOfAny($_charsRequiringQuotes) -ge 0) {
-                    $Quote = '"'
+                    ## Check for quotes in the last block of the input line,
+                    ## if they exist, PowerShell will add them to this output
+                    ## if not, then quotes can safely be added
+                    if (-not (@([Char[]]$LastBlock | Where-Object {$_ -match '"|'''}).Count % 2)) {$Quote = '"'}
                     if (($LastBlock.Trim() -eq $LastWord)) {$Invoke = '& '}
                 }
                 $_.Value = "$Invoke$Quote$($_.Value)$Quote"
