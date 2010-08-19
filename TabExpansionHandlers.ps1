@@ -240,7 +240,8 @@ Register-TabExpansion "Reset-ComputerMachinePassword" -Type "Command" {
                 if ($Context.OtherParameters["ComputerName"]) {
                     $Parameters["ComputerName"] = ResolveParameterValue $Context.OtherParameters["ComputerName"]
                 }
-                Get-EventLog -List -AsString @Parameters | Where-Object {$_ -like "$Argument*"}
+                Get-EventLog -List -AsString @Parameters | Where-Object {$_ -like "$Argument*"} |
+                    New-TabItem -Value {$_} -Text {$_} -Type EventLog
             }
         }
     }.GetNewClosure()
@@ -380,7 +381,7 @@ Register-TabExpansion "Get-Module" -Type "Command" {
             $Modules = @(Get-Module "$Argument*" @Parameters | Sort-Object Name)
             if ($Modules.Count -gt 0) {
                 $TabExpansionHasOutput.Value = $true
-                $Modules | New-TabItem -Value {$_.Name} -Text {$_.Name} -Type "Module"
+                $Modules | New-TabItem -Value {$_.Name} -Text {$_.Name} -Type Module
             }
         }
     }
@@ -395,7 +396,7 @@ Register-TabExpansion "Import-Module" -Type "Command" {
             $Modules = @(Find-Module "$Argument*" | Sort-Object BaseName)
             if ($Modules.Count -gt 0) {
                 $TabExpansionHasOutput.Value = $true
-                $Modules | New-TabItem -Value {$_.BaseName} -Text {$_.BaseName} -Type "Module"
+                $Modules | New-TabItem -Value {$_.BaseName} -Text {$_.BaseName} -Type Module
             }
         }
     }
@@ -409,7 +410,7 @@ Register-TabExpansion "Remove-Module" -Type "Command" {
         'Name' {
             $TabExpansionHasOutput.Value = $true
             Get-Module "$Argument*" | Select-Object -ExpandProperty Name | Sort-Object |
-                New-TabItem -Value {$_.Name} -Text {$_.Name} -Type "Module"
+                New-TabItem -Value {$_.Name} -Text {$_.Name} -Type Module
         }
     }
 }.GetNewClosure()
@@ -438,7 +439,7 @@ Register-TabExpansion "New-Object" -Type "Command" {
             ## TODO: Maybe cache these like we do with .NET types and WMI object names?
             ## TODO: [workitem:13]
             $TabExpansionHasOutput.Value = $true
-            Get-TabExpansion "$Argument*" COM | Select-Object -ExpandProperty Name
+            Get-TabExpansion "$Argument*" COM | New-TabItem -Value {$_.Name} -Text {$_.Name} -Type COMObject
         }
         'TypeName' {
             if ($Argument -notmatch '^\.') {
@@ -447,14 +448,14 @@ Register-TabExpansion "New-Object" -Type "Command" {
                 $Dots = $Argument.Split(".").Count - 1
                 $res = @()
                 $res += $dsTabExpansionDatabase.Tables['Types'].Select("NS like '$Argument*' and DC = $($Dots + 1)") |
-                    Select-Object -Unique -ExpandProperty NS
+                    Select-Object -Unique -ExpandProperty NS | New-TabItem -Value {$_} -Text {"$_."} -Type Namespace
                 $res += $dsTabExpansionDatabase.Tables['Types'].Select("NS like 'System.$Argument*' and DC = $($Dots + 2)") |
-                    Select-Object -Unique -ExpandProperty NS
+                    Select-Object -Unique -ExpandProperty NS | New-TabItem -Value {$_} -Text {"$_."} -Type Namespace
                 if ($Dots -gt 0) {
                     $res += $dsTabExpansionDatabase.Tables['Types'].Select("Name like '$Argument*' and DC = $Dots") |
-                        Select-Object -ExpandProperty Name
+                        Select-Object -ExpandProperty Name | New-TabItem -Value {$_} -Text {$_} -Type Type
                     $res += $dsTabExpansionDatabase.Tables['Types'].Select("Name like 'System.$Argument*' and DC = $($Dots + 1)") |
-                        Select-Object -ExpandProperty Name
+                        Select-Object -ExpandProperty Name | New-TabItem -Value {$_} -Text {$_} -Type Type
                 }
                 $res | Where-Object {$_}
             }
@@ -503,7 +504,7 @@ Register-TabExpansion "Out-Printer" -Type "Command" {
             ## TODO: support printers that are not installed using paths \\server\printer
             ## TODO: [workitem:14]
             $TabExpansionHasOutput.Value = $true
-            Get-WMIObject Win32_Printer -Filter "Name LIKE '$Argument*'" | Select-Object -ExpandProperty Name
+            Get-WMIObject Win32_Printer -Filter "Name LIKE '$Argument*'" | New-TabItem -Value {$_.Name} -Text {$_.Name} -Type Printer
         }
     }
 }.GetNewClosure()
@@ -934,7 +935,7 @@ Register-TabExpansion "Get-WinEvent" -Type "Command" {
             'Class' {
                 $TabExpansionHasOutput.Value = $true
                 ## TODO: escape special characters?
-                Get-TabExpansion "$Argument*" WMI | Select-Object -ExpandProperty Name
+                Get-TabExpansion "$Argument*" WMI | New-TabItem -Value {$_.Name} -Text {$_.Name} -Type WMIClass
             }
             'Locale' {
                 $TabExpansionHasOutput.Value = $true
@@ -961,7 +962,7 @@ Register-TabExpansion "Get-WinEvent" -Type "Command" {
                 $ParentNamespace = $Argument -replace '\\[^\\]*$'
                 $Namespaces = New-Object System.Management.ManagementClass "\\$ComputerName\${ParentNamespace}:__NAMESPACE"
                 $Namespaces = foreach ($Namespace in $Namespaces.PSBase.GetInstances()) {"{0}\{1}" -f $Namespace.__NameSpace,$Namespace.Name}
-                $Namespaces | Where-Object {$_ -like "$Argument*"} | Sort-Object
+                $Namespaces | Where-Object {$_ -like "$Argument*"} | Sort-Object | New-TabItem -Value {$_} -Text {$_} -Type WMINamespace
             }
             'Path' {
                 ## TODO: ???
