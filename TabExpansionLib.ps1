@@ -625,7 +625,7 @@ Function Update-TabExpansionWmi {
         foreach ($Class in (([WmiClass]'').PSBase.GetSubclasses($Options))) {
             $i++ ; if ($i % 10 -eq 0) {Write-Progress $Resources.update_tabexpansiondatabase_wmi_activity $i}
             ## TODO: Is there a better way to get the description that is faster?
-            [Void]$dsTabExpansionDatabase.Tables['WMI'].Rows.Add($_.Name, ($_.PSbase.Qualifiers |
+            [Void]$dsTabExpansionDatabase.Tables['WMI'].Rows.Add($Class.Name, ($Class.PSbase.Qualifiers |
                 Where-Object {$_.Name -eq 'Description'} | ForEach-Object {$_.Value}))
         }
         Write-Progress $Resources.update_tabexpansiondatabase_wmi_activity $i -Completed
