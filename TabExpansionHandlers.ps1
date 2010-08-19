@@ -87,7 +87,7 @@ Register-TabExpansion "Reset-ComputerMachinePassword" -Type "Command" {
         switch -exact ($Context.Parameter) {
             'Drive' {
                 $TabExpansionHasOutput.Value = $true
-                Get-PSDrive -PSProvider FileSystem "$Argument*" | Select-Object -ExpandProperty Root
+                Get-PSDrive -PSProvider FileSystem "$Argument*" | New-TabItem -Value {$_.Root} -Text {$_.Root} -Type Drive
             }
         }
     }.GetNewClosure()
@@ -101,17 +101,18 @@ Register-TabExpansion "Reset-ComputerMachinePassword" -Type "Command" {
                 $QuoteSpaces.Value = $false
                 ## TODO: Display more info
                 ## TODO: [workitem:10]
-                try {
-                    foreach ($Point in Get-ComputerRestorePoint) {"{0} <# {1} #>" -f ([String]$Point.SequenceNumber),$Point.CreationTime}
-                } catch {}
+                foreach ($Point in Get-ComputerRestorePoint -EA Stop) {
+                    $Text = "{0}: {1}" -f ([String]$Point.SequenceNumber),[DateTime]::ParseExact($Point.CreationTime, "yyyyMMddHHmmss.ffffff-000", $null)
+                    New-TabItem -Value $Point.SequenceNumber -Text $Text -Type ComputerRestorePoint
+                }
             }
         }
     }.GetNewClosure()
 
-    Register-TabExpansion "Disable-ComputerRestore" $ComputerRestoreHandler -Type "Command"
-    Register-TabExpansion "Enable-ComputerRestore" $ComputerRestoreHandler -Type "Command"
-    Register-TabExpansion "Get-ComputerRestorePoint" $ComputerRestorePointHandler -Type "Command"
-    Register-TabExpansion "Restore-Computer" $ComputerRestorePointHandler -Type "Command"
+    Register-TabExpansion "Disable-ComputerRestore" $ComputerRestoreHandler -Type Command
+    Register-TabExpansion "Enable-ComputerRestore" $ComputerRestoreHandler -Type Command
+    Register-TabExpansion "Get-ComputerRestorePoint" $ComputerRestorePointHandler -Type Command
+    Register-TabExpansion "Restore-Computer" $ComputerRestorePointHandler -Type Command
 }
 
 ## Counter
@@ -230,9 +231,8 @@ Register-TabExpansion "Reset-ComputerMachinePassword" -Type "Command" {
                     @{'Id'='6';'Name'='System Event'},
                     @{'Id'='7';'Name'='Network'}
                 )
-                foreach ($Category in $Categories | Where-Object {$_.Name -like "$Argument*"}) {
-                    "{0} <#{1}#>" -f ([String]$Category.Id),$Category.Name
-                }
+                $Categories | Where-Object {$_.Name -like "$Argument*"} |
+                    New-TabItem -Value {$_.Id} -Text {$_.Name} -Type EventLogCategory
             }
             'LogName' {
                 $TabExpansionHasOutput.Value = $true
@@ -518,14 +518,16 @@ Register-TabExpansion "Out-Printer" -Type "Command" {
                 $TabExpansionHasOutput.Value = $true
                 $QuoteSpaces.Value = $false
                 if ($Argument -match '^[0-9]+$') {
-                    Get-Process | Where-Object {$_.Id.ToString() -like "$Argument*"} | ForEach-Object {"{0:-4} <# {1} #>" -f ([String]$_.Id),$_.Name}
+                    Get-Process | Where-Object {$_.Id.ToString() -like "$Argument*"} |
+                        New-TabItem -Value {$_.Id} -Text {"{0:-4} {1}" -f ([String]$_.Id),$_.Name} -Type Process
                 } else {
-                    Get-Process | Where-Object {$_.Name -like "$Argument*"} | ForEach-Object {"{0:-4} <# {1} #>" -f ([String]$_.Id),$_.Name}
+                    Get-Process | Where-Object {$_.Name -like "$Argument*"} |
+                        New-TabItem -Value {$_.Id} -Text {"{0:-4} {1}" -f ([String]$_.Id),$_.Name} -Type Process
                 }
             }
             'Name' {
                 $TabExpansionHasOutput.Value = $true
-                Get-Process -Name "$Argument*" | Get-Unique | New-TabItem -Value {$_.Name} -Text {$_.Name} -Type "Process"
+                Get-Process -Name "$Argument*" | Get-Unique | New-TabItem -Value {$_.Name} -Text {$_.Name} -Type Process
             }
         }
     }.GetNewClosure()
@@ -543,10 +545,10 @@ Register-TabExpansion "Out-Printer" -Type "Command" {
                 }
                 if ($Argument -match '^[0-9]+$') {
                     Get-Process @Parameters | Where-Object {$_.Id.ToString() -like "$Argument*"} |
-                        ForEach-Object {"{0:-4} <# {1} #>" -f ([String]$_.Id),$_.Name}
+                        New-TabItem -Value {$_.Id} -Text {"{0:-4} <# {1} #>" -f ([String]$_.Id),$_.Name} -Type Process
                 } else {
                     Get-Process @Parameters | Where-Object {$_.Name -like "$Argument*"} |
-                        ForEach-Object {"{0:-4} <# {1} #>" -f ([String]$_.Id),$_.Name}
+                        New-TabItem -Value {$_.Id} -Text {"{0:-4} <# {1} #>" -f ([String]$_.Id),$_.Name} -Type Process
                 }
             }
             'Name' {
@@ -555,7 +557,7 @@ Register-TabExpansion "Out-Printer" -Type "Command" {
                 if ($Context.OtherParameters["ComputerName"]) {
                     $Parameters["ComputerName"] = ResolveParameterValue $Context.OtherParameters["ComputerName"]
                 }
-                Get-Process -Name "$Argument*" @Parameters | Get-Unique | New-TabItem -Value {$_.Name} -Text {$_.Name} -Type "Process"
+                Get-Process -Name "$Argument*" @Parameters | Get-Unique | New-TabItem -Value {$_.Name} -Text {$_.Name} -Type Process
             }
         }
     }.GetNewClosure()
@@ -939,7 +941,7 @@ Register-TabExpansion "Get-WinEvent" -Type "Command" {
                 $QuoteSpaces.Value = $false
                 [System.Globalization.CultureInfo]::GetCultures([System.Globalization.CultureTypes]::InstalledWin32Cultures) |
                     Where-Object {$_.Name -like "$Argument*"} | Sort-Object -Property Name |
-                        ForEach-Object {"<#{0}#> {1}" -f $_.Name,([String]$_.LCID)}
+                        New-TabItem -Value {$_.LCID} -Text {$_.Name} -Type Locale
             }
             'Name' {
                 ## TODO: ??? (Method Name)
@@ -1217,7 +1219,7 @@ Register-TabExpansion "PSProvider" -Type "Parameter" {
                 $Argument = [Regex]::Escape($Argument)
                 $Favorites = Get-ChildItem "$env:USERPROFILE/Favorites/*" -Include "*.url" -Recurse
                 $Favorites = $Favorites | Where-Object {($_.Name -match $Argument) -or ($_ | Select-String "^URL=.*$Argument")} |
-                    ForEach-Object {"{0} <#{1}#>" -f (($_ | Select-String "^URL=").Line -replace "^URL="),($_.Name -replace '\.url$')}
+                    New-TabItem -Value {($_ | Select-String "^URL=").Line -replace "^URL="} -Text {$_.Name -replace '\.url$'} -Type URL
 
                 if ($Favorites) {
                     $TabExpansionHasOutput.Value = $true
