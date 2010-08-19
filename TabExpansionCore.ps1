@@ -336,9 +336,9 @@ Function Invoke-TabExpansion {
             ## Command info
             if (-not $TabExpansionHasOutput) {
                 if ($CurrentContext.CommandInfo) {
-                    $Parameter = $LastWord -replace "^-"
+                    $ParameterName = $LastWord -replace "^-"
                     $PossibleValues = foreach ($Parameter in $CurrentContext.CommandInfo.Parameters.Values) {
-                        if ($Parameter.Name -like "$Parameter*") {
+                        if ($Parameter.Name -like "$ParameterName*") {
                             "-" + $Parameter.Name
                         }
                     }
