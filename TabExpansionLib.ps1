@@ -165,17 +165,16 @@ Function Invoke-TabItemSelector {
 
         ## List of selection handlers that can handle objects
         ## TODO: Upgrade ConsoleList
-        #$ObjectHandlers = @("ConsoleList")
-        $ObjectHandlers = @("ObjectDefault")
+        $ObjectHandlers = @("ConsoleList","ObjectDefault")
 
         if (($ObjectHandlers -contains $SelectionHandler) -and ($PSCmdlet.ParameterSetName -eq "Values")) {
-            $Objects = foreach ($Value in $Values) {@{"Text"=$Value; "Value"=$Value; "Type"="Unknown"}}
+            $Objects = foreach ($Item in $Values) {New-TabItem -Value $Item -Text $Item -Type Unknown}
         } elseif (($ObjectHandlers -notcontains $SelectionHandler) -and ($PSCmdlet.ParameterSetName -eq "Objects")) {
-            $Values = foreach ($Object in $Objects) {$Object.Value}
+            $Values = foreach ($Item in $Objects) {$Item.Value}
         }
 
         switch -exact ($SelectionHandler) {
-            'ConsoleList' {$Values | Out-ConsoleList $LastWord $ReturnWord -ForceList:$ForceList}
+            'ConsoleList' {$Objects | Out-ConsoleList $LastWord $ReturnWord -ForceList:$ForceList}
             'Intellisense' {$Values | Invoke-Intellisense $LastWord}
             'ObjectDefault' {$Objects}
             'Default' {$Values}

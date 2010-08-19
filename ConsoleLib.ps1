@@ -6,322 +6,332 @@
 Function Out-ConsoleList {
     #[CmdletBinding()]
     param(
-        #[Parameter(Position = 0, ValueFromPipeline = $true)]
-        #[ValidateNotNull()]
-        #[String[]]
-        #$Content = @()
-        #,
-        #[Parameter(Position = 1)]
+        [Parameter(Position = 1)]
         [ValidateNotNull()]
         [String]
         $LastWord = ''
         ,
-        #[Parameter(Position = 2)]
+        [Parameter(Position = 2)]
         [ValidateNotNull()]
         [String]
         $ReturnWord = ''  ## Text to return with filter if list closes without a selected item
+        ,
+        [Parameter(ValueFromPipeline = $true)]
+        [ValidateNotNull()]
+        [Object[]]
+        $InputObject = @()
         ,
         [Switch]
         $ForceList
     )
 
-    if (-not $ReturnWord) {$ReturnWord = $LastWord}
-    $Content = @($Input)
-
-    ## If contents contains less than minimum options, then forward contents without displaying console list
-    if (($Content.Length -lt $PowerTabConfig.MinimumListItems) -and (-not $ForceList)) {
-        return $Content
+    begin {
+        [Object[]]$Content = @()
     }
 
-    ## Create console list
-    $Filter = ''
-    $ListHandle = New-ConsoleList $Content $PowerTabConfig.Colors.BorderColor $PowerTabConfig.Colors.BorderBackColor `
-        $PowerTabConfig.Colors.TextColor $PowerTabConfig.Colors.BackColor
-
-    ## Preview of current filter, shows up where cursor is at
-    $PreviewBuffer =  ConvertTo-BufferCellArray "$Filter " $PowerTabConfig.Colors.FilterColor $Host.UI.RawUI.BackgroundColor
-    $Preview = New-Buffer $Host.UI.RawUI.CursorPosition $PreviewBuffer
-
-    Function Add-Status {
-        ## Title buffer, shows the last word in header of console list
-        $TitleBuffer = ConvertTo-BufferCellArray " $LastWord" $PowerTabConfig.Colors.BorderTextColor $PowerTabConfig.Colors.BorderBackColor
-        $TitlePosition = $ListHandle.Position
-        $TitlePosition.X += 2
-        $TitleHandle = New-Buffer $TitlePosition $TitleBuffer
-
-        ## Filter buffer, shows the current filter after the last word in header of console list
-        $FilterBuffer = ConvertTo-BufferCellArray "$Filter " $PowerTabConfig.Colors.FilterColor $PowerTabConfig.Colors.BorderBackColor
-        $FilterPosition = $ListHandle.Position
-        $FilterPosition.X += (3 + $LastWord.Length)
-        $FilterHandle = New-Buffer $FilterPosition $FilterBuffer
-
-        ## Status buffer, shows at footer of console list.  Displays selected item index, index range of currently visible items, and total item count.
-        $StatusBuffer = ConvertTo-BufferCellArray "[$($ListHandle.SelectedItem + 1)] $($ListHandle.FirstItem + 1)-$($ListHandle.LastItem + 1) [$($Content.Length)]" $PowerTabConfig.Colors.BorderTextColor $PowerTabConfig.Colors.BorderBackColor
-        $StatusPosition = $ListHandle.Position
-        $StatusPosition.X += 2
-        $StatusPosition.Y += ($listHandle.ListConfig.ListHeight - 1)
-        $StatusHandle = New-Buffer $StatusPosition $StatusBuffer
-
+    process {
+        $Content += $InputObject
     }
-    . Add-Status
 
-    ## Select the first item in the list
-    $SelectedItem = 0
-    Set-Selection 1 ($SelectedItem + 1) ($ListHandle.ListConfig.ListWidth - 3) $PowerTabConfig.Colors.SelectedTextColor $PowerTabConfig.Colors.SelectedBackColor
+    end {
+        if (-not $ReturnWord) {$ReturnWord = $LastWord}
 
-    ## Listen for first key press
-    $Key = $Host.UI.RawUI.ReadKey('NoEcho,IncludeKeyDown')
-
-    ## Process key presses
-    $Continue = $true
-    while ($Key.VirtualKeyCode -ne 27 -and $Continue -eq $true) {
-        if (-not $HasChild) {
-            if ($OldFilter -ne $Filter) {
-              $Preview.Clear()
-              $PreviewBuffer = ConvertTo-BufferCellArray "$Filter " $PowerTabConfig.Colors.FilterColor $Host.UI.RawUI.BackgroundColor
-              $Preview = New-Buffer $Preview.Location $PreviewBuffer
-            }
-            $OldFilter = $Filter
+        ## If contents contains less than minimum options, then forward contents without displaying console list
+        if (($Content.Length -lt $PowerTabConfig.MinimumListItems) -and (-not $ForceList)) {
+            $Content | Select-Object -ExpandProperty Value
+            return
         }
-        $Shift = $Key.ControlKeyState.ToString()
-        $HasChild = $false
-        switch ($Key.VirtualKeyCode) {
-            9 { ## Tab
-                ## In Visual Studio, Tab acts like Enter
-                if ($PowerTabConfig.VisualStudioTabBehavior) {
-                    ## Expand with currently selected item
-                    @($ListHandle.Items)[$ListHandle.SelectedItem].Trim()
-                    $Continue = $false
-                    break
-                } else {
-                    if ($Shift -match 'ShiftPressed') {
-                        Move-Selection -1  ## Up
-                    } else {
-                        Move-Selection 1  ## Down
-                    }
-                    break
-                }
-            }
-            38 { ## Up Arrow
-                if ($Shift -match 'ShiftPressed') {
-                    ## Fast scroll selected
-                    if ($PowerTabConfig.FastScrollItemCount -gt ($ListHandle.Items.Count - 1)) {
-                        $Count = ($ListHandle.Items.Count - 1)
-                    } else {
-                        $Count = $PowerTabConfig.FastScrollItemCount
-                    }
-                    Move-Selection (- $Count)
-                } else {
-                    Move-Selection -1
-                }
-                break
-            }
-            40 { ## Down Arrow
-                if ($Shift -match 'ShiftPressed') {
-                    ## Fast scroll selected
-                    if ($PowerTabConfig.FastScrollItemCount -gt ($ListHandle.Items.count - 1)) {
-                        $Count = ($ListHandle.Items.Count - 1)
-                    } else {
-                        $Count = $PowerTabConfig.FastScrollItemCount
-                    }
-                    Move-Selection $Count
-                } else {
-                    Move-Selection 1
-                }
-                break
-            }
-            33 { ## Page Up
-                $Count = $ListHandle.Items.Count
-                if ($Count -gt $ListHandle.MaxItems) {
-                    $Count = $ListHandle.MaxItems
-                }
-                Move-Selection (-($Count - 1))
-                break
-            }
-            34 { ## Page Down
-                $Count = $ListHandle.Items.Count
-                if ($Count -gt $ListHandle.MaxItems) {
-                    $Count = $ListHandle.MaxItems
-                }
-                Move-Selection ($Count - 1)
-                break
-            }
-            39 { ## Right Arrow
-                ## Add a new character (the one right after the current filter string) from currently selected item
-                $Char = (@($ListHandle.Items)[$ListHandle.SelectedItem][($LastWord.Length + $Filter.Length + 1)])
-                $Filter += $Char
-                
-                $Old = $Items.Length
-                $Items = $Content -match ([Regex]::Escape("$LastWord$Filter") + '.*')
-                $New = $Items.Length
-                if ($New -lt 1) {
-                    ## If new filter results in no items, sound error beep and remove character
-                    Write-Host "`a" -NoNewline
-                    $Filter = $Filter.SubString(0, $Filter.Length - 1)
-                } else {
-                    if ($Old -ne $New) {
-                        ## Update console list contents
-                        $ListHandle.Clear()
-                        $ListHandle = New-ConsoleList $Items $PowerTabConfig.Colors.BorderColor $PowerTabConfig.Colors.BorderBackColor `
-                            $PowerTabConfig.Colors.TextColor $PowerTabConfig.Colors.BackColor
-                        ## Update status buffers
-                        . Add-Status
-                    }
-                    ## Select first item of new list
-                    $SelectedItem = 0
-                    Set-Selection 1 ($SelectedItem + 1) ($ListHandle.ListConfig.ListWidth - 3) $PowerTabConfig.Colors.SelectedTextColor $PowerTabConfig.Colors.SelectedBackColor
-                    $Host.UI.Write($PowerTabConfig.Colors.FilterColor, $Host.UI.RawUI.BackgroundColor, $Char)
-                }
-                break
-            }
-            {(8,37 -contains $_)} { # Backspace or Left Arrow
-                if ($Filter) {
-                    ## Remove last character from filter
-                    $Filter = $Filter.SubString(0, $Filter.Length - 1)
-                    $Host.UI.Write([char]8)
-                    Write-Line ($Host.UI.RawUI.CursorPosition.X) ($Host.UI.RawUI.CursorPosition.Y - $Host.UI.RawUI.WindowPosition.Y) " " $PowerTabConfig.Colors.FilterColor $Host.UI.RawUI.BackgroundColor
 
+        ## Create console list
+        $Filter = ''
+        $ListHandle = New-ConsoleList $Content $PowerTabConfig.Colors.BorderColor $PowerTabConfig.Colors.BorderBackColor `
+            $PowerTabConfig.Colors.TextColor $PowerTabConfig.Colors.BackColor
+
+        ## Preview of current filter, shows up where cursor is at
+        $PreviewBuffer =  ConvertTo-BufferCellArray "$Filter " $PowerTabConfig.Colors.FilterColor $Host.UI.RawUI.BackgroundColor
+        $Preview = New-Buffer $Host.UI.RawUI.CursorPosition $PreviewBuffer
+
+        Function Add-Status {
+            ## Title buffer, shows the last word in header of console list
+            $TitleBuffer = ConvertTo-BufferCellArray " $LastWord" $PowerTabConfig.Colors.BorderTextColor $PowerTabConfig.Colors.BorderBackColor
+            $TitlePosition = $ListHandle.Position
+            $TitlePosition.X += 2
+            $TitleHandle = New-Buffer $TitlePosition $TitleBuffer
+
+            ## Filter buffer, shows the current filter after the last word in header of console list
+            $FilterBuffer = ConvertTo-BufferCellArray "$Filter " $PowerTabConfig.Colors.FilterColor $PowerTabConfig.Colors.BorderBackColor
+            $FilterPosition = $ListHandle.Position
+            $FilterPosition.X += (3 + $LastWord.Length)
+            $FilterHandle = New-Buffer $FilterPosition $FilterBuffer
+
+            ## Status buffer, shows at footer of console list.  Displays selected item index, index range of currently visible items, and total item count.
+            $StatusBuffer = ConvertTo-BufferCellArray "[$($ListHandle.SelectedItem + 1)] $($ListHandle.FirstItem + 1)-$($ListHandle.LastItem + 1) [$($Content.Length)]" $PowerTabConfig.Colors.BorderTextColor $PowerTabConfig.Colors.BorderBackColor
+            $StatusPosition = $ListHandle.Position
+            $StatusPosition.X += 2
+            $StatusPosition.Y += ($listHandle.ListConfig.ListHeight - 1)
+            $StatusHandle = New-Buffer $StatusPosition $StatusBuffer
+
+        }
+        . Add-Status
+
+        ## Select the first item in the list
+        $SelectedItem = 0
+        Set-Selection 1 ($SelectedItem + 1) ($ListHandle.ListConfig.ListWidth - 3) $PowerTabConfig.Colors.SelectedTextColor $PowerTabConfig.Colors.SelectedBackColor
+
+        ## Listen for first key press
+        $Key = $Host.UI.RawUI.ReadKey('NoEcho,IncludeKeyDown')
+
+        ## Process key presses
+        $Continue = $true
+        while ($Key.VirtualKeyCode -ne 27 -and $Continue -eq $true) {
+            if (-not $HasChild) {
+                if ($OldFilter -ne $Filter) {
+                  $Preview.Clear()
+                  $PreviewBuffer = ConvertTo-BufferCellArray "$Filter " $PowerTabConfig.Colors.FilterColor $Host.UI.RawUI.BackgroundColor
+                  $Preview = New-Buffer $Preview.Location $PreviewBuffer
+                }
+                $OldFilter = $Filter
+            }
+            $Shift = $Key.ControlKeyState.ToString()
+            $HasChild = $false
+            switch ($Key.VirtualKeyCode) {
+                9 { ## Tab
+                    ## In Visual Studio, Tab acts like Enter
+                    if ($PowerTabConfig.VisualStudioTabBehavior) {
+                        ## Expand with currently selected item
+                        $ListHandle.Items[$ListHandle.SelectedItem].Value
+                        $Continue = $false
+                        break
+                    } else {
+                        if ($Shift -match 'ShiftPressed') {
+                            Move-Selection -1  ## Up
+                        } else {
+                            Move-Selection 1  ## Down
+                        }
+                        break
+                    }
+                }
+                38 { ## Up Arrow
+                    if ($Shift -match 'ShiftPressed') {
+                        ## Fast scroll selected
+                        if ($PowerTabConfig.FastScrollItemCount -gt ($ListHandle.Items.Count - 1)) {
+                            $Count = ($ListHandle.Items.Count - 1)
+                        } else {
+                            $Count = $PowerTabConfig.FastScrollItemCount
+                        }
+                        Move-Selection (- $Count)
+                    } else {
+                        Move-Selection -1
+                    }
+                    break
+                }
+                40 { ## Down Arrow
+                    if ($Shift -match 'ShiftPressed') {
+                        ## Fast scroll selected
+                        if ($PowerTabConfig.FastScrollItemCount -gt ($ListHandle.Items.Count - 1)) {
+                            $Count = ($ListHandle.Items.Count - 1)
+                        } else {
+                            $Count = $PowerTabConfig.FastScrollItemCount
+                        }
+                        Move-Selection $Count
+                    } else {
+                        Move-Selection 1
+                    }
+                    break
+                }
+                33 { ## Page Up
+                    $Count = $ListHandle.Items.Count
+                    if ($Count -gt $ListHandle.MaxItems) {
+                        $Count = $ListHandle.MaxItems
+                    }
+                    Move-Selection (-($Count - 1))
+                    break
+                }
+                34 { ## Page Down
+                    $Count = $ListHandle.Items.Count
+                    if ($Count -gt $ListHandle.MaxItems) {
+                        $Count = $ListHandle.MaxItems
+                    }
+                    Move-Selection ($Count - 1)
+                    break
+                }
+                39 { ## Right Arrow
+                    ## Add a new character (the one right after the current filter string) from currently selected item
+                    $Char = $ListHandle.Items[$ListHandle.SelectedItem].Text[($LastWord.Length + $Filter.Length + 1)]
+                    $Filter += $Char
+                    
                     $Old = $Items.Length
                     $Items = $Content -match ([Regex]::Escape("$LastWord$Filter") + '.*')
                     $New = $Items.Length
-                    if ($Old -ne $New) {
-                        ## If the item list changed, update the contents of the console list
-                        $ListHandle.Clear()
-                        $ListHandle = New-ConsoleList $Items $PowerTabConfig.Colors.BorderColor $PowerTabConfig.Colors.BorderBackColor `
-                            $PowerTabConfig.Colors.TextColor $PowerTabConfig.Colors.BackColor
-                        ## Update status buffers
-                        . Add-Status
-                    }
-                    ## Select first item of new list
-                    $SelectedItem = 0
-                    Set-Selection 1 ($SelectedItem + 1) ($ListHandle.ListConfig.ListWidth - 3) $PowerTabConfig.Colors.SelectedTextColor $PowerTabConfig.Colors.SelectedBackColor
-                } else {
-                    if ($PowerTabConfig.CloseListOnEmptyFilter) {
-                        $Key.VirtualKeyCode = 27
-                        $Continue = $false
-                    } else {
+                    if ($New -lt 1) {
+                        ## If new filter results in no items, sound error beep and remove character
                         Write-Host "`a" -NoNewline
-                    }
-                }
-                break
-            }
-            190 { ## Period
-                if ($PowerTabConfig.DotComplete -and -not $PowerTabFileSystemMode) {
-                    if ($PowerTabConfig.AutoExpandOnDot) {
-                        ## Expand with currently selected item
-                        $Host.UI.Write($Host.UI.RawUI.ForegroundColor, $Host.UI.RawUI.BackgroundColor, (@($ListHandle.Items)[$ListHandle.SelectedItem].Trim().SubString($LastWord.Length + $Filter.Length) + '.'))
-                        $ListHandle.Clear()
-                        $LinePart = $Line.SubString(0, $Line.Length - $LastWord.Length)
-
-                        ## Remove message handle ([Tab]) because we will be reinvoking tab expansion
-                        Remove-TabActivityIndicator
-
-                        ## Recursive tab expansion
-                        . TabExpansion ($LinePart + @($ListHandle.Items)[$ListHandle.SelectedItem].Trim() + '.') (@($ListHandle.Items)[$ListHandle.SelectedItem].Trim() + '.') -ForceList
-                        $HasChild = $true
+                        $Filter = $Filter.SubString(0, $Filter.Length - 1)
                     } else {
-                        @($ListHandle.Items)[$ListHandle.SelectedItem].Trim()
-                    }
-                    $Continue = $false
-                    break
-                }
-            }
-            {'\','/' -contains $Key.Character} { ## Path Separators
-                if ($PowerTabConfig.BackSlashComplete) {
-                    if ($PowerTabConfig.AutoExpandOnBackSlash) {
-                        ## Expand with currently selected item
-                        $Host.UI.Write($Host.UI.RawUI.ForegroundColor, $Host.UI.RawUI.BackgroundColor, (@($ListHandle.Items)[$ListHandle.SelectedItem].Trim().SubString($LastWord.Length + $Filter.Length) + $Key.Character))
-                        $ListHandle.Clear()
-                        if ($Line.Length -ge $LastWord.Length) {
-                            $LinePart = $Line.SubString(0, $Line.Length - $LastWord.Length)
+                        if ($Old -ne $New) {
+                            ## Update console list contents
+                            $ListHandle.Clear()
+                            $ListHandle = New-ConsoleList $Items $PowerTabConfig.Colors.BorderColor $PowerTabConfig.Colors.BorderBackColor `
+                                $PowerTabConfig.Colors.TextColor $PowerTabConfig.Colors.BackColor
+                            ## Update status buffers
+                            . Add-Status
                         }
-
-                        ## Remove message handle ([Tab]) because we will be reinvoking tab expansion
-                        Remove-TabActivityIndicator
-
-                        ## Recursive tab expansion
-                        . Invoke-TabExpansion ($LinePart + @($ListHandle.Items)[$ListHandle.SelectedItem].Trim() + $Key.Character) (@($ListHandle.Items)[$ListHandle.SelectedItem].Trim() + $Key.Character) -ForceList
-                        $HasChild = $true
-                    } else {
-                        @($ListHandle.Items)[$ListHandle.SelectedItem].Trim()
+                        ## Select first item of new list
+                        $SelectedItem = 0
+                        Set-Selection 1 ($SelectedItem + 1) ($ListHandle.ListConfig.ListWidth - 3) $PowerTabConfig.Colors.SelectedTextColor $PowerTabConfig.Colors.SelectedBackColor
+                        $Host.UI.Write($PowerTabConfig.Colors.FilterColor, $Host.UI.RawUI.BackgroundColor, $Char)
                     }
-                    $Continue = $false
                     break
                 }
-            }
-            32 { ## Space
-                ## True if "Space" and SpaceComplete is true, or "Ctrl+Space" and SpaceComplete is false
-                if (($PowerTabConfig.SpaceComplete -and -not ($Key.ControlKeyState -match 'CtrlPressed')) -or (-not $PowerTabConfig.SpaceComplete -and ($Key.ControlKeyState -match 'CtrlPressed'))) {
-                    ## Expand with currently selected item
-                    $Item = @($ListHandle.Items)[$ListHandle.SelectedItem].Trim()
-                    if ((-not $Item.Contains(' ')) -and ($PowerTabFileSystemMode -ne $true)) {$Item += ' '}
+                {(8,37 -contains $_)} { # Backspace or Left Arrow
+                    if ($Filter) {
+                        ## Remove last character from filter
+                        $Filter = $Filter.SubString(0, $Filter.Length - 1)
+                        $Host.UI.Write([char]8)
+                        Write-Line ($Host.UI.RawUI.CursorPosition.X) ($Host.UI.RawUI.CursorPosition.Y - $Host.UI.RawUI.WindowPosition.Y) " " $PowerTabConfig.Colors.FilterColor $Host.UI.RawUI.BackgroundColor
+
+                        $Old = $Items.Length
+                        $Items = $Content -match ([Regex]::Escape("$LastWord$Filter") + '.*')
+                        $New = $Items.Length
+                        if ($Old -ne $New) {
+                            ## If the item list changed, update the contents of the console list
+                            $ListHandle.Clear()
+                            $ListHandle = New-ConsoleList $Items $PowerTabConfig.Colors.BorderColor $PowerTabConfig.Colors.BorderBackColor `
+                                $PowerTabConfig.Colors.TextColor $PowerTabConfig.Colors.BackColor
+                            ## Update status buffers
+                            . Add-Status
+                        }
+                        ## Select first item of new list
+                        $SelectedItem = 0
+                        Set-Selection 1 ($SelectedItem + 1) ($ListHandle.ListConfig.ListWidth - 3) $PowerTabConfig.Colors.SelectedTextColor $PowerTabConfig.Colors.SelectedBackColor
+                    } else {
+                        if ($PowerTabConfig.CloseListOnEmptyFilter) {
+                            $Key.VirtualKeyCode = 27
+                            $Continue = $false
+                        } else {
+                            Write-Host "`a" -NoNewline
+                        }
+                    }
+                    break
+                }
+                190 { ## Period
+                    if ($PowerTabConfig.DotComplete -and -not $PowerTabFileSystemMode) {
+                        if ($PowerTabConfig.AutoExpandOnDot) {
+                            ## Expand with currently selected item
+                            $Host.UI.Write($Host.UI.RawUI.ForegroundColor, $Host.UI.RawUI.BackgroundColor, ($ListHandle.Items[$ListHandle.SelectedItem].Value.SubString($LastWord.Length + $Filter.Length) + '.'))
+                            $ListHandle.Clear()
+                            $LinePart = $Line.SubString(0, $Line.Length - $LastWord.Length)
+
+                            ## Remove message handle ([Tab]) because we will be reinvoking tab expansion
+                            Remove-TabActivityIndicator
+
+                            ## Recursive tab expansion
+                            . TabExpansion ($LinePart + $ListHandle.Items[$ListHandle.SelectedItem].Value + '.') ($ListHandle.Items[$ListHandle.SelectedItem].Value + '.') -ForceList
+                            $HasChild = $true
+                        } else {
+                            $ListHandle.Items[$ListHandle.SelectedItem].Value
+                        }
+                        $Continue = $false
+                        break
+                    }
+                }
+                {'\','/' -contains $Key.Character} { ## Path Separators
+                    if ($PowerTabConfig.BackSlashComplete) {
+                        if ($PowerTabConfig.AutoExpandOnBackSlash) {
+                            ## Expand with currently selected item
+                            $Host.UI.Write($Host.UI.RawUI.ForegroundColor, $Host.UI.RawUI.BackgroundColor, ($ListHandle.Items[$ListHandle.SelectedItem].Value.SubString($LastWord.Length + $Filter.Length) + $Key.Character))
+                            $ListHandle.Clear()
+                            if ($Line.Length -ge $LastWord.Length) {
+                                $LinePart = $Line.SubString(0, $Line.Length - $LastWord.Length)
+                            }
+
+                            ## Remove message handle ([Tab]) because we will be reinvoking tab expansion
+                            Remove-TabActivityIndicator
+
+                            ## Recursive tab expansion
+                            . Invoke-TabExpansion ($LinePart + $ListHandle.Items[$ListHandle.SelectedItem].Value + $Key.Character) ($ListHandle.Items[$ListHandle.SelectedItem].Value + $Key.Character) -ForceList
+                            $HasChild = $true
+                        } else {
+                            $ListHandle.Items[$ListHandle.SelectedItem].Value
+                        }
+                        $Continue = $false
+                        break
+                    }
+                }
+                32 { ## Space
+                    ## True if "Space" and SpaceComplete is true, or "Ctrl+Space" and SpaceComplete is false
+                    if (($PowerTabConfig.SpaceComplete -and -not ($Key.ControlKeyState -match 'CtrlPressed')) -or (-not $PowerTabConfig.SpaceComplete -and ($Key.ControlKeyState -match 'CtrlPressed'))) {
+                        ## Expand with currently selected item
+                        $Item = $ListHandle.Items[$ListHandle.SelectedItem].Value
+                        if ((-not $Item.Contains(' ')) -and ($PowerTabFileSystemMode -ne $true)) {$Item += ' '}
+                        $Item
+                        $Continue = $false
+                        break
+                    }
+                }
+                {($PowerTabConfig.CustomCompletionChars.ToCharArray() -contains $Key.Character) -and $PowerTabConfig.CustomComplete} { ## Extra completions
+                    $Item = $ListHandle.Items[$ListHandle.SelectedItem].Value
+                    $Item = ($Item + $Key.Character) -replace "\$($Key.Character){2}$",$Key.Character
                     $Item
                     $Continue = $false
                     break
                 }
-            }
-            {($PowerTabConfig.CustomCompletionChars.ToCharArray() -contains $Key.Character) -and $PowerTabConfig.CustomComplete} { ## Extra completions
-                $Item = @($ListHandle.Items)[$ListHandle.SelectedItem].Trim()
-                $Item = ($Item + $Key.Character) -replace "\$($Key.Character){2}$",$Key.Character
-                $Item
-                $Continue = $false
-                break
-            }
-            13 { ## Enter
-                ## Expand with currently selected item
-                @($ListHandle.Items)[$ListHandle.SelectedItem].Trim()
-                $Continue = $false
-                break
-            }
-            {$_ -ge 32 -and $_ -le 190}  { ## Letter or digit or symbol (ASCII)
-                ## Add character to filter
-                $Filter += $Key.Character
-
-                $Old = $Items.Length
-                $Items = $Content -match ([Regex]::Escape("$LastWord$Filter") + '.*')
-                $New = $Items.Length
-                if ($Items.Length -lt 1) {
-                    ## New filter results in no items
-                    if ($PowerTabConfig.CloseListOnEmptyFilter) {
-                        ## Close console list and return the return word with current filter (includes new character)
-                        $ListHandle.Clear()
-                        return "$ReturnWord$Filter"
-                    } else {
-                        ## Sound error beep and remove character
-                        Write-Host "`a" -NoNewline
-                        $Filter = $Filter.SubString(0, $Filter.Length - 1)
-                    }
-                } else {
-                    if ($Old -ne $New) {
-                        ## If the item list changed, update the contents of the console list
-                        $ListHandle.Clear()
-                        $ListHandle = New-ConsoleList $Items $PowerTabConfig.Colors.BorderColor $PowerTabConfig.Colors.BorderBackColor `
-                            $PowerTabConfig.Colors.TextColor $PowerTabConfig.Colors.BackColor
-                        ## Update status buffer
-                        . Add-Status
-                        ## Select first item of new list
-                        $SelectedItem = 0
-                        Set-Selection 1 ($SelectedItem + 1) ($ListHandle.ListConfig.ListWidth - 3) $PowerTabConfig.Colors.SelectedTextColor $PowerTabConfig.Colors.SelectedBackColor
-                    }
-
-                    $Host.UI.Write($PowerTabConfig.Colors.FilterColor, $Host.UI.RawUI.BackgroundColor, $Key.Character)
+                13 { ## Enter
+                    ## Expand with currently selected item
+                    $ListHandle.Items[$ListHandle.SelectedItem].Value
+                    $Continue = $false
+                    break
                 }
-                break
+                {$_ -ge 32 -and $_ -le 190}  { ## Letter or digit or symbol (ASCII)
+                    ## Add character to filter
+                    $Filter += $Key.Character
+
+                    $Old = $Items.Length
+                    $Items = $Content -match ([Regex]::Escape("$LastWord$Filter") + '.*')
+                    $New = $Items.Length
+                    if ($Items.Length -lt 1) {
+                        ## New filter results in no items
+                        if ($PowerTabConfig.CloseListOnEmptyFilter) {
+                            ## Close console list and return the return word with current filter (includes new character)
+                            $ListHandle.Clear()
+                            return "$ReturnWord$Filter"
+                        } else {
+                            ## Sound error beep and remove character
+                            Write-Host "`a" -NoNewline
+                            $Filter = $Filter.SubString(0, $Filter.Length - 1)
+                        }
+                    } else {
+                        if ($Old -ne $New) {
+                            ## If the item list changed, update the contents of the console list
+                            $ListHandle.Clear()
+                            $ListHandle = New-ConsoleList $Items $PowerTabConfig.Colors.BorderColor $PowerTabConfig.Colors.BorderBackColor `
+                                $PowerTabConfig.Colors.TextColor $PowerTabConfig.Colors.BackColor
+                            ## Update status buffer
+                            . Add-Status
+                            ## Select first item of new list
+                            $SelectedItem = 0
+                            Set-Selection 1 ($SelectedItem + 1) ($ListHandle.ListConfig.ListWidth - 3) $PowerTabConfig.Colors.SelectedTextColor $PowerTabConfig.Colors.SelectedBackColor
+                        }
+
+                        $Host.UI.Write($PowerTabConfig.Colors.FilterColor, $Host.UI.RawUI.BackgroundColor, $Key.Character)
+                    }
+                    break
+                }
+            }
+
+            ## Listen for next key press
+            if ($Continue) {$Key = $Host.UI.RawUI.ReadKey('NoEcho,IncludeKeyDown')}
+        }
+
+        $ListHandle.Clear()
+        if (-not $HasChild) {
+            if ($Key.VirtualKeyCode -eq 27) {
+        		#Write-Line ($Host.UI.RawUI.CursorPosition.X - 1) ($Host.UI.RawUI.CursorPosition.Y - $Host.UI.RawUI.WindowPosition.Y) " " $PowerTabConfig.Colors.FilterColor $Host.UI.RawUI.BackgroundColor
+                ## No items left and request that console list close, so return the return word with current filter
+                return "$ReturnWord$Filter"
             }
         }
-
-        ## Listen for next key press
-        if ($Continue) {$Key = $Host.UI.RawUI.ReadKey('NoEcho,IncludeKeyDown')}
-    }
-
-    $ListHandle.Clear()
-    if (-not $HasChild) {
-        if ($Key.VirtualKeyCode -eq 27) {
-    		#Write-Line ($Host.UI.RawUI.CursorPosition.X - 1) ($Host.UI.RawUI.CursorPosition.Y - $Host.UI.RawUI.WindowPosition.Y) " " $PowerTabConfig.Colors.FilterColor $Host.UI.RawUI.BackgroundColor
-            ## No items left and request that console list close, so return the return word with current filter
-            return "$ReturnWord$Filter"
-        }
-    }
+    }  ## end of "end" block
 }
 
 
@@ -418,10 +428,10 @@ Function Out-ConsoleList {
 
     Function Get-ContentSize {
         param(
-            [String[]]$Content
+            [Object[]]$Content
         )
 
-        $MaxWidth = @($Content | Sort-Object Length -Descending)[0].Length
+        $MaxWidth = @($Content | Select-Object -ExpandProperty Text | Sort-Object Length -Descending)[0].Length
         New-Object System.Drawing.Size $MaxWidth, $Content.Length
     }
 
@@ -478,7 +488,6 @@ Function Out-ConsoleList {
             $BackgroundColor = $Host.UI.RawUI.BackgroundColor
         )
 
-        $Content = $Content | ForEach-Object {$_}
         ,$Host.UI.RawUI.NewBufferCellArray($Content, $ForegroundColor, $BackgroundColor)
     }
 
@@ -544,7 +553,7 @@ Function Out-ConsoleList {
 
     Function New-ConsoleList {
         param(
-            [String[]]
+            [Object[]]
             $Content
             ,
             [System.ConsoleColor]
@@ -563,7 +572,10 @@ Function Out-ConsoleList {
         $Size = Get-ContentSize $Content
         $MinWidth = ([String]$Content.Count).Length * 4 + 7
         if ($Size.Width -lt $MinWidth) {$Size.Width = $MinWidth}
-        $Content = $Content | ForEach-Object {" $_ ".PadRight($Size.Width + 2)}
+        $Content = foreach ($Item in $Content) {
+            $Item.Text = " $($Item.Text) ".PadRight($Size.Width + 2)
+            $Item
+        }
         $ListConfig = Parse-List $Size
         $BoxSize = New-Object System.Drawing.Size $ListConfig.ListWidth, $ListConfig.ListHeight
         $Box = New-Box $BoxSize $BorderForegroundColor $BorderBackgroundColor
@@ -574,7 +586,7 @@ Function Out-ConsoleList {
         # Place content 
         $Position.X += 1
         $Position.Y += 1
-        $ContentBuffer = ConvertTo-BufferCellArray @($Content)[0..($ListConfig.ListHeight - 3)] $ContentForegroundColor $ContentBackgroundColor
+        $ContentBuffer = ConvertTo-BufferCellArray ($Content[0..($ListConfig.ListHeight - 3)] | Select-Object -ExpandProperty Text) $ContentForegroundColor $ContentBackgroundColor
         $ContentHandle = New-Buffer $Position $ContentBuffer
         $Handle = New-Object System.Management.Automation.PSObject -Property @{
             'Position' = (New-Position $ListConfig.TopX $ListConfig.TopY)
@@ -678,11 +690,11 @@ Function Out-ConsoleList {
         $SelectedItem = $ListHandle.SelectedItem
         $Line = $ListHandle.SelectedLine
         if ($Count -eq ([Math]::Abs([Int]$Count))) { ## Down in list
-            if ($SelectedItem -eq (@($ListHandle.Items).Count -1)) {return}
+            if ($SelectedItem -eq ($ListHandle.Items.Count - 1)) {return}
             $One = 1
             if ($SelectedItem -eq $ListHandle.LastItem) {
                 $Move = $true
-                if (($ListHandle.Items.count - $SelectedItem -1) -lt $Count) {$Count = $ListHandle.Items.Count - $SelectedItem - 1}
+                if (($ListHandle.Items.Count - $SelectedItem - 1) -lt $Count) {$Count = $ListHandle.Items.Count - $SelectedItem - 1}
             } else {
                 $Move = $false
                 if (($ListHandle.MaxItems - $Line) -lt $Count) {$Count = $ListHandle.MaxItems - $Line}       
@@ -710,10 +722,10 @@ Function Out-ConsoleList {
             $LinePosition.X += 1
             if ($One -eq 1) {
                 $LinePosition.Y += $Line - ($Count - $One)
-                $LineBuffer = ConvertTo-BufferCellArray ($ListHandle.Items[($SelectedItem - ($Count - $One)) .. $SelectedItem]) $PowerTabConfig.Colors.TextColor $PowerTabConfig.Colors.BackColor
+                $LineBuffer = ConvertTo-BufferCellArray ($ListHandle.Items[($SelectedItem - ($Count - $One)) .. $SelectedItem] | Select-Object -ExpandProperty Text) $PowerTabConfig.Colors.TextColor $PowerTabConfig.Colors.BackColor
             } else {
                 $LinePosition.Y += 1
-                $LineBuffer = ConvertTo-BufferCellArray ($ListHandle.Items[($SelectedItem..($SelectedItem - ($Count - $One)))]) $PowerTabConfig.Colors.TextColor $PowerTabConfig.Colors.BackColor
+                $LineBuffer = ConvertTo-BufferCellArray ($ListHandle.Items[($SelectedItem..($SelectedItem - ($Count - $One)))] | Select-Object -ExpandProperty Text) $PowerTabConfig.Colors.TextColor $PowerTabConfig.Colors.BackColor
             }
             $LineHandle = New-Buffer $LinePosition $LineBuffer
             Set-Selection 1 $Line ($ListHandle.ListConfig.ListWidth - 3) $PowerTabConfig.Colors.SelectedTextColor $PowerTabConfig.Colors.SelectedBackColor
