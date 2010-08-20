@@ -295,7 +295,8 @@ Function Invoke-TabExpansion {
                     ## Enum
                     if ($ParameterInfo.ParameterType.BaseType -eq [System.Enum]) {
                         $TabExpansionHasOutput = $true
-                        $PossibleValues = [Enum]::GetNames($ParameterInfo.ParameterType) | Where-Object {$_ -like ($CurrentContext.Argument + "*")}
+                        $PossibleValues = [Enum]::GetNames($ParameterInfo.ParameterType) | Where-Object {$_ -like ($CurrentContext.Argument + "*")} | 
+                            New-TabItem -Value {$_} -Text {$_} -Type Enum
                     }
 
                     ## ValidateSet
@@ -303,7 +304,9 @@ Function Invoke-TabExpansion {
                         $ValidateSet = $ParameterInfo.Attributes | Where-Object {$_ -is [System.Management.Automation.ValidateSetAttribute]}
                         if ($ValidateSet) {
                             $TabExpansionHasOutput = $true
-                            $PossibleValues = $ValidateSet | Select-Object -ExpandProperty ValidValues | Where-Object {$_ -like ($CurrentContext.Argument + "*")}
+                            $PossibleValues = $ValidateSet | Select-Object -ExpandProperty ValidValues |
+                                Where-Object {$_ -like ($CurrentContext.Argument + "*")} | 
+                                New-TabItem -Value {$_} -Text {$_} -Type Enum
                         }
                     }
                 } catch {}
@@ -320,14 +323,14 @@ Function Invoke-TabExpansion {
             ## Parameter name registry
             if ((-not $TabExpansionHasOutput) -and $TabExpansionParameterNameRegistry[$FullCommandName]) {
                 $ScriptBlock = $TabExpansionParameterNameRegistry[$FullCommandName]
-                $PossibleValues = & $ScriptBlock $CurrentContext $LastWord
+                $PossibleValues = & $ScriptBlock $CurrentContext $LastWord | New-TabItem -Value {$_} -Text {$_} -Type Parameter
                 if ($PossibleValues) {
                     $TabExpansionHasOutput = $true
                 }
             }
             if ((-not $TabExpansionHasOutput) -and $TabExpansionParameterNameRegistry[$InternalCommandName]) {
                 $ScriptBlock = $TabExpansionParameterNameRegistry[$InternalCommandName]
-                $PossibleValues = & $ScriptBlock $CurrentContext $LastWord
+                $PossibleValues = & $ScriptBlock $CurrentContext $LastWord | New-TabItem -Value {$_} -Text {$_} -Type Parameter
                 if ($PossibleValues) {
                     $TabExpansionHasOutput = $true
                 }
@@ -361,7 +364,8 @@ Function Invoke-TabExpansion {
                         }
                         $Parameters = $Parameters -join ", "
                     }
-                    "{0}{1})" -f $LastWord,$Parameters
+                    $Value = "{0}{1})" -f $LastWord,$Parameters
+                    New-TabItem -Value $Value -Text $Value -Type MethodSignature
                 }
                 $TabExpansionHasOutput = $true
             }
@@ -482,10 +486,12 @@ Function Invoke-PowerTab {
             } | ForEach-Object {
                 if ($_.MemberType -band $_Method) {
                     ## Return a method...
-                    $val + '.' + $_.Name + '('
+                    $Value = $val + '.' + $_.Name + '('
+                    New-TabItem -Value $Value -Text $Value -Type Method
                 } else {
                     ## Return a property...
-                    $val + '.' + $_.Name
+                    $Value = $val + '.' + $_.Name
+                    New-TabItem -Value $Value -Text $Value -Type Property
                 }
             }
         }
@@ -538,7 +544,7 @@ Function Invoke-PowerTab {
             ## Handle inline type search, e.g. new-object .identityreference<tab> or .identityre<tab> (oisin) 
             '^(\[*?)\.(\w+)$' {
                 $TypeName = $Matches[2]
-                Get-TabExpansion "%.${TypeName}%" Types | Select-Object -ExpandProperty Name |
+                Get-TabExpansion "*.${TypeName}*" Types | New-TabItem -Value {$_.Name} -Text {$_.Name} -Type Type |
                     Invoke-TabItemSelector $LastWord.Replace('[', '') -SelectionHandler $SelectionHandler |
                     ForEach-Object {if ($Matches[1] -eq '[') {"[$_]"} else {$_}}
                 break
@@ -558,10 +564,12 @@ Function Invoke-PowerTab {
                 } | ForEach-Object {
                     if ($_.MemberType -band $_Method) {
                         ## Return a method...
-                        $ScriptBlock + '.' + $_.Name + '('
+                        $Value = $ScriptBlock + '.' + $_.Name + '('
+                        New-TabItem -Value $Value -Text $Value -Type Method
                     } else {
                         ## Return a property...
-                        $ScriptBlock + '.' + $_.Name
+                        $Value = $ScriptBlock + '.' + $_.Name
+                        New-TabItem -Value $Value -Text $Value -Type Property
                     }
                 } | Invoke-TabItemSelector "$ScriptBlock.$Member" -SelectionHandler $SelectionHandler
                 break
@@ -574,7 +582,7 @@ Function Invoke-PowerTab {
                 $ComputerName = $Matches[1]
                 $ShareName = $Matches[2]
                 [Trinet.Networking.ShareCollection]::GetShares($ComputerName) | Where-Object {$_.NetName -like "$ShareName*"} |
-                    Sort-Object NetName | ForEach-Object {"\\$ComputerName\" + $_.NetName} |
+                    Sort-Object NetName | New-TabItem -Value {"\\$ComputerName\" + $_.NetName} -Text {"\\$ComputerName\" + $_.NetName} -Type Share |
                     Invoke-TabItemSelector $LastWord -SelectionHandler $SelectionHandler
                 break
             }
@@ -582,7 +590,8 @@ Function Invoke-PowerTab {
             ## Completion on computers in database
             '^\\\\([^\\]*)$' {
                 $Computers = foreach ($Computer in Get-TabExpansion "$($Matches[1])*" Computer) {
-                    "\\" + $Computer.Text
+                    $Value = "\\" + $Computer.Text
+                    New-TabItem -Value $Value -Text $Value -Type Computer
                 }
                 $Computers | Invoke-TabItemSelector $LastWord -SelectionHandler $SelectionHandler
                 break
@@ -599,7 +608,10 @@ Function Invoke-PowerTab {
             '.*\-\?' {"Get-Help " + $LastWord.Replace('-?', ' -')}
 
             ## PSDrive expansion on :[tab]
-            '^:$' {Get-PSDrive | ForEach-Object {$_.Name + ':'} | Invoke-TabItemSelector '' -SelectionHandler $SelectionHandler}
+            '^:$' {
+                Get-PSDrive | New-TabItem -Value {$_.Name + ':'} -Text {$_.Name + ':'} -Type PSDrive |
+                    Invoke-TabItemSelector '' -SelectionHandler $SelectionHandler
+            }
 
             ## History completion against either #<pattern> or #<id>
             '^#(\w*)' {
@@ -608,14 +620,15 @@ Function Invoke-PowerTab {
                     @(Get-History -Id $Pattern -ErrorAction SilentlyContinue)[0].CommandLine
                 } else {
                     Get-History -Count 32767 | Where-Object {$_.CommandLine -like "$Pattern*"} | Sort-Object -Descending Id |
-                        Select-Object -ExpandProperty CommandLine | Invoke-TabItemSelector $Pattern -SelectionHandler $SelectionHandler
+                        New-TabItem -Value {$_.CommandLine} -Text {$_.CommandLine} -Type History |
+                        Invoke-TabItemSelector $Pattern -SelectionHandler $SelectionHandler
                 }
                 break
             }
 
             ## About Topics completion
             'about_(.*)' {
-                Get-Help "about_$($Matches[1])*" | Select-Object -ExpandProperty Name |
+                Get-Help "about_$($Matches[1])*" | New-TabItem -Value {$_.Name} -Text {$_.Name} -Type Help |
                     Invoke-TabItemSelector $LastWord -SelectionHandler $SelectionHandler
                 break
             }
@@ -631,7 +644,7 @@ Function Invoke-PowerTab {
 
             ## WMI completion
             '(win32_.*|cim_.*|MSFT_.*)' {
-                Get-TabExpansion "$($Matches[1])*" WMI | Select-Object -ExpandProperty Name |
+                Get-TabExpansion "$($Matches[1])*" WMI | New-TabItem -Value {$_.Name} -Text {$_.Name} -Type WMIObject |
                     Invoke-TabItemSelector $LastWord -SelectionHandler $SelectionHandler
                 break
             }
@@ -644,7 +657,7 @@ Function Invoke-PowerTab {
             }
 
             ## Translate typename to New-Object statement  [String][tab]
-            '(\[.*\])=(\w*)' {
+            '^(\[.*\])=(\w*)$' {
                 "New-Object $($Matches[1].Replace('[','').Replace(']',''))"
                 break
             }
@@ -663,9 +676,11 @@ Function Invoke-PowerTab {
                     Invoke-Expression "$($Matches[1]) | Get-Member -Static" | Where-Object {
                         $_.Name -like $Pattern -and $_.Name -notmatch '^[ge]et_'} | ForEach-Object {
                             if ($_.MemberType -band $_Method) {
-                                "${LastType}::$($_.Name)" + '('
+                                $Value = "${LastType}::$($_.Name)" + '('
+                                New-TabItem -Value $Value -Text $Value -Type StaticMethod
                             } else {
-                                "${LastType}::$($_.Name)"
+                                $Value = "${LastType}::$($_.Name)"
+                                New-TabItem -Value $Value -Text $Value -Type StaticProperty
                             }
                         } | Invoke-TabItemSelector $LastWord -SelectionHandler $SelectionHandler
                 }
@@ -688,9 +703,11 @@ Function Invoke-PowerTab {
                     Invoke-Expression "$($Matches[1]) | Get-Member -Static" | Where-Object {
                         $_.Name -like $Pattern -and $_.Name -notmatch '^[ge]et_'} | ForEach-Object {
                             if ($_.MemberType -band $_Method) {
-                                "${LastType}${gt}::$($_.Name)" + '('
+                                $Value = "${LastType}${gt}::$($_.Name)" + '('
+                                New-TabItem -Value $Value -Text $Value -Type StaticMethod
                             } else {
-                                "${LastType}${gt}::$($_.Name)"
+                                $Value = "${LastType}${gt}::$($_.Name)"
+                                New-TabItem -Value $Value -Text $Value -Type StaticProperty
                             }
                         } | Invoke-TabItemSelector $LastWord.Replace('::',"${gt}::") -SelectionHandler $SelectionHandler
                 }
@@ -703,7 +720,8 @@ Function Invoke-PowerTab {
                 $BaseType = (Invoke-Expression "$LastType.BaseType.FullName")
                 . {
                     if ($BaseType -eq 'System.Enum') {
-                        $Names = Invoke-Expression "[Enum]::GetNames($LastType)" | ForEach-Object {"${LastType}::$_"} |
+                        $Names = Invoke-Expression "[Enum]::GetNames($LastType)" |
+                            New-TabItem -Value {"${LastType}::$_"} -Text {"${LastType}::$_"} -Type Enum |
                             Invoke-TabItemSelector ($LastType + '::') -SelectionHandler $SelectionHandler
                     } else {
                         $Constructors = Invoke-Expression "$LastType.GetConstructors()" | ForEach-Object {
@@ -715,7 +733,8 @@ Function Invoke-PowerTab {
                             "New-Object $($LastType.Trim('[]'))($Param)".Replace('([])','()')
                         }
                         if ($Constructors) {
-                            $Constructors | Invoke-TabItemSelector $LastType -SelectionHandler $SelectionHandler
+                            $Constructors | New-TabItem -Value {$_} -Text {$_} -Type Constructor |
+                                Invoke-TabItemSelector $LastType -SelectionHandler $SelectionHandler
                         } else {
                             $LastWord
                         }
@@ -729,9 +748,11 @@ Function Invoke-PowerTab {
                 $LastType = $Matches[1].Split(',')[-1]
                 Invoke-Expression "$LastType | Get-Member" | Where-Object {$_.Name -like "$($Matches[2])*"} | ForEach-Object {
                     if ($_.MemberType -band $_Method) {
-                        "$LastType.$($_.Name)" + '('
+                        $Value = "$LastType.$($_.Name)" + '('
+                        New-TabItem -Value $Value -Text $Value -Type Method
                     } else {
-                        "$LastType.$($_.Name)"
+                        $Value = "$LastType.$($_.Name)"
+                        New-TabItem -Value $Value -Text $Value -Type Property
                     }
                 } | Invoke-TabItemSelector $LastWord -SelectionHandler $SelectionHandler
                 break
@@ -744,18 +765,22 @@ Function Invoke-PowerTab {
                 $res = @()
                 $res += foreach ($Namespace in $dsTabExpansionDatabase.Tables['Types'].Select("NS like '$($Matched)%' and DC = $($Dots + 1)") |
                         Select-Object -Unique NS) {
-                    "[$($Namespace.NS)"
+                    $Value = "[$($Namespace.NS)"
+                    New-TabItem -Value $Value -Text $Value -Type Namespace
                 }
                 $res += foreach ($Namespace in $dsTabExpansionDatabase.Tables['Types'].Select("NS like 'System.$($Matched)%' and DC = $($Dots + 2)") |
                         Select-Object -Unique NS) {
-                    "[$($Namespace.NS)"
+                    $Value = "[$($Namespace.NS)"
+                    New-TabItem -Value $Value -Text $Value -Type Namespace
                 }
                 if ($Dots -gt 0) {
                     $res += foreach ($Type in $dsTabExpansionDatabase.Tables['Types'].Select("Name like '$($Matched)%' and DC = $Dots")) {
-                        "[$($Type.Name)]"
+                        $Value = "[$($Type.Name)]"
+                        New-TabItem -Value $Value -Text $Value -Type Type
                     }
                     $res += foreach ($Type in $dsTabExpansionDatabase.Tables['Types'].Select("Name like 'System.$($Matched)%' and DC = $($Dots + 1)")) {
-                        "[$($Type.Name)]"
+                        $Value = "[$($Type.Name)]"
+                        New-TabItem -Value $Value -Text $Value -Type Type
                     }
                 }
                 $res | Where-Object {$_} | Invoke-TabItemSelector $LastWord -SelectionHandler $SelectionHandler -ForceList:$ForceList
@@ -778,18 +803,17 @@ Function Invoke-PowerTab {
                         '$' + (QuoteVariable ($Type + ":" + $t.Name))
                     }
                 }
-                $Variables | Invoke-TabItemSelector $LastWord -SelectionHandler $SelectionHandler
+                $Variables | New-TabItem -Value {$_} -Text {$_} -Type Variable | Invoke-TabItemSelector $LastWord -SelectionHandler $SelectionHandler
                 break
             }
 
             ## Handle variable name expansion
             '^([\$@])(\w*)$' {
-                ## TODO: This could be simplified
                 $VarName = $Matches[2]
                 $Variables = foreach ($Variable in Get-Variable "$VarName*" -Scope Global) {
                     $Matches[1] + (QuoteVariable $Variable.Name)
                 }
-                $Variables | Invoke-TabItemSelector $LastWord -SelectionHandler $SelectionHandler
+                $Variables | New-TabItem -Value {$_} -Text {$_} -Type Variable | Invoke-TabItemSelector $LastWord -SelectionHandler $SelectionHandler
                 break
             }
 
@@ -798,26 +822,27 @@ Function Invoke-PowerTab {
             ## Native commands / scripts in path
             "(.*)$([Regex]::Escape($PowerTabConfig.ShortcutChars.Native))`$" { 
                 & {
-                    Get-Command -CommandType ExternalScript -Name "$($Matches[1])*"
+                    Get-Command -CommandType ExternalScript -Name "$($Matches[1])*" |
+                        New-TabItem -Value {$_.Name} -Text {$_.Name} -Type Script
                     Get-Command -CommandType Application -Name "$($Matches[1])*" |
-                        Where-Object {($env:PATHEXT).Split(";") -contains $_.Extension}
-                } | Select-Object -ExpandProperty Name |
-                    Invoke-TabItemSelector $Matches[1] -SelectionHandler $SelectionHandler
+                        Where-Object {($env:PATHEXT).Split(";") -contains $_.Extension} |
+                        New-TabItem -Value {$_.Name} -Text {$_.Name} -Type Application
+                } | Invoke-TabItemSelector $Matches[1] -SelectionHandler $SelectionHandler
                 break
             }
 
             ## Aliases
             "(.+)$([Regex]::Escape($PowerTabConfig.ShortcutChars.Alias))`$" {
                 & {
-                    Get-Command -CommandType Alias -Name $Matches[1] | Select-Object -ExpandProperty Definition
-                    Get-TabExpansion $Matches[1] Alias | Select-Object -ExpandProperty Text
+                    Get-Command -CommandType Alias -Name $Matches[1] | New-TabItem -Value {$_.Definition} -Text {$_.Definition} -Type Alias
+                    Get-TabExpansion $Matches[1] Alias | New-TabItem -Value {$_.Text} -Text {$_.Text} -Type Alias
                 } | Invoke-TabItemSelector $Matches[1] -SelectionHandler $SelectionHandler
                 break
             }
 
             ## Custom
             "(.*)$([Regex]::Escape($PowerTabConfig.ShortcutChars.Custom))`$" {
-                Get-TabExpansion "$($Matches[1])*" Custom | Select-Object -ExpandProperty Text |
+                Get-TabExpansion "$($Matches[1])*" Custom | New-TabItem -Value {$_.Text} -Text {$_.Text} -Type Unknown |
                     Invoke-TabItemSelector $Matches[1] -SelectionHandler $SelectionHandler
                 break
             }
@@ -825,7 +850,7 @@ Function Invoke-PowerTab {
             ## Invoke
             "(.+)$([Regex]::Escape($PowerTabConfig.ShortcutChars.Invoke))`$" {
                 Get-TabExpansion "$($Matches[1])*" Invoke | ForEach-Object {
-                    $ExecutionContext.InvokeCommand.InvokeScript($_.Text)
+                    $ExecutionContext.InvokeCommand.InvokeScript($_.Text) | New-TabItem -Value {$_} -Text {$_} -Type Unknown
                 } | Invoke-TabItemSelector $Matches[1] -SelectionHandler $SelectionHandler
                 break
             }
@@ -834,7 +859,8 @@ Function Invoke-PowerTab {
             "(.*)$([Regex]::Escape($PowerTabConfig.ShortcutChars.CustomFunction))`$" {
                 if ($PowerTabConfig.CustomFunctionEnabled) {
                     $Matches[1] | ForEach-Object {
-                        $ExecutionContext.InvokeCommand.InvokeScript("$($PowerTabConfig.CustomUserFunction) '$_'")
+                        $ExecutionContext.InvokeCommand.InvokeScript("$($PowerTabConfig.CustomUserFunction) '$_'") | 
+                            New-TabItem -Value {$_} -Text {$_} -Type Unknown
                     } | Invoke-TabItemSelector $Matches[1] -SelectionHandler $SelectionHandler
                 }
                 break
@@ -842,14 +868,18 @@ Function Invoke-PowerTab {
 
             ## Partial functions or cmdlets
             "(.*)$([Regex]::Escape($PowerTabConfig.ShortcutChars.Partial))`$" {
-                Get-Command -CommandType Function,ExternalScript,Filter,Cmdlet -Name "$($Matches[1])*" | Select-Object -ExpandProperty Name |
+                ## TODO: Give different types?
+                Get-Command -CommandType Function,ExternalScript,Filter,Cmdlet -Name "$($Matches[1])*" |
+                    New-TabItem -Value {$_.Name} -Text {$_.Name} -Type Command |
                     Invoke-TabItemSelector $Matches[1] -SelectionHandler $SelectionHandler
                 break
             }
 
             ## Functions or cmdlets on dash
             '(.+-.*)' {
-                Get-Command -CommandType Function,ExternalScript,Filter,Cmdlet -Name "$($Matches[1])*" | Select-Object -ExpandProperty Name |
+                ## TODO: Give different types?
+                Get-Command -CommandType Function,ExternalScript,Filter,Cmdlet -Name "$($Matches[1])*" |
+                    New-TabItem -Value {$_.Name} -Text {$_.Name} -Type Command |
                     Invoke-TabItemSelector $LastWord -SelectionHandler $SelectionHandler
                 break
             }
@@ -858,11 +888,11 @@ Function Invoke-PowerTab {
             '(.+)$' {
                 if ($DoubleTab -or $PowerTabConfig.AliasQuickExpand) {
                     & {
-                        Get-Command -CommandType Alias -Name $Matches[1] | Select-Object -ExpandProperty Definition
-                        Get-TabExpansion $Matches[1] Alias | Select-Object -ExpandProperty Text
+                        Get-Command -CommandType Alias -Name $Matches[1] | New-TabItem -Value {$_.Definition} -Text {$_.Definition} -Type Alias
+                        Get-TabExpansion $Matches[1] Alias | New-TabItem -Value {$_.Text} -Text {$_.Text} -Type Alias
                     } | Invoke-TabItemSelector $LastWord -SelectionHandler $SelectionHandler
                 } else {
-                    Get-TabExpansion $Matches[1] Alias | Select-Object -ExpandProperty Text |
+                    Get-TabExpansion $Matches[1] Alias | New-TabItem -Value {$_.Text} -Text {$_.Text} -Type Alias |
                         Invoke-TabItemSelector -SelectionHandler $SelectionHandler
                 }
                 break
@@ -901,8 +931,8 @@ Function Invoke-PowerTab {
                 "System.IO.DirectoryInfo" {"Directory";break}
                 "System.IO.FileInfo" {"File";break}
                 "System.Management.Automation.AliasInfo" {"Alias";break}
-                "System.Management.Automation.FilterInfo" {"Filter";break}
-                "System.Management.Automation.FunctionInfo" {"Function";break}
+                "System.Management.Automation.FilterInfo" {"Command";break}
+                "System.Management.Automation.FunctionInfo" {"Command";break}
                 "System.Security.Cryptography.X509Certificates.X509Certificate2" {"Certificate";break}
                 "Microsoft.Powershell.Commands.X509StoreLocation" {"CertificateStore";break}
                 "Microsoft.Win32.RegistryKey" {"RegistryKey";break}
