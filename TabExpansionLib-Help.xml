@@ -23,6 +23,7 @@
           <command:parameterValue required="true">String</command:parameterValue>
         </command:parameter>
       </command:syntaxItem>
+    <command:syntax>
     </command:syntax>
       <command:syntaxItem>
         <command:name>Add-TabExpansionComputer</command:name>
@@ -32,6 +33,7 @@
           <command:parameterValue required="true">DirectoryEntry</command:parameterValue>
         </command:parameter>
       </command:syntaxItem>
+    <command:syntax>
     </command:syntax>
       <command:syntaxItem>
         <command:name>Add-TabExpansionComputer</command:name>
