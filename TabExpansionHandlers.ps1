@@ -1120,14 +1120,19 @@ Register-TabExpansion "function" -Type "Command" {
 ## Parameter handlers
 #########################
 
-## -ComputerName
-Register-TabExpansion "ComputerName" -Type "Parameter" {
-    param($Argument, [ref]$TabExpansionHasOutput)
-    if ($Argument -notmatch '^\$') {
-        $TabExpansionHasOutput.Value = $true
-        Get-TabExpansion "$Argument*" Computer | Select-Object -ExpandProperty "Text"
-    }
-}.GetNewClosure()
+## -ComputerName and -Server
+& {
+    $ComputerNameHandler =  {
+        param($Argument, [ref]$TabExpansionHasOutput)
+        if ($Argument -notmatch '^\$') {
+            $TabExpansionHasOutput.Value = $true
+            Get-TabExpansion "$Argument*" Computer | Select-Object -ExpandProperty Text
+        }
+    }.GetNewClosure()
+
+    Register-TabExpansion "ComputerName" $ComputerNameHandler -Type Parameter
+    Register-TabExpansion "Server" $ComputerNameHandler -Type Parameter
+}
 
 ## Parameters that take the name of a variable
 & {
@@ -1135,14 +1140,14 @@ Register-TabExpansion "ComputerName" -Type "Parameter" {
         param($Argument, [ref]$TabExpansionHasOutput)
         if ($Argument -notlike '^\$') {
             $TabExpansionHasOutput.Value = $true
-            Get-Variable "$Argument*" -Scope "Global" | Select-Object -ExpandProperty "Name"
+            Get-Variable "$Argument*" -Scope Global | Select-Object -ExpandProperty Name
         }
     }.GetNewClosure()
     
-    Register-TabExpansion "ErrorVariable" $VariableHandler -Type "Parameter"
-    Register-TabExpansion "OutVariable" $VariableHandler -Type "Parameter"
-    Register-TabExpansion "Variable" $VariableHandler -Type "Parameter"
-    Register-TabExpansion "WarningVariable" $VariableHandler -Type "Parameter"
+    Register-TabExpansion "ErrorVariable" $VariableHandler -Type Parameter
+    Register-TabExpansion "OutVariable" $VariableHandler -Type Parameter
+    Register-TabExpansion "Variable" $VariableHandler -Type Parameter
+    Register-TabExpansion "WarningVariable" $VariableHandler -Type Parameter
 }
 
 ## Parameters that take the name of a culture
@@ -1152,29 +1157,29 @@ Register-TabExpansion "ComputerName" -Type "Parameter" {
         if ($Argument -notlike '^\$') {
             $TabExpansionHasOutput.Value = $true
             [System.Globalization.CultureInfo]::GetCultures([System.Globalization.CultureTypes]::InstalledWin32Cultures) |
-                Where-Object {$_.Name -like "$Argument*"} | Select-Object -ExpandProperty "Name" | Sort-Object
+                Where-Object {$_.Name -like "$Argument*"} | Select-Object -ExpandProperty Name | Sort-Object
         }
     }.GetNewClosure()
     
-    Register-TabExpansion "Culture" $CultureHandler -Type "Parameter"
-    Register-TabExpansion "UICulture" $CultureHandler -Type "Parameter"
+    Register-TabExpansion "Culture" $CultureHandler -Type Parameter
+    Register-TabExpansion "UICulture" $CultureHandler -Type Parameter
 }
 
 ## -PSDrive
-Register-TabExpansion "PSDrive" -Type "Parameter" {
+Register-TabExpansion "PSDrive" -Type Parameter {
     param($Argument, [ref]$TabExpansionHasOutput)
     if ($Argument -notlike '^\$') {
         $TabExpansionHasOutput.Value = $true
-        Get-PSDrive "$Argument*" | Select-Object -ExpandProperty "Name"
+        Get-PSDrive "$Argument*" | Select-Object -ExpandProperty Name
     }
 }.GetNewClosure()
 
 ## -PSProvider
-Register-TabExpansion "PSProvider" -Type "Parameter" {
+Register-TabExpansion "PSProvider" -Type Parameter {
     param($Argument, [ref]$TabExpansionHasOutput)
     if ($Argument -notlike '^\$') {
         $TabExpansionHasOutput.Value = $true
-        Get-PSProvider "$Argument*" | Select-Object -ExpandProperty "Name"
+        Get-PSProvider "$Argument*" | Select-Object -ExpandProperty Name
     }
 }.GetNewClosure()
 
@@ -1185,7 +1190,7 @@ Register-TabExpansion "PSProvider" -Type "Parameter" {
 
 ## iexplore.exe
 & {
-    Register-TabExpansion "iexplore.exe" -Type "ParameterName" {
+    Register-TabExpansion iexplore.exe -Type ParameterName {
         param($Context, $Parameter)
         $Parameters = "-extoff","-embedding","-k","-nohome"
         $Parameters | Where-Object {$_ -like "$Parameter*"}
@@ -1206,19 +1211,19 @@ Register-TabExpansion "PSProvider" -Type "Parameter" {
         )
     }
 
-    $IExploreCommandInfo = Get-Command "iexploreexeparameters"
-    Register-TabExpansion "iexplore.exe" -Type "CommandInfo" {
+    $IExploreCommandInfo = Get-Command iexploreexeparameters
+    Register-TabExpansion iexplore.exe -Type CommandInfo {
         param($Context)
         $IExploreCommandInfo
     }.GetNewClosure()
 
-    Register-TabExpansion "iexplore.exe" -Type "Command" {
+    Register-TabExpansion iexplore.exe -Type Command {
         param($Context, [ref]$TabExpansionHasOutput, [ref]$QuoteSpaces)
         $Argument = $Context.Argument
         switch -exact ($Context.Parameter) {
             'URL' {
                 $Argument = [Regex]::Escape($Argument)
-                $Favorites = Get-ChildItem "$env:USERPROFILE/Favorites/*" -Include "*.url" -Recurse
+                $Favorites = Get-ChildItem "$env:USERPROFILE/Favorites/*" -Include *.url -Recurse
                 $Favorites = $Favorites | Where-Object {($_.Name -match $Argument) -or ($_ | Select-String "^URL=.*$Argument")} |
                     New-TabItem -Value {($_ | Select-String "^URL=").Line -replace "^URL="} -Text {$_.Name -replace '\.url$'} -Type URL
 
@@ -1234,7 +1239,7 @@ Register-TabExpansion "PSProvider" -Type "Parameter" {
 
 ## powershell.exe
 & {
-    Register-TabExpansion "powershell.exe" -Type "ParameterName" {
+    Register-TabExpansion powershell.exe -Type ParameterName {
         param($Context, $Parameter)
         $Parameters = "-Command","-EncodedCommand","-ExecutionPolicy","-File","-InputFormat","-NoExit","-NoLogo",
             "-NonInteractive","-NoProfile","-OutputFormat","-PSConsoleFile","-Sta","-Version","-WindowStyle"
@@ -1286,8 +1291,8 @@ Register-TabExpansion "PSProvider" -Type "Parameter" {
         )
     }
 
-    $PowershellCommandInfo = Get-Command "powershellexeparameters"
-    Register-TabExpansion "powershell.exe" -Type "CommandInfo" {
+    $PowershellCommandInfo = Get-Command powershellexeparameters
+    Register-TabExpansion powershell.exe -Type CommandInfo {
         param($Context)
         $PowershellCommandInfo
     }.GetNewClosure()
@@ -1312,7 +1317,7 @@ Register-TabExpansion "PSProvider" -Type "Parameter" {
         }
     }
 
-    Register-TabExpansion "Import-TabExpansionTheme" $ThemeHandler -Type "Command"
-    Register-TabExpansion "Export-TabExpansionTheme" $ThemeHandler -Type "Command"
+    Register-TabExpansion "Import-TabExpansionTheme" $ThemeHandler -Type Command
+    Register-TabExpansion "Export-TabExpansionTheme" $ThemeHandler -Type Command
 }
 
