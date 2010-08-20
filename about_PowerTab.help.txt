@@ -34,7 +34,10 @@ LOAD POWERTAB WITH AN EXISTING CONFIG
         Import-Module PowerTab -ArgumentList $Path
 
 FEEDBACK
-    TODO.
+    Please submit suggestions, bug reports or questions to the PowerTab
+    website.
+
+        http://powertab.codeplex.com
 
 CREDITS
     This is a list of people and/or groups who have directly or indirectly
