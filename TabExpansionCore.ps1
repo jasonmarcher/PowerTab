@@ -256,7 +256,7 @@ Function Invoke-TabExpansion {
 
         [Bool]$TabExpansionHasOutput = $false
         [Bool]$QuoteSpaces = $true
-        $PossibleValues = @()
+        [Object[]]$PossibleValues = @()
         if ($CurrentContext.isParameterValue) {
             ## Tab complete parameter value
 
