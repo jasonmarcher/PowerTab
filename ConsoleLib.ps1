@@ -191,7 +191,7 @@ Function Out-ConsoleList {
                         Write-Line ($Host.UI.RawUI.CursorPosition.X) ($Host.UI.RawUI.CursorPosition.Y - $Host.UI.RawUI.WindowPosition.Y) " " $PowerTabConfig.Colors.FilterColor $Host.UI.RawUI.BackgroundColor
 
                         $Old = $Items.Length
-                        $Items = $Content -match ([Regex]::Escape("$LastWord$Filter") + '.*')
+                        $Items = @($Content | Where-Object {$_.Text -match ([Regex]::Escape("$LastWord$Filter") + '.*')})
                         $New = $Items.Length
                         if ($Old -ne $New) {
                             ## If the item list changed, update the contents of the console list
@@ -287,7 +287,7 @@ Function Out-ConsoleList {
                     $Filter += $Key.Character
 
                     $Old = $Items.Length
-                    $Items = $Content -match ([Regex]::Escape("$LastWord$Filter") + '.*')
+                    $Items = @($Content | Where-Object {$_.Text -match ([Regex]::Escape("$LastWord$Filter") + '.*')})
                     $New = $Items.Length
                     if ($Items.Length -lt 1) {
                         ## New filter results in no items
@@ -573,7 +573,7 @@ Function Out-ConsoleList {
         $MinWidth = ([String]$Content.Count).Length * 4 + 7
         if ($Size.Width -lt $MinWidth) {$Size.Width = $MinWidth}
         $Content = foreach ($Item in $Content) {
-            $Item.Text = " $($Item.Text) ".PadRight($Size.Width + 2)
+            $Item.DisplayText = " $($Item.Text) ".PadRight($Size.Width + 2)
             $Item
         }
         $ListConfig = Parse-List $Size
@@ -586,7 +586,7 @@ Function Out-ConsoleList {
         # Place content 
         $Position.X += 1
         $Position.Y += 1
-        $ContentBuffer = ConvertTo-BufferCellArray ($Content[0..($ListConfig.ListHeight - 3)] | Select-Object -ExpandProperty Text) $ContentForegroundColor $ContentBackgroundColor
+        $ContentBuffer = ConvertTo-BufferCellArray ($Content[0..($ListConfig.ListHeight - 3)] | Select-Object -ExpandProperty DisplayText) $ContentForegroundColor $ContentBackgroundColor
         $ContentHandle = New-Buffer $Position $ContentBuffer
         $Handle = New-Object System.Management.Automation.PSObject -Property @{
             'Position' = (New-Position $ListConfig.TopX $ListConfig.TopY)
@@ -603,7 +603,7 @@ Function Out-ConsoleList {
             'MaxItems' = $Listconfig.MaxItems
         }
         Add-Member -InputObject $Handle -MemberType 'ScriptMethod' -Name 'Clear' -Value {$This.Box.Clear()}
-        Add-Member -InputObject $Handle -MemberType 'ScriptMethod' -Name 'Show' -Value {$This.Box.Show(),$This.Content.Show()}
+        Add-Member -InputObject $Handle -MemberType 'ScriptMethod' -Name 'Show' -Value {$This.Box.Show(); $This.Content.Show()}
         $Handle
     }
 
