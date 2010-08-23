@@ -18,9 +18,9 @@ Function Invoke-TabActivityIndicator {
         if ($PowerTabConfig.TabActivityIndicator) {
             if ("ConsoleHost","PowerShellPlus Host" -contains $Host.Name) {
                 if ($Error) {
-                    $MessageBuffer = ConvertTo-BufferCellArray ([String[]]@("[Err]")) Yellow Red
+                    $MessageBuffer = ConvertTo-BufferCellArray ([String[]]"[Err]") Yellow Red
                 } else {
-                    $MessageBuffer = ConvertTo-BufferCellArray ([String[]]@("[Tab]")) Yellow Blue
+                    $MessageBuffer = ConvertTo-BufferCellArray ([String[]]"[Tab]") Yellow Blue
                 }
                 if ($MessageHandle) {
                     $MessageHandle.Content = $MessageBuffer
@@ -202,7 +202,7 @@ Function New-TabItem {
     )
 
     process {
-        New-Object PSObject -Property @{"Text"=$Text;"Value"=$Value;"Type"=$Type}
+        New-Object PSObject -Property @{Text=$Text; DisplayText=""; Value=$Value; Type=$Type}
     }
 }
 
