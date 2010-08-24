@@ -21,6 +21,12 @@ Function Invoke-TabExpansion {
         $ForceList
     )
 
+    try {
+    ## Save global errors
+    $ErrorBackup = $global:Error.Clone()
+    $global:Error.Clear()
+    $global:Error.AddRange($PowerTabError)
+
     if ($PowerTabConfig -eq $null) {
         ## Something happened to the PowerTabConfig object, recreate it
         CreatePowerTabConfig
@@ -413,6 +419,13 @@ Function Invoke-TabExpansion {
     } finally {
         ## Remove busy indication on ready or error
         Remove-TabActivityIndicator
+    }
+
+    } finally {
+        ## Save PowerTab errors and replace global errors
+        $script:PowerTabError = $global:Error.Clone()
+        $global:Error.Clear()
+        $global:Error.AddRange($ErrorBackup)
     }
 }
 

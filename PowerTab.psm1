@@ -46,6 +46,8 @@ $ConfigFileName = "PowerTabConfig.xml"
 
 $PowerTabConfig = New-Object System.Management.Automation.PSObject
 
+$PowerTabError = New-Object System.Collections.ArrayList	
+
 
 #########################
 ## Functions
@@ -221,7 +223,7 @@ if ($PowerTabConfig.ShowBanner) {
 $ExcludedFuctions = @("Initialize-TabExpansion")
 $Functions = Get-Command "*-TabExpansion*","New-TabItem" | Where-Object {$ExcludedFuctions -notcontains $_.Name}
 #$Functions = Get-Command "*-*" | Where-Object {$ExcludedFuctions -notcontains $_.Name}
-Export-ModuleMember -Function $Functions -Variable PowerTabConfig -Alias *
+Export-ModuleMember -Function $Functions -Variable PowerTabConfig, PowerTabError -Alias *
 
 <#
 TODOs
