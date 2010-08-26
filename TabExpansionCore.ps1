@@ -114,6 +114,7 @@ Function Invoke-TabExpansion {
             }
 
             if ($LastToken.EndColumn -ne $Token.StartColumn) {
+                ## The parameter check is for the case of a switch appearing just befor a positional parameter:  Func -Switch tex<TAB>
                 if ((-not $Token.Content.StartsWith("-")) -and (($CurrentContext.Argument -ne "") -or ($CurrentContext.Parameter -eq ""))) {
                     if ($CurrentContext.Parameter) {
                         $CurrentContext.OtherParameters[$CurrentContext.Parameter] = $CurrentContext.Argument
