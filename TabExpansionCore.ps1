@@ -114,7 +114,7 @@ Function Invoke-TabExpansion {
             }
 
             if ($LastToken.EndColumn -ne $Token.StartColumn) {
-                if ((-not $Token.Content.StartsWith("-")) -and $CurrentContext.Argument -ne "") {
+                if ((-not $Token.Content.StartsWith("-")) -and (($CurrentContext.Argument -ne "") -or ($CurrentContext.Parameter -eq ""))) {
                     if ($CurrentContext.Parameter) {
                         $CurrentContext.OtherParameters[$CurrentContext.Parameter] = $CurrentContext.Argument
                     } elseif ($CurrentContext.Argument) {
