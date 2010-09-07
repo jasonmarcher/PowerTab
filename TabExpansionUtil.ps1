@@ -351,6 +351,26 @@ Function Get-CommandPrefix {
 
 ############
 
+Function Resolve-TabExpansionParameterValue {
+    param(
+        [String]$Value
+    )
+
+    switch -regex ($Value) {
+        '^\$' {
+            [String](Invoke-Expression $_)
+            break
+        }
+        '^\(.*\)$' {
+            [String](Invoke-Expression $_)
+            break
+        }
+        Default {$Value}
+    }
+}
+
+############
+
 ## Slightly modified from http://blog.sapien.com/index.php/2009/08/24/writing-form-centered-scripts-with-primalforms/
 Function Get-GuiDate {
     param(
