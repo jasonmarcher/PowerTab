@@ -165,7 +165,7 @@ Function Import-Resources {
 
     process {
         if (Test-Path "$PSScriptRoot\$($Culture.Name)\$FileName.psd1") {
-            Import-LocalizedData -BindingVariable "TempResources" -FileName $FileName -UICulture $Culture
+            Import-LocalizedData -BindingVariable "TempResources" -FileName $FileName -UICulture $Culture -ErrorAction SilentlyContinue
             $TempResources
         } else {
             @{}
