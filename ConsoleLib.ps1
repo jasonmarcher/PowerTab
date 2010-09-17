@@ -287,7 +287,7 @@ Function Out-ConsoleList {
                     $Filter += $Key.Character
 
                     $Old = $Items.Length
-                    $Items = @($Content | Where-Object {$_.Text -match ([Regex]::Escape("$LastWord$Filter") + '.*')})
+                    $Items = @($Content | Where-Object {$_.Text -match ('^' + [Regex]::Escape("$LastWord$Filter") + '.*')})
                     $New = $Items.Length
                     if ($Items.Length -lt 1) {
                         ## New filter results in no items
