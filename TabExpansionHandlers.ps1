@@ -393,10 +393,12 @@ Register-TabExpansion "Import-Module" -Type "Command" {
     $Argument = $Context.Argument
     switch -exact ($Context.Parameter) {
         'Name' {
-            $Modules = @(Find-Module "$Argument*" | Sort-Object BaseName)
-            if ($Modules.Count -gt 0) {
-                $TabExpansionHasOutput.Value = $true
-                $Modules | New-TabItem -Value {$_.BaseName} -Text {$_.BaseName} -Type Module
+            if ($Argument -notmatch '^\.') {
+                $Modules = @(Find-Module "$Argument*" | Sort-Object BaseName)
+                if ($Modules.Count -gt 0) {
+                    $TabExpansionHasOutput.Value = $true
+                    $Modules | New-TabItem -Value {$_.BaseName} -Text {$_.BaseName} -Type Module
+                }
             }
         }
     }
