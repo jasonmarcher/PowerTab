@@ -590,9 +590,9 @@ Function Invoke-PowerTab {
             }
 
             ## Completion on Shares (commented lines without DLL but need admin rights )
-            '^[\\/]{2}(?<Computer>[^\\/]+)[\\/](?<Share>[^\\/]*)$' {
-                #gwmi win32_share -computer $matches[1] -filter "name like '$($matches[2])%'" | Foreach-Object {"\\$($matches[1])\$($_.name)"}
-                #([adsi]"WinNT://$($matches[1])/LanmanServer,FileService" ).psbase.children |? {$_.name -like "$($matches[2])*"}  |% {$_.name}
+            '^(\\\\|//)(?<Computer>[^\\/]+)[\\/](?<Share>[^\\/]*)$' {
+                #gwmi win32_share -computer $ComputerName -filter "name like '$($ShareName)%'" | Foreach-Object {"\\$($ComputerName)\$($_.name)"}
+                #([adsi]"WinNT://$($ComputerName)/LanmanServer,FileService" ).psbase.children |? {$_.name -like "$($ShareName)*"}  |% {$_.name}
                 $ComputerName = $Matches.Computer
                 $ShareName = $Matches.Share
                 [Trinet.Networking.ShareCollection]::GetShares($ComputerName) | Where-Object {$_.NetName -like "$ShareName*"} |
@@ -601,9 +601,8 @@ Function Invoke-PowerTab {
                 break
             }
 
-            ## Completion on computers in database
-            #'^\\\\([^\\]*)$' {
-			'^[\\/]{2}(?<Computer>[^\\/]*)$' {
+            ## Completion on computers in database            
+			'^(\\\\|//)(?<Computer>[^\\/]*)$' {
                 $Computers = foreach ($Computer in Get-TabExpansion "$($Matches.Computer)*" Computer) {
                     $Value = "\\" + $Computer.Text
                     New-TabItem -Value $Value -Text $Value -Type Computer
