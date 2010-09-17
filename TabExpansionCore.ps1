@@ -628,7 +628,7 @@ Function Invoke-PowerTab {
             }
 
             ## History completion against either #<pattern> or #<id>
-            '^#(\w*)' {
+            '^#(.*)' {
                 $Pattern = $Matches[1]
                 if ($Pattern -match '^[0-9]+$') {
                     @(Get-History -Id $Pattern -ErrorAction SilentlyContinue)[0].CommandLine
