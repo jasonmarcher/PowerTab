@@ -3,7 +3,7 @@ TOPIC
 
 SHORT DESCRIPTION
     PowerTab extends the tab expansion feature of PowerShell to offer more
-    productivity for PowerShell users. 
+    productivity for PowerShell users.
 
 LONG DESCRIPTION
     Tab expansion is a productivity feature of PowerShell similar to
@@ -15,60 +15,64 @@ LONG DESCRIPTION
     for adding specialized tab expansion support for third party applications
     and commands.
 
-GETTING STARTED
-    PowerTab is packaged as a PowerShell module and can simply be imported
-    after being saved to one of the locations of modules in $env:PSModulePath.
 
-        Import-Module PowerTab
+  GETTING STARTED
+      PowerTab is packaged as a PowerShell module and can simply be imported
+      after being saved to one of the locations of modules in
+      $env:PSModulePath.
 
-    With no arguments, PowerTab will offer to run the setup wizard which will
-    help setup a location to save the PowerTab config file. The config file
-    is required to persist configuration settings for PowerTab, and cached
-    values for .NET type, WMI class and computer name expansion.
+          Import-Module PowerTab
 
-LOAD POWERTAB WITH AN EXISTING CONFIG
-    To load an existing conifig file into PowerTab, pass in the full path to
-    the config file as the first argument when importing the PowerTab module.
+      With no arguments, PowerTab will offer to run the setup wizard which will
+      help setup a location to save the PowerTab config file. The config file
+      is required to persist configuration settings for PowerTab, and cached
+      values for .NET type, WMI class and computer name expansion.
 
-        $Path = "C:\Users\Bob\Documents\WindowsPowerShell\PowerTabConfig.xml"
-        Import-Module PowerTab -ArgumentList $Path
 
-FEEDBACK
-    Please submit suggestions, bug reports or questions to the PowerTab
-    website.
+  LOAD POWERTAB WITH AN EXISTING CONFIG
+      To load an existing conifig file into PowerTab, pass in the full path to
+      the config file as the first argument when importing the PowerTab module.
 
-        http://powertab.codeplex.com
+          $Path = "C:\Users\Bob\Documents\WindowsPowerShell\PowerTabConfig.xml"
+          Import-Module PowerTab -ArgumentList $Path
 
-CREDITS
-    This is a list of people and/or groups who have directly or indirectly
-    helped by offering significant suggestions, code or linkable binaries. In
-    no particular order:
 
-    Marc "/\/\o\/\/" van Orsouw, MVP
-    https://mvp.support.microsoft.com/profile/van%20Orsouw
-    http://thepowershellguy.com/
+  FEEDBACK
+      Please submit suggestions, bug reports or questions to the PowerTab
+      website.
 
-    Xaegr
-    http://xaegr.livejournal.com/
+          http://powertab.codeplex.com
 
-    Jacques
-    http://janel.spaces.live.com/blog/
 
-    Igor Dvorkin
+  CREDITS
+      This is a list of people and/or groups who have directly or indirectly
+      helped by offering significant suggestions, code or linkable binaries.
+      In no particular order:
 
-    Aaron Lerch / Invoke-Intellisense / Lerch.PowerShell.dll
-    http://www.aaronlerch.com/
+      Marc "/\/\o\/\/" van Orsouw, MVP
+      https://mvp.support.microsoft.com/profile/van%20Orsouw
+      http://thepowershellguy.com/
 
-    Richard Deeming / Shares.dll
-    http://www.codeproject.com/KB/IP/networkshares.aspx
+      Xaegr
+      http://xaegr.livejournal.com/
 
-    Jason Archer
+      Jacques
+      http://janel.spaces.live.com/blog/
+
+      Igor Dvorkin
+
+      Aaron Lerch / Invoke-Intellisense / Lerch.PowerShell.dll
+      http://www.aaronlerch.com/
+
+      Richard Deeming / Shares.dll
+      http://www.codeproject.com/KB/IP/networkshares.aspx
+
+      Jason Archer
 
 
 SEE ALSO
 
-    Get-TabExpansion
-    Add-TabExpansion
+    about_PowerTab_context
     Update-TabExpansionDataBase
     Register-TabExpansion
     Import-TabExpansionTheme
