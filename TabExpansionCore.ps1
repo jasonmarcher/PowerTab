@@ -32,9 +32,8 @@ Function Invoke-TabExpansion {
         CreatePowerTabConfig
     }
 
-    $null = [System.Management.Automation.PSParser]::Tokenize('', [ref]$null)
-    $Errors = New-Object System.Collections.ObjectModel.Collection``1[System.Management.Automation.PSParseError]
-    $Tokens = [System.Management.Automation.PSParser]::Tokenize($Line, [ref]$Errors)
+    $ParseErrors = $null
+    $Tokens = [System.Management.Automation.PSParser]::Tokenize($Line, [ref]$ParseErrors)
 
     ## Figure out the context of this tab expansion request
     $_TokenTypes = [System.Management.Automation.PSTokenType]
@@ -358,7 +357,7 @@ Function Invoke-TabExpansion {
             }
         } elseif ($LastToken.Type -eq $_TokenTypes::GroupStart) {
             ## Tab complete method signatures
-            $MethodTokens = @([System.Management.Automation.PSParser]::Tokenize($LastWord, [ref]$Errors))
+            $MethodTokens = @([System.Management.Automation.PSParser]::Tokenize($LastWord, [ref]$ParseErrors))
             if ($MethodTokens[-2].Type -eq $_TokenTypes::Member) {
                 $MethodObject = $LastWord.SubString(0, $MethodTokens[-1].Start)
                 $PossibleValues = foreach ($Overload in Invoke-Expression "$MethodObject.OverloadDefinitions") {
