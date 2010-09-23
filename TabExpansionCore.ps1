@@ -22,8 +22,9 @@ Function Invoke-TabExpansion {
     )
 
     try {
-    ## Save global errors
-    $ErrorBackup = $global:Error.Clone()
+    ## Save global errors in the script scoped Error ( doesn't appear to be used )
+    # This also addresses the problem of $Error[0].<TAB> not working since it uses the script scoped $Error as well.
+    $script:Error.AddRange($global:Error)    
     $global:Error.Clear()
     $global:Error.AddRange($PowerTabError)
 
@@ -425,7 +426,7 @@ Function Invoke-TabExpansion {
         ## Save PowerTab errors and replace global errors
         $script:PowerTabError = $global:Error.Clone()
         $global:Error.Clear()
-        $global:Error.AddRange($ErrorBackup)
+        $global:Error.AddRange($script:Error)
     }
 }
 
