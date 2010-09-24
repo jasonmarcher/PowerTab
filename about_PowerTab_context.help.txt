@@ -1,0 +1,138 @@
+TOPIC
+    about_PowerTab_context
+
+SHORT DESCRIPTION
+    Describes all the contexts that PowerTab understands when tab expanding.
+
+LONG DESCRIPTION
+    ...
+
+
+  PATHS
+      Paths are the default context that PowerTab can handle. Any PSDrive path
+      will work and relative paths will be preserved.
+
+          .\
+          HKLM:\
+
+
+  COMMANDS
+      PowerTab can complete the name of Powershell cmdlets, functions and
+      aliases given hints. PowerTab will look for the "<VERB>-" pattern for
+      commands. Adding a "%" character to the end of the search string will
+      force PowerTab to search for any type of command (cmdlet, function,
+      script, or application).
+
+          Get-
+          %
+          add%
+
+
+  COMMAND PARAMETERS
+      Command parameter names can be expaned for cmdlets, functions and
+      scripts. PowerTab will also detect the corresponding command to the
+      current cursor location.
+
+          Get-ChildItem -
+          Get-Process | Format-Table -
+
+
+  VARIABLE NAMES
+      Powertab can expand the names of variables, including quoting with "{"
+      and "}" as needed.
+
+          $
+          $error
+
+
+  VARIABLE PROPERTIES AND METHODS
+      Properties and methods on objects stored in variables can be accessed
+      with PowerTab.
+
+          $error.g
+
+
+  VARIABLE STATIC METHODS
+      Static properties and methods of objects stored in variables can also be
+      accessed.
+
+          $error::
+
+
+  VARIABLES BY SCOPE
+      PowerTab will respect scope when expanding variable names with a scope.
+
+          $global:
+
+
+  VARIABLES BY TYPE
+      Variable references to items on other PSDrives can also be expanded in
+      PowerTab.
+
+          $alias:
+          $function:
+
+
+  NATIVE COMMANDS
+      To tab expand the names of native commands and executables, add the "!"
+      character to the end of the search string (that character will be removed
+      from the results).
+
+          !
+          net!
+
+
+  HISTORY
+      PowerTab supports expanding command history in the same way as the
+      default tab expansion in PowerShell, using the "#" character to lead off
+      the search string. Additionally, PowerTab supports wildcards in the
+      search string.
+
+          #
+          #cd
+          #12
+
+
+  HELP TOPICS
+      When looking up a help topic, PowerTab can assist by tab expanding the
+      names of the available help topics.
+
+          about_
+          Get-Help about_
+
+
+  TYPES
+      
+
+          [
+          [System.
+          [.DateTime
+          .DateTime
+
+      The last two examples will search for any namespace or type beginning
+      with the entered string.
+
+
+  TYPE STATIC MEMBERS
+      Static properties and methods on .Net types
+
+          [System.DateTime]::
+
+
+  ENUMS
+      
+
+          [ConsoleColor]::B
+
+
+  WMI CLASSES
+      
+
+          win32_
+          cim_
+          msft_	
+
+
+SEE ALSO
+
+    
