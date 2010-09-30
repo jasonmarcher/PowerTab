@@ -81,3 +81,4 @@ SEE ALSO
     Import-TabExpansionDataBase
     Export-TabExpansionConfig
     Export-TabExpansionDatabase
+    http://powertab.codeplex.com/documentation

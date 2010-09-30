@@ -1,0 +1,153 @@
+TOPIC
+    about_PowerTab_usage
+
+SHORT DESCRIPTION
+    Describes the uses of tab expansion that PowerTab offers.
+
+LONG DESCRIPTION
+    PowerTab supports additional usage scenarios for tab expanding commands,
+    references and code constructs. This topic describes the general set of
+    uses built into PowerTab, with examples. To try the examples, enter the
+    exact text of the example and press the [TAB] key.
+
+    PowerTab also offers specific support for many important command
+    parameters such as enums, process names, and other information that
+    PowerTab can look up. If a parameter is directly support, it will take
+    precedence over the usage patterns described in this topic.
+
+
+  PATHS
+      Paths are the basic usage that PowerTab can handle. Any PSDrive path
+      will work and relative paths will be preserved.
+
+          .\
+          HKLM:\
+
+
+  COMMANDS
+      PowerTab can complete the name of Powershell cmdlets, functions and
+      aliases given hints. PowerTab will look for the "<VERB>-" pattern for
+      commands. Adding a "%" character to the end of the search string will
+      force PowerTab to search for any type of command (cmdlet, function,
+      script, or application).
+
+          Get-
+          %
+          add%
+
+
+  COMMAND PARAMETERS
+      Command parameter names can be expaned for cmdlets, functions and
+      scripts. PowerTab will also detect the corresponding command to the
+      current cursor location.
+
+          Get-ChildItem -
+          Get-Process | Format-Table -
+
+
+  VARIABLE NAMES
+      Powertab can expand the names of variables, including quoting with "{"
+      and "}" as needed.
+
+          $
+          $error
+
+
+  VARIABLE PROPERTIES AND METHODS
+      Properties and methods on objects stored in variables can be accessed
+      with PowerTab.
+
+          $error.g
+
+
+  VARIABLE STATIC METHODS
+      Static properties and methods of objects stored in variables can also be
+      accessed.
+
+          $error::
+
+
+  VARIABLES BY SCOPE
+      PowerTab will respect scope when expanding variable names with a scope.
+
+          $global:
+
+
+  VARIABLES BY TYPE
+      Variable references to items on other PSDrives can also be expanded in
+      PowerTab.
+
+          $alias:
+          $function:
+
+
+  NATIVE COMMANDS
+      To tab expand the names of native commands and executables, add the "!"
+      character to the end of the search string (that character will be removed
+      from the results).
+
+          !
+          net!
+
+
+  HISTORY
+      PowerTab supports expanding command history in the same way as the
+      default tab expansion in PowerShell, using the "#" character to lead off
+      the search string. Additionally, PowerTab supports wildcards in the
+      search string.
+
+          #
+          #cd
+          #12
+
+
+  HELP TOPICS
+      When looking up a help topic, PowerTab can assist by tab expanding the
+      names of the available help topics.
+
+          about_
+          Get-Help about_
+
+
+  TYPES
+      Type name expansion can be accomplished if .NET type names have been
+      cached in the tab expansion database. Use the following patterns.
+
+          [
+          [System.
+          [.DateTime
+          .DateTime
+
+      The last two examples will search for any namespace or type beginning
+      with the entered string.
+
+      To update the tab expansion database with a list of type names, run this
+      command.
+
+          Update-TabExpansionType
+
+
+  TYPE STATIC MEMBERS
+      Static properties and methods on .Net types are recognized by PowerTab.
+
+          [System.DateTime]::
+
+
+  ENUMS
+      Enumeration values can also be expaned with PowerTab.
+
+          [ConsoleColor]::B
+
+
+  WMI CLASSES
+      References to WMI class names can be expaned with PowerTab using these
+      patterns.
+
+          win32_
+          cim_
+          msft_	
+
+
+SEE ALSO
+
+    http://powertab.codeplex.com/documentation
