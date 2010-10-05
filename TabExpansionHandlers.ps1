@@ -503,10 +503,8 @@ Register-TabExpansion "Out-Printer" -Type "Command" {
     $Argument = $Context.Argument
     switch -exact ($Context.Parameter) {
         'Name' {
-            ## TODO: support printers that are not installed using paths \\server\printer
-            ## TODO: [workitem:14]
             $TabExpansionHasOutput.Value = $true
-            Get-WMIObject Win32_Printer -Filter "Name LIKE '$Argument*'" | New-TabItem -Value {$_.Name} -Text {$_.Name} -Type Printer
+            Get-WMIObject Win32_Printer -Filter "Name LIKE '$Argument%'" | New-TabItem -Value {$_.Name} -Text {$_.Name} -Type Printer
         }
     }
 }.GetNewClosure()
