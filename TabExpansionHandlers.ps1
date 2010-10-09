@@ -828,6 +828,18 @@ Register-TabExpansion "Get-PSSnapin" -Type "Command" {
     Register-TabExpansion "Suspend-Service" $ServiceHandler -Type "Command"
 }
 
+## Set-StrictMode
+Register-TabExpansion "Set-StrictMode" -Type Command {
+    param($Context, [ref]$TabExpansionHasOutput)
+    $Argument = $Context.Argument
+    switch -exact ($Context.Parameter) {
+        'Version' {
+            $TabExpansionHasOutput.Value = $true
+            "1.0","2.0","Latest" | Where-Object {$_ -like "$Argument*"}
+        }
+    }
+}.GetNewClosure()
+
 ## TraceSource
 & {
     $TraceSourceHandler = {
