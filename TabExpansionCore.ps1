@@ -918,6 +918,7 @@ Function Invoke-PowerTab {
     ## Filesystem Completion
     if ((-not $TabExpansionHasOutput) -and $PowerTabConfig.FileSystemExpand) {
         $PowerTabFileSystemMode = $true
+        $LastWord = $LastWord -replace '`'
 
         if (("Push-Location","Set-Location") -contains $Context.Command) {
             $ChildItems = @(Get-ChildItem "$LastWord*" | Where-Object {$_.PSIsContainer})
