@@ -389,14 +389,14 @@ Function Invoke-TabExpansion {
                 if ($_ -is [String]) {
                     if ($QuoteSpaces -and ($_ -match " ") -and ($_ -notmatch "^[`"'].*[`"']`$") -and
                         (($LastToken.Type -eq $_TokenTypes::CommandArgument) -or ($LastWord -eq ""))) {
-                        '"' + $_ + '"'
+                        '"' + ($_ -replace '([\$"`])','`$1') + '"'
                     } else {
                         $_
                     }
                 } else {
                     if ($QuoteSpaces -and ($_.Value -match " ") -and ($_.Value -notmatch "^[`"'].*[`"']`$") -and
                         (($LastToken.Type -eq $_TokenTypes::CommandArgument) -or ($LastWord -eq ""))) {
-                        $_.Value = '"' + $_.Value + '"'
+                        $_.Value = '"' + ($_.Value -replace '([\$"`])','`$1') + '"'
                     } else {
                         $_
                     }
