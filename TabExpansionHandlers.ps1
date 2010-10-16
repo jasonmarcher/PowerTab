@@ -1138,7 +1138,7 @@ Register-TabExpansion "function" -Type "Command" {
         param($Argument, [ref]$TabExpansionHasOutput)
         if ($Argument -notmatch '^\$') {
             $TabExpansionHasOutput.Value = $true
-            Get-TabExpansion "$Argument*" Computer | Select-Object -ExpandProperty Text
+            Get-TabExpansion "$Argument*" Computer | New-TabItem {$_.Text} {$_.Text} -Type Computer
         }
     }.GetNewClosure()
 
@@ -1152,7 +1152,7 @@ Register-TabExpansion "function" -Type "Command" {
         param($Argument, [ref]$TabExpansionHasOutput)
         if ($Argument -notlike '^\$') {
             $TabExpansionHasOutput.Value = $true
-            Get-Variable "$Argument*" -Scope Global | Select-Object -ExpandProperty Name
+            Get-Variable "$Argument*" -Scope Global | New-TabItem {$_.Name} {$_.Name} -Type Variable
         }
     }.GetNewClosure()
     
@@ -1169,7 +1169,7 @@ Register-TabExpansion "function" -Type "Command" {
         if ($Argument -notlike '^\$') {
             $TabExpansionHasOutput.Value = $true
             [System.Globalization.CultureInfo]::GetCultures([System.Globalization.CultureTypes]::InstalledWin32Cultures) |
-                Where-Object {$_.Name -like "$Argument*"} | Select-Object -ExpandProperty Name | Sort-Object
+                Where-Object {$_.Name -like "$Argument*"} | New-TabItem {$_.Name} {$_.Name} -Type Culture | Sort-Object Name
         }
     }.GetNewClosure()
     
