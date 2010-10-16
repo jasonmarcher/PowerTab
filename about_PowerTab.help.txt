@@ -72,13 +72,5 @@ LONG DESCRIPTION
 
 SEE ALSO
 
-    about_PowerTab_context
-    Update-TabExpansionDataBase
-    Register-TabExpansion
-    Import-TabExpansionTheme
-    Export-TabExpansionTheme
-    Import-TabExpansionConfig
-    Import-TabExpansionDataBase
-    Export-TabExpansionConfig
-    Export-TabExpansionDatabase
+    about_PowerTab_usage
     http://powertab.codeplex.com/documentation
