@@ -1293,11 +1293,7 @@ Function CreatePowerTabConfig {
     Add-Member -InputObject $PowerTabConfig -MemberType ScriptProperty -Name Enabled `
         -Value $ExecutionContext.InvokeCommand.NewScriptBlock(
             "`$v = `$dsTabExpansionConfig.Tables['Config'].Select(`"Name = 'Enabled'`")[0]
-            if (`$v.Type -eq 'Bool') {
-                [Bool][Int]`$v.Value
-            } else {
-                [$($_.Type)](`$v.Value)
-            }") `
+            [Bool][Int]`$v.Value") `
         -SecondValue $ExecutionContext.InvokeCommand.NewScriptBlock(
             "trap {Write-Warning `$_; continue}
             [Int]`$val = [Bool]`$args[0]
