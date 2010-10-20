@@ -1,0 +1,107 @@
+TOPIC
+    about_PowerTab_handlers
+
+SHORT DESCRIPTION
+    Tab expansion suppose in PowerTab can be extended with plug-ins by
+    following the steps in this topic.
+
+LONG DESCRIPTION
+    .
+
+
+  CREATING A COMMAND HANDLER
+      .
+
+      Command handlers must follow this contract.
+
+      NOTE: This applies to command and parameter handlers
+      1: PowerTab WILL provide a context object that records what is known
+          about the current command line, and a couple of reference variables
+          (see about_PowerTab_context for details).
+      2: If the handler will provide the tab expansion options for the given
+          context, it MUST set the variable $TabExpansionHasOutput.Value to
+          $true, even if no results will be produced. This will stop PowerTab
+          from interpreting the context any further.
+      3: The handler MUST output the options to be displayed to the user, or
+          no output at all.
+      4: The handler MAY set the variable $QuoteSpaces.Value to $false to
+          prevent PowerTab from quoting output values from the handler that
+          contain spaces. The default is $true.
+
+      Example:
+
+          Register-TabExpansion "Get-Service" -Type Command {
+              # 1:
+              param($Context, [ref]$TabExpansionHasOutput, [ref]$QuoteSpaces)
+
+              $Argument = $Context.Argument
+              switch -exact ($Context.Parameter) {
+                  'DisplayName' {
+                      $TabExpansionHasOutput.Value = $true  # 2:
+                      Get-Service -DisplayName "*$Argument*" |
+                          Select-Object -ExpandProperty DisplayName  # 3:
+                  }
+                  'Name' {
+                      $TabExpansionHasOutput.Value = $true  # 2:
+                      Get-Service -Name "$Argument*" |
+                          Select-Object -ExpandProperty Name  # 3:
+                  }
+              }
+          }
+
+
+  CREATING A PARAMETER HANDLER
+      .
+
+      Parameter handlers must follow this contract.
+
+      NOTE: This applies to command and parameter handlers
+      1: PowerTab WILL provide a context object that records what is known
+          about the current command line, and a couple of reference variables
+          (see about_PowerTab_context for details).
+      2: If the handler will provide the tab expansion options for the given
+          context, it MUST set the variable $TabExpansionHasOutput.Value to
+          $true, even if no results will be produced. This will stop PowerTab
+          from interpreting the context any further.
+      3: The handler MUST output the options to be displayed to the user, or
+          no output at all.
+      4: The handler MAY set the variable $QuoteSpaces.Value to $false to
+          prevent PowerTab from quoting output values from the handler that
+          contain spaces. The default is $true.
+
+      Example:
+
+          Register-TabExpansion "PSDrive" -Type Parameter {
+              # 1:
+              param($Argument, [ref]$TabExpansionHasOutput, [ref]$QuoteSpaces)
+
+              if ($Argument -notlike '^\$') {
+                  $TabExpansionHasOutput.Value = $true  # 2:
+                  Get-PSDrive "$Argument*" |
+                      Select-Object -ExpandProperty Name  # 3:
+              }
+          }
+
+
+  REGISTERING A HANDLER
+      Once the hander's script block is defined, it must be registered with
+      PowerTab. Here is the syntax of the registration command.
+
+          Register-TabExpansion [-Name] <String> [-Handler] <ScriptBlock>
+          [-Type <String>] [-Force]
+
+      The name of the command or parameter to handle must be entered. There can
+      only be one handler for a command name or parameter name.
+
+      A command name can either be simple like "Get-FooBar" or fully qualified
+      like "MyModule\Get-Foobar". Using the simple name will trigger on any
+      module using that command name.
+
+      A parameter name should only be the real name of the parameter like
+      "ComputerName". Parameter name aliases will be resolved by PowerTab like
+      "cn" or "comp".
+
+
+SEE ALSO
+
+    about_PowerTab_context

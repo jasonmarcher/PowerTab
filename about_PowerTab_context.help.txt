@@ -8,6 +8,71 @@ LONG DESCRIPTION
     [Repurposing this topic.]
 
 
+  CONTEXT OBJECT
+      
+
+      Line : <String>
+          The full command line.
+      LastWord : <String>
+          The last word, subject of the tab expansion.
+      LastToken : <System.Management.Automation.PSToken>
+          The last token parsed from the command line, may not be a token of
+          the last word.
+      Command : <String>
+          The name of the command that PowerTab has identified as being the
+          current context (see isCommandMode).
+      Parameter : <String>
+          The name of the parameter that PowerTab has identified as being the
+          current context of the last word (see isParameterValue).
+      Argument : <String>
+          The value entered so far for the parameter, typically this is the
+          last word.
+      PositionalParameter : <Int>
+          
+      PositionalParameters : <String[]>
+          
+      OtherParameters : <Hashtable>
+          A collection of the other identified parameters to the current
+          command and their values, from the command line.
+      isCommandMode : <Bool>
+          Identifies the current context as a command to be run
+      isAssignment : <Bool>
+          
+      isParameterValue : <Bool>
+          Identifies the current context of the last word as being a value
+          to a parameter.
+
+
+      Examples:
+
+          Line                 : Get-Process d* -ComputerName 
+          LastWord             : 
+          LastToken            : CommandParameter
+          Command              : Get-Process
+          Parameter            : ComputerName
+          Argument             : 
+          PositionalParameter  : 0
+          PositionalParameters : {d*}
+          OtherParameters      : {}
+          isCommandMode        : True
+          isAssignment         : False
+          isParameterValue     : True
+
+
+          Line                 : Get-Process -Name d* -ErrorVariable e
+          LastWord             : e
+          LastToken            : CommandArgument
+          Command              : Get-Process
+          Parameter            : ErrorVariable
+          Argument             : e
+          PositionalParameter  : -1
+          PositionalParameters : {}
+          OtherParameters      : {Name}
+          isCommandMode        : True
+          isAssignment         : False
+          isParameterValue     : True
+
+
 SEE ALSO
 
     
