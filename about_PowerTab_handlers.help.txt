@@ -6,11 +6,33 @@ SHORT DESCRIPTION
     following the steps in this topic.
 
 LONG DESCRIPTION
-    .
+    PowerTab provides a framework to enrich the tab expansion experience in
+    PowerShell. It also provides extension points to add tab expansion support
+    for additional cmdlets, functions and applications that are not already
+    supported by PowerTab. This is done through tab expansion handlers that
+    add logic to PowerTab.
+
+    Tab expansion handlers are given first chance to decide what to do with
+    the command line. Once a handler has signaled that it has decided on the
+    appropriate output, processing halts and the output of that handler is
+    pressented to the user according to their preferences or the limitations of
+    the PowerShell host.
+
+    Order of operation:
+    1: Command Handler (for the current command, if it exists)
+    2: Parameter Handler (for the current parameter, if it exists)
+    3: Enum Handler (internal to PowerTab, handles parameters with enum
+        values)
+    4: Core Handler (general PowerTab logic)
 
 
   CREATING A COMMAND HANDLER
-      .
+      Command handlers are called when the last word (location of the cursor)
+      will be the value to a parameter of the command that the command handler
+      is registered to. The handler will be given first chance at the user
+      input as well as information on the current context. Because of this,
+      command handlers can override default PowerTab behavior for parameters
+      of the command.
 
       Command handlers must follow this contract.
 
@@ -22,8 +44,8 @@ LONG DESCRIPTION
           context, it MUST set the variable $TabExpansionHasOutput.Value to
           $true, even if no results will be produced. This will stop PowerTab
           from interpreting the context any further.
-      3: The handler MUST output the options to be displayed to the user, or
-          no output at all.
+      3: The handler MUST output the options, as strings, to be displayed to
+          the user, or no output at all.
       4: The handler MAY set the variable $QuoteSpaces.Value to $false to
           prevent PowerTab from quoting output values from the handler that
           contain spaces. The default is $true.
@@ -51,7 +73,10 @@ LONG DESCRIPTION
 
 
   CREATING A PARAMETER HANDLER
-      .
+      Parameter handlers are called when the last word (location of the cursor)
+      will be the value to the parameter that the parameter handler is
+      registered to. This handler will be called for any command, but only if
+      the registered parameter is the current context.
 
       Parameter handlers must follow this contract.
 
@@ -63,8 +88,8 @@ LONG DESCRIPTION
           context, it MUST set the variable $TabExpansionHasOutput.Value to
           $true, even if no results will be produced. This will stop PowerTab
           from interpreting the context any further.
-      3: The handler MUST output the options to be displayed to the user, or
-          no output at all.
+      3: The handler MUST output the options, as strings, to be displayed to
+          the user, or no output at all.
       4: The handler MAY set the variable $QuoteSpaces.Value to $false to
           prevent PowerTab from quoting output values from the handler that
           contain spaces. The default is $true.
