@@ -9,7 +9,8 @@ LONG DESCRIPTION
 
 
   CONTEXT OBJECT
-      
+      The context object represents PowerTab's understanding of the current
+      command line.
 
       Line : <String>
           The full command line.

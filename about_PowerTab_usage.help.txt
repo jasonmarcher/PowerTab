@@ -133,6 +133,14 @@ LONG DESCRIPTION
           [System.DateTime]::
 
 
+  TYPE METHOD SIGNATURES
+      By pressing [TAB] after the first parenthesis of a method, PowerTab will
+      offer safe syntax for all the available overloads of the method.
+
+          [System.DateTime]::Compare(
+          $Date.ToString(
+
+
   ENUMS
       Enumeration values can also be expaned with PowerTab.
 
