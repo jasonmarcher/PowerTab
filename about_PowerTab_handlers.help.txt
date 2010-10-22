@@ -130,3 +130,4 @@ LONG DESCRIPTION
 SEE ALSO
 
     about_PowerTab_context
+    http://powertab.codeplex.com/documentation
