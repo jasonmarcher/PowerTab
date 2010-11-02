@@ -426,7 +426,7 @@ Register-TabExpansion "Group-Object" -Type "Command" {
             if ($Argument -like "@*") {
                 $TabExpansionHasOutput.Value = $true
                 $QuoteSpaces.Value = $false
-                '@{Name=""; Expression={$_.}}'
+                '@{Expression={$_.}}'
             }
         }
     }
