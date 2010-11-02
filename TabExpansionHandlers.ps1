@@ -55,8 +55,9 @@ Register-TabExpansion "Get-Command" -Type "Command" {
             Get-Command "$Argument*" @Parameters | Select-Object -ExpandProperty Name
         }
         'Noun' {
-            ## TODO
-            ## TODO: [workitem:9]
+            $TabExpansionHasOutput.Value = $true
+            Get-Command -CommandType Cmdlet,Filter,Function | Where-Object {$_.Name -match "^[^-]+-(?<Noun>$Argument.*)"} |
+                ForEach-Object {$Matches.Noun} | Sort-Object -Unique
         }
         'Verb' {
             $TabExpansionHasOutput.Value = $true
