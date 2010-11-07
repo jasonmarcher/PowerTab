@@ -331,14 +331,20 @@ Function Invoke-TabExpansion {
             ## Parameter name registry
             if ((-not $TabExpansionHasOutput) -and $TabExpansionParameterNameRegistry[$FullCommandName]) {
                 $ScriptBlock = $TabExpansionParameterNameRegistry[$FullCommandName]
-                $PossibleValues = & $ScriptBlock $CurrentContext $LastWord | New-TabItem -Value {$_} -Text {$_} -Type Parameter
+                $PossibleValues = & $ScriptBlock $CurrentContext $LastWord | ForEach-Object {
+                    if ($_ -is [System.String]) {New-TabItem -Value {$_} -Text {$_} -Type Parameter}
+                    else {$_}
+                }
                 if ($PossibleValues) {
                     $TabExpansionHasOutput = $true
                 }
             }
             if ((-not $TabExpansionHasOutput) -and $TabExpansionParameterNameRegistry[$InternalCommandName]) {
                 $ScriptBlock = $TabExpansionParameterNameRegistry[$InternalCommandName]
-                $PossibleValues = & $ScriptBlock $CurrentContext $LastWord | New-TabItem -Value {$_} -Text {$_} -Type Parameter
+                $PossibleValues = & $ScriptBlock $CurrentContext $LastWord | ForEach-Object {
+                    if ($_ -is [System.String]) {New-TabItem -Value {$_} -Text {$_} -Type Parameter}
+                    else {$_}
+                }
                 if ($PossibleValues) {
                     $TabExpansionHasOutput = $true
                 }
