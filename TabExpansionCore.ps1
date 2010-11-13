@@ -655,11 +655,16 @@ Function Invoke-PowerTab {
             }
 
             ## DataGrid GUI Shortcuts
-            '^a_(.*)' {Get-Help "about_$($Matches[1])*" | Select-Object Name,Synopsis,Length | Out-DataGridView Name | Foreach-Object {Get-Help $_}}
-            '^w_(.*)' {Get-TabExpansion "win32_$($Matches[1])*" WMI | Select-Object "Name" | Out-DataGridView Name}
-            '^t_(.*)' {Get-TabExpansion "*$($Matches[1])*" Types | Select-Object "Name" | Out-DataGridView Name}
-            '^c_(.*)' {Get-TabExpansion "$($Matches[1])*" | Select-Object "Text" | Out-DataGridView Text}
+            '^a_(.*)' {Get-Help "about_$($Matches[1])*" | Select-Object Name,Synopsis,Length | Out-DataGridView Name |
+                Foreach-Object {Get-Help $_}}
+            ## TODO: Add description?
+            '^w_(.*)' {Get-TabExpansion "win32_$($Matches[1])*" WMI | Select-Object Name | Out-DataGridView Name}
+            '^t_(.*)' {Get-TabExpansion "*$($Matches[1])*" Types | Where-Object {$_.Name -ne "Dummy"} |
+                Select-Object Name | Out-DataGridView Name}
+            '^c_(.*)' {Get-TabExpansion "$($Matches[1])*" | Select-Object Text | Out-DataGridView Text}
+            ## TODO: Add synopsis?
             '^f_' {Get-ChildItem function: | Select-Object Name | Out-DataGridView Name}
+            ## TODO: I think this needs some work
             '^d_' {Get-ChildItem | Select-Object Mode,LastWriteTime,Length,Name,FullName | Out-DataGridView FullName}
             '^h_' {Get-History -Count 100 | Out-DataGridView Commandline}
 
