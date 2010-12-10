@@ -72,7 +72,7 @@ Register-TabExpansion "Reset-ComputerMachinePassword" -Type "Command" {
     $Argument = $Context.Argument
     switch -exact ($Context.Parameter) {
         'Server' {
-            if ($Argument -match "^\w") {
+            if ($Argument -notmatch '^\$') {
                 $TabExpansionHasOutput.Value = $true
                 Get-TabExpansion "$Argument*" Computer | Select-Object -ExpandProperty "Text"
             }
