@@ -1207,7 +1207,7 @@ Function InternalImportTabExpansionDataBase {
             [System.IO.FileMode]::Open, $UserIsoStorage)
         [Void]$Database.ReadXml($IsoFile)
     } elseif (Test-Path $LiteralPath) {
-        if (![System.IO.Path]::IsPathRooted($_)) {
+        if (![System.IO.Path]::IsPathRooted($LiteralPath)) {
             $LiteralPath = Resolve-Path $LiteralPath
         }
         [Void]$Database.ReadXml($LiteralPath)
@@ -1261,7 +1261,7 @@ Function InternalImportTabExpansionConfig {
             [System.IO.FileMode]::Open, $UserIsoStorage)
         [Void]$Config.ReadXml($IsoFile, 'InferSchema')
     } elseif (Test-Path $LiteralPath) {
-        if (![System.IO.Path]::IsPathRooted($_)) {
+        if (![System.IO.Path]::IsPathRooted($LiteralPath)) {
             $LiteralPath = Resolve-Path $LiteralPath
         }
         [Void]$Config.ReadXml($LiteralPath, 'InferSchema')
