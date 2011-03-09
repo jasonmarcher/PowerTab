@@ -227,7 +227,7 @@ Function Invoke-TabExpansion {
     ##  Special debug logging
     if ($PowerTabLog) {
         $CurrentContext | Select-Object Line,LastWord,LastToken,Command,Parameter,Argument,PositionalParameter,
-            PositionalParameters,OtherParameters,isCommandMode,isAssignment,isParameterValue | Out-String |
+            PositionalParameters,OtherParameters,isCommandMode,isAssignment,isParameterValue,CommandInfo | Out-String |
             Add-Content (Join-Path $env:USERPROFILE "PowerTab.log")
     }
 
@@ -355,6 +355,7 @@ Function Invoke-TabExpansion {
                 if ($CurrentContext.CommandInfo) {
                     $ParameterName = $LastWord -replace "^-"
                     $PossibleValues = foreach ($Parameter in $CurrentContext.CommandInfo.Parameters.Values) {
+                        ##if ($Parameter.Name -like "$ParameterName*" -and $CurrentContext.OtherParameters.Keys -notcontains $Parameter.Name) {
                         if ($Parameter.Name -like "$ParameterName*") {
                             $Value = "-" + $Parameter.Name
                             New-TabItem -Value $Value -Text ("$Value [$($Parameter.ParameterType)]") -Type Parameter
@@ -384,6 +385,8 @@ Function Invoke-TabExpansion {
                 $TabExpansionHasOutput = $true
             }
         }
+
+        if ($PossibleValues -eq $null) {$PossibleValues = @()}
 
         if ($PowerTabConfig -eq $null) {
             ## Something happened to the PowerTabConfig object, recreate it
