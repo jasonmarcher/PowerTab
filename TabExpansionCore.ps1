@@ -332,7 +332,7 @@ Function Invoke-TabExpansion {
             if ((-not $TabExpansionHasOutput) -and $TabExpansionParameterNameRegistry[$FullCommandName]) {
                 $ScriptBlock = $TabExpansionParameterNameRegistry[$FullCommandName]
                 $PossibleValues = & $ScriptBlock $CurrentContext $LastWord | ForEach-Object {
-                    if ($_ -is [System.String]) {New-TabItem -Value {$_} -Text {$_} -Type Parameter}
+                    if ($_ -is [System.String]) {New-TabItem -Value $_ -Text $_ -Type Parameter}
                     else {$_}
                 }
                 if ($PossibleValues) {
@@ -342,7 +342,7 @@ Function Invoke-TabExpansion {
             if ((-not $TabExpansionHasOutput) -and $TabExpansionParameterNameRegistry[$InternalCommandName]) {
                 $ScriptBlock = $TabExpansionParameterNameRegistry[$InternalCommandName]
                 $PossibleValues = & $ScriptBlock $CurrentContext $LastWord | ForEach-Object {
-                    if ($_ -is [System.String]) {New-TabItem -Value {$_} -Text {$_} -Type Parameter}
+                    if ($_ -is [System.String]) {New-TabItem -Value $_ -Text $_ -Type Parameter}
                     else {$_}
                 }
                 if ($PossibleValues) {
