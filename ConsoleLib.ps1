@@ -573,7 +573,7 @@ Function Out-ConsoleList {
         $MinWidth = ([String]$Content.Count).Length * 4 + 7
         if ($Size.Width -lt $MinWidth) {$Size.Width = $MinWidth}
         $Content = foreach ($Item in $Content) {
-            $Item.DisplayText = " $($Item.Text) ".PadRight($Size.Width + 2)
+            $Item.DisplayText = "$($Item.Text) ".PadRight($Size.Width + 2)
             $Item
         }
         $ListConfig = Parse-List $Size
