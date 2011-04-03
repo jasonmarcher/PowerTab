@@ -426,6 +426,7 @@ Function Invoke-TabExpansion {
         }
     } catch {
         Invoke-TabActivityIndicator -Error
+        ## Send blank to prevent default PowerShell tab expansion
         ""
     } finally {
         ## Remove busy indication on ready or error
