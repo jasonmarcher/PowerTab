@@ -384,6 +384,31 @@ Function Invoke-TabExpansion {
                 }
                 $TabExpansionHasOutput = $true
             }
+        } elseif ($CurrentContext.isAssignment -and ($Tokens[0].Type -eq $_TokenTypes::Variable)) {
+            if (Test-Path "variable:$($Tokens[0].Content -replace '\$')") {
+                $Variable = Get-Variable ($Tokens[0].Content -replace '\$')
+                $VariableType = $Variable.Value.GetType()
+
+                ## Strongly typed variables
+                if (((Get-Variable ($Tokens[0].Content -replace '\$') -ea SilentlyContinue).Attributes.GetEnumerator() |
+                    Foreach-Object {$_.GetType().Name}) -contains "ArgumentTypeConverterAttribute") {
+                    if ($VariableType.BaseType -eq [System.Enum]) {
+                        ## Tab complete strongly typed enum variables
+                        $PossibleValues = [Enum]::GetNames($VariableType) | Where-Object {$_ -like ($CurrentContext.LastWord + "*")} | 
+                            New-TabItem -Value {"`"$_`""} -Text {$_} -Type Enum
+                        if ($PossibleValues) {
+                            $TabExpansionHasOutput = $true
+                        }
+                    }
+                } elseif (($VariableType -eq [System.Boolean]) -and ($Tokens[0].Content -like "*Preference")) {
+                    ## Tab complete preference variables that are bools
+                    $PossibleValues = 'true','false' | Where-Object {$_ -like ($CurrentContext.LastWord + "*")} | 
+                        New-TabItem -Value {"`$$_"} -Text {$_} -Type Enum
+                    if ($PossibleValues) {
+                        $TabExpansionHasOutput = $true
+                    }
+                }
+            }
         }
 
         if ($PossibleValues -eq $null) {$PossibleValues = @()}
