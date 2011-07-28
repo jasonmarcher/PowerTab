@@ -325,6 +325,21 @@ Register-TabExpansion "Get-HotFix" -Type "Command" {
     }
 }.GetNewClosure()
 
+## ConvertTo-HTML
+Register-TabExpansion "ConvertTo-HTML" -Type "Command" {
+    param($Context, [ref]$TabExpansionHasOutput, [ref]$QuoteSpaces)
+    $Argument = $Context.Argument
+    switch -exact ($Context.Parameter) {
+        'Property' {
+            if ($Argument -like "@*") {
+                $TabExpansionHasOutput.Value = $true
+                $QuoteSpaces.Value = $false
+                '@{Label=""; Expression={$_.}}'
+            }
+        }
+    }
+}
+
 ## ItemProperty
 & {
     $ItemPropertyHandler = {
