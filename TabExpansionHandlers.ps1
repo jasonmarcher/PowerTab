@@ -254,6 +254,33 @@ Register-TabExpansion "Reset-ComputerMachinePassword" -Type "Command" {
     Register-TabExpansion "Write-EventLog" $EventLogHandler -Type "Command"
 }
 
+## Get-FormatData
+Register-TabExpansion "Get-FormatData" -Type "Command" {
+    param($Context, [ref]$TabExpansionHasOutput)
+    $Argument = $Context.Argument
+    switch -exact ($Context.Parameter) {
+        'TypeName' {
+            if ($Argument -notmatch '^\.') {
+                ## TODO: Find way to differentiate namespaces from types
+                $TabExpansionHasOutput.Value = $true
+                $Dots = $Argument.Split(".").Count - 1
+                $res = @()
+                $res += $dsTabExpansionDatabase.Tables['Types'].Select("NS like '$Argument*' and DC = $($Dots + 1)") |
+                    Select-Object -Unique -ExpandProperty NS | New-TabItem -Value {$_} -Text {"$_."} -Type Namespace
+                $res += $dsTabExpansionDatabase.Tables['Types'].Select("NS like 'System.$Argument*' and DC = $($Dots + 2)") |
+                    Select-Object -Unique -ExpandProperty NS | New-TabItem -Value {$_} -Text {"$_."} -Type Namespace
+                if ($Dots -gt 0) {
+                    $res += $dsTabExpansionDatabase.Tables['Types'].Select("Name like '$Argument*' and DC = $Dots") |
+                        Select-Object -ExpandProperty Name | New-TabItem -Value {$_} -Text {$_} -Type Type
+                    $res += $dsTabExpansionDatabase.Tables['Types'].Select("Name like 'System.$Argument*' and DC = $($Dots + 1)") |
+                        Select-Object -ExpandProperty Name | New-TabItem -Value {$_} -Text {$_} -Type Type
+                }
+                $res | Where-Object {$_}
+            }
+        }
+    }
+}
+
 ## Get-Help
 & {
     $HelpHandler = {
@@ -277,7 +304,7 @@ Register-TabExpansion "Reset-ComputerMachinePassword" -Type "Command" {
             }
         }
     }.GetNewClosure()
-    
+
     Register-TabExpansion "Get-Help" $HelpHandler -Type "Command"
     Register-TabExpansion "help" $HelpHandler -Type "Command"
 }
