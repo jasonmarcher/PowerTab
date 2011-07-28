@@ -669,7 +669,7 @@ Function Invoke-PowerTab {
                 if ($Pattern -match '^[0-9]+$') {
                     @(Get-History -Id $Pattern -ErrorAction SilentlyContinue)[0].CommandLine
                 } else {
-					Get-History -Count 32767 | Where-Object {$_.CommandLine -like "$Pattern*"} | Sort Id -Descending |
+					Get-History -Count 32767 | Where-Object {$_.CommandLine -like "*$Pattern*"} | Sort Id -Descending |
                         Select-Object -ExpandProperty CommandLine -Unique | New-TabItem -Value {$_} -Text {$_} -Type History |
                         Invoke-TabItemSelector $Pattern -SelectionHandler $SelectionHandler
                 }
