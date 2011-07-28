@@ -434,7 +434,7 @@ Function Import-TabExpansionTheme {
     )
 
     end {
-		if ($PSCmdlet.ParameterSetName -eq "Name") {
+        if ($PSCmdlet.ParameterSetName -eq "Name") {
             Import-Csv (Join-Path $PSScriptRoot "ColorThemes\Theme${Name}.csv") | ForEach-Object {$PowerTabConfig.Colors."$($_.Name)" = $_.Color}
         } else {
             Import-Csv $LiteralPath | ForEach-Object {$PowerTabConfig.Colors."$($_.Name)" = $_.Color}
@@ -460,7 +460,7 @@ Function Export-TabExpansionTheme {
     )
 
     process {
-		if ($PSCmdlet.ParameterSetName -eq "Name") {
+        if ($PSCmdlet.ParameterSetName -eq "Name") {
             $ExportPath = Join-Path $PSScriptRoot "ColorThemes\Theme${Name}.csv"
         } else {
             $ExportPath = $LiteralPath
@@ -480,9 +480,9 @@ Function Export-TabExpansionTheme {
 
 # .ExternalHelp TabExpansionLib-Help.xml
 Function Update-TabExpansionDataBase {
-	[CmdletBinding(SupportsShouldProcess = $true, SupportsTransactions = $false,
-		ConfirmImpact = "Low", DefaultParameterSetName = "")]
-	param(
+    [CmdletBinding(SupportsShouldProcess = $true, SupportsTransactions = $false,
+        ConfirmImpact = "Low", DefaultParameterSetName = "")]
+    param(
         [Switch]
         $Force
     )
@@ -512,7 +512,7 @@ Set-Alias udte Update-TabExpansionDataBase
 
 # .ExternalHelp TabExpansionLib-Help.xml
 Function Update-TabExpansionType {
-	[CmdletBinding()]
+    [CmdletBinding()]
     param()
 
     end {
@@ -557,9 +557,9 @@ Function Update-TabExpansionType {
 
 # .ExternalHelp TabExpansionLib-Help.xml
 Function Add-TabExpansionType {
-	[CmdletBinding()]
+    [CmdletBinding()]
     param(
-		[Parameter(Position = 0, Mandatory = $true, ValueFromPipeline = $true)]
+        [Parameter(Position = 0, Mandatory = $true, ValueFromPipeline = $true)]
         [ValidateNotNull()]
         [System.Reflection.Assembly]
         $Assembly
@@ -607,9 +607,37 @@ Function Add-TabExpansionType {
 }
 
 
+Function Find-TabExpansionType {
+    [CmdletBinding()]
+    param(
+        [Parameter(Position = 0, ValueFromPipeline = $true)]
+        [String]
+        $Name
+    )
+
+    process {
+        ## TODO: Find way to differentiate namespaces from types
+        $Dots = $Name.Split(".").Count - 1
+        $res = @()
+
+        $res += $dsTabExpansionDatabase.Tables['Types'].Select("NS like '$Name*' and DC = $($Dots + 1)") |
+            Select-Object -Unique -ExpandProperty NS | New-TabItem -Value {$_} -Text {"$_."} -Type Namespace
+        $res += $dsTabExpansionDatabase.Tables['Types'].Select("NS like 'System.$Name*' and DC = $($Dots + 2)") |
+            Select-Object -Unique -ExpandProperty NS | New-TabItem -Value {$_} -Text {"$_."} -Type Namespace
+        if ($Dots -gt 0) {
+            $res += $dsTabExpansionDatabase.Tables['Types'].Select("Name like '$Name*' and DC = $Dots") |
+                Select-Object -ExpandProperty Name | New-TabItem -Value {$_} -Text {$_} -Type Type
+            $res += $dsTabExpansionDatabase.Tables['Types'].Select("Name like 'System.$Name*' and DC = $($Dots + 1)") |
+                Select-Object -ExpandProperty Name | New-TabItem -Value {$_} -Text {$_} -Type Type
+        }
+        $res | Where-Object {$_}
+    }
+}
+
+
 # .ExternalHelp TabExpansionLib-Help.xml
 Function Update-TabExpansionWmi {
-	[CmdletBinding()]
+    [CmdletBinding()]
     param()
 
     end {
@@ -633,7 +661,7 @@ Function Update-TabExpansionWmi {
 
 # .ExternalHelp TabExpansionLib-Help.xml
 Function Update-TabExpansionCom {
-	[CmdletBinding()]
+    [CmdletBinding()]
     param()
 
     end {
@@ -651,21 +679,21 @@ Function Update-TabExpansionCom {
 
 # .ExternalHelp TabExpansionLib-Help.xml
 Function Add-TabExpansionComputer {
-	[CmdletBinding(SupportsShouldProcess = $false, SupportsTransactions = $false,
-		ConfirmImpact = "None", DefaultParameterSetName = "Name")]
-	param(
+    [CmdletBinding(SupportsShouldProcess = $false, SupportsTransactions = $false,
+        ConfirmImpact = "None", DefaultParameterSetName = "Name")]
+    param(
         [Alias("Name")]
-		[Parameter(ParameterSetName = "Name", Position = 0, Mandatory = $true, ValueFromPipeline = $true, ValueFromPipelineByPropertyName = $true)]
+        [Parameter(ParameterSetName = "Name", Position = 0, Mandatory = $true, ValueFromPipeline = $true, ValueFromPipelineByPropertyName = $true)]
         [ValidateNotNullOrEmpty()]
         [String]
         $ComputerName
         ,
-		[Parameter(ParameterSetName = "OU", Position = 0, Mandatory = $true, ValueFromPipeline = $true)]
+        [Parameter(ParameterSetName = "OU", Position = 0, Mandatory = $true, ValueFromPipeline = $true)]
         [ValidateNotNull()]
         [System.DirectoryServices.DirectoryEntry]
         $OU
         ,
-		[Parameter(ParameterSetName = "NetView")]
+        [Parameter(ParameterSetName = "NetView")]
         [Switch]
         $NetView
     )
@@ -705,7 +733,7 @@ Function Add-TabExpansionComputer {
 
 # .ExternalHelp TabExpansionLib-Help.xml
 Function Remove-TabExpansionComputer {
-	[CmdletBinding()]
+    [CmdletBinding()]
     param()
 
     end {
@@ -719,7 +747,7 @@ Function Remove-TabExpansionComputer {
 
 # .ExternalHelp TabExpansionLib-Help.xml
 Function Get-TabExpansion {
-	[CmdletBinding()]
+    [CmdletBinding()]
     param(
         [Parameter(Position = 0)]
         [String]
@@ -775,7 +803,7 @@ Set-Alias gte Get-TabExpansion
 
 # .ExternalHelp TabExpansionLib-Help.xml
 Function Add-TabExpansion {
-	[CmdletBinding()]
+    [CmdletBinding()]
     param(
         [Parameter(Position = 0, Mandatory = $true)]
         [ValidateNotNullOrEmpty()]
@@ -808,7 +836,7 @@ Set-Alias ate Add-TabExpansion
 
 # .ExternalHelp TabExpansionLib-Help.xml
 Function Remove-TabExpansion {
-	[CmdletBinding()]
+    [CmdletBinding()]
     param(
         [Parameter(Position = 0, Mandatory = $true)]
         [ValidateNotNullOrEmpty()]
@@ -835,7 +863,7 @@ Set-Alias rte Remove-TabExpansion
 
 # .ExternalHelp TabExpansionLib-Help.xml
 Function Invoke-TabExpansionEditor {
-	[CmdletBinding()]
+    [CmdletBinding()]
     param()
 
     end {
@@ -866,14 +894,14 @@ Set-Alias itee Invoke-TabExpansionEditor
 
 # .ExternalHelp TabExpansionLib-Help.xml
 Function Register-TabExpansion {
-	[CmdletBinding()]
+    [CmdletBinding()]
     param(
-		[Parameter(Position = 0, Mandatory = $true, ValueFromPipelineByPropertyName = $true)]
+        [Parameter(Position = 0, Mandatory = $true, ValueFromPipelineByPropertyName = $true)]
         [ValidateNotNullOrEmpty()]
         [String]
         $Name
         ,
-		[Parameter(Position = 1, Mandatory = $true, ValueFromPipelineByPropertyName = $true)]
+        [Parameter(Position = 1, Mandatory = $true, ValueFromPipelineByPropertyName = $true)]
         [ValidateNotNull()]
         [ScriptBlock]
         $Handler
