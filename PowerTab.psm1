@@ -17,7 +17,10 @@ if (-not ([AppDomain]::CurrentDomain.GetAssemblies() | Where-Object {$_.Manifest
 $OldTabExpansion = Get-Content Function:TabExpansion
 $Module = $MyInvocation.MyCommand.ScriptBlock.Module 
 $Module.OnRemove = {
-    Set-Content Function:\TabExpansion -Value $OldTabExpansion
+    if ((Get-Command TabExpansion).Module.Name -eq "PowerTab") {
+        ## Only reset TabExpansion() if PowerTab's override is currently in use
+        Set-Content Function:\TabExpansion -Value $OldTabExpansion
+    }
 }
 
 
