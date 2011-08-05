@@ -916,10 +916,9 @@ Function Invoke-PowerTab {
             ## Call function
             "(.*)$([Regex]::Escape($PowerTabConfig.ShortcutChars.CustomFunction))`$" {
                 if ($PowerTabConfig.CustomFunctionEnabled) {
-                    $Matches[1] | ForEach-Object {
-                        $ExecutionContext.InvokeCommand.InvokeScript("$($PowerTabConfig.CustomUserFunction) '$_'") | 
-                            New-TabItem -Value {$_} -Text {$_} -Type Unknown
-                    } | Invoke-TabItemSelector $Matches[1] -SelectionHandler $SelectionHandler
+                    & $PowerTabConfig.CustomUserFunction $Context | 
+                        New-TabItem -Value {$_} -Text {$_} -Type Unknown |
+                        Invoke-TabItemSelector $Matches[1] -SelectionHandler $SelectionHandler
                 }
                 break
             }
