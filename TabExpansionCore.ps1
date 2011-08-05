@@ -665,15 +665,18 @@ Function Invoke-PowerTab {
 
             ## History completion against either #<pattern> or #<id>
             '^#(.*)' {
-                $Pattern = $Matches[1]
-                if ($Pattern -match '^[0-9]+$') {
-                    @(Get-History -Id $Pattern -ErrorAction SilentlyContinue)[0].CommandLine
-                } else {
-					Get-History -Count 32767 | Where-Object {$_.CommandLine -like "*$Pattern*"} | Sort Id -Descending |
-                        Select-Object -ExpandProperty CommandLine -Unique | New-TabItem -Value {$_} -Text {$_} -Type History |
-                        Invoke-TabItemSelector $Pattern -SelectionHandler $SelectionHandler
+                ## Only do history if there is not a command in the current context
+                if (-not $Context.isCommandMode) {
+                    $Pattern = $Matches[1]
+                    if ($Pattern -match '^[0-9]+$') {
+                        @(Get-History -Id $Pattern -ErrorAction SilentlyContinue)[0].CommandLine
+                    } else {
+    					Get-History -Count 32767 | Where-Object {$_.CommandLine -like "*$Pattern*"} | Sort Id -Descending |
+                            Select-Object -ExpandProperty CommandLine -Unique | New-TabItem -Value {$_} -Text {$_} -Type History |
+                            Invoke-TabItemSelector $Pattern -SelectionHandler $SelectionHandler
+                    }
+                    break
                 }
-                break
             }
 
             ## About Topics completion
