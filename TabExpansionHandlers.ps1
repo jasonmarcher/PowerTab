@@ -302,6 +302,22 @@ Register-TabExpansion "Get-FormatData" -Type "Command" {
                     }
                 }
             }
+            'Parameter' {
+                $TabExpansionHasOutput.Value = $true
+                if ($Context.OtherParameters["Name"]) {
+                    $Command = $Context.OtherParameters["Name"]
+                } else {
+                    $Command = $Context.PositionalParameters[0]
+                }
+                $CommandInfo = try {& (Get-Module PowerTab) Resolve-Command $Command -CommandInfo -ErrorAction "Stop"} catch {}
+                if ($CommandInfo) {
+                    foreach ($Parameter in $CommandInfo.Parameters.Values) {
+                        if ($Parameter.Name -like "$Argument*") {
+                            New-TabItem -Value $Parameter.Name -Text $Parameter.Name -Type Parameter
+                        }
+                    }
+                }
+            }
         }
     }.GetNewClosure()
 
