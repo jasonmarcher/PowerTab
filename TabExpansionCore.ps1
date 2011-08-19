@@ -305,6 +305,13 @@ Function Invoke-TabExpansion {
                         $TabExpansionHasOutput = $true
                         $PossibleValues = [Enum]::GetNames($ParameterInfo.ParameterType) | Where-Object {$_ -like ($CurrentContext.Argument + "*")} | 
                             New-TabItem -Value {$_} -Text {$_} -Type Enum
+                    } elseif ($ParameterInfo.ParameterType -eq [System.Boolean]) {
+                        ## Treat boolean parameters as enums
+                        $PossibleValues = 'true','false' | Where-Object {$_ -like ($CurrentContext.LastWord + "*")} | 
+                            New-TabItem -Value {"`$$_"} -Text {$_} -Type Enum
+                        if ($PossibleValues) {
+                            $TabExpansionHasOutput = $true
+                        }
                     }
 
                     ## ValidateSet
