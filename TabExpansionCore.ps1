@@ -529,25 +529,24 @@ Function Invoke-PowerTab {
         }
 
         ## Resolve Members
-        $val = $Object
-        $pat = $Pattern.Split('.')[($Level -1)] + '*'
+        $Pattern = $Pattern.Split('.')[($LevelCount -1)] + '*'
         . {
-            if ('PSBase' -like $pat) {$val + '.PSBase'}
-            Invoke-Expression "Get-Member -InputObject ($val)" | Where-Object {
+            if ('PSBase' -like $Pattern) {$Object + '.PSBase'}
+            Invoke-Expression "Get-Member -InputObject ($Object)" | Where-Object {
                 $n = $_.Name
                 if (-not $PowerTabConfig.ShowAccessorMethods) {
-                    $n -like $pat -and $n -notmatch '^[gs]et_'
+                    $n -like $Pattern -and $n -notmatch '^[gs]et_'
                 } else {
-                    $n -like $pat
+                    $n -like $Pattern
                 }
             } | ForEach-Object {
                 if ($_.MemberType -band $_Method) {
                     ## Return a method...
-                    $Value = $val + '.' + $_.Name + '('
+                    $Value = $Object + '.' + $_.Name + '('
                     New-TabItem -Value $Value -Text $Value -Type Method
                 } else {
                     ## Return a property...
-                    $Value = $val + '.' + $_.Name
+                    $Value = $Object + '.' + $_.Name
                     New-TabItem -Value $Value -Text $Value -Type Property
                 }
             }
@@ -733,8 +732,8 @@ Function Invoke-PowerTab {
                 $Level = $Matches[2].Split('.').Count
 
                 if ($Level -gt 1) {
-                    $LastType += ('::' + $Matches[2].Split('.')[0])
-                    $Pattern = $Matches[2].SubString(($Matches[2].IndexOf('.') + 1))
+                    $LastType += '::' + $Matches[2].SubString(0, $Matches[2].LastIndexOf('.'))
+                    $Pattern = $Matches[2].Split('.')[-1]
                     Resolve-Member -Object $LastType -Pattern $Pattern | Invoke-TabItemSelector $LastWord -SelectionHandler $SelectionHandler
                 } else {
                     $Pattern = $Matches[2].Split('.')[($Level -1)] + '*'
@@ -760,8 +759,8 @@ Function Invoke-PowerTab {
 
                 if ((Invoke-Expression "$LastType.GetType().Name") -ne 'RuntimeType') {$gt = '.GetType'}
                 if ($Level -gt 1) {
-                    $LastType += ('::' + $Matches[2].Split('.')[0])
-                    $Pattern = $Matches[2].SubString(($Matches[2].IndexOf('.') + 1))
+                    $LastType += '::' + $Matches[2].SubString(0, $Matches[2].LastIndexOf('.'))
+                    $Pattern = $Matches[2].Split('.')[-1]
                     Resolve-Member -Object $LastType -Pattern $Pattern | Invoke-TabItemSelector $LastWord -SelectionHandler $SelectionHandler
                 } else {
                     $Pattern = $Matches[2].Split('.')[($Level -1)] + '*'
