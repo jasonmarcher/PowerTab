@@ -823,6 +823,15 @@ Function Add-TabExpansion {
 
     ## TODO: Add -PassThru support
     process {
+        ## Do not allow duplicate computer entries
+        if ($Type -eq "Computer") {
+            if (Get-TabExpansion -Filter $Filter -Type $Type) {
+                ## TODO: Localize!
+                Write-Verbose "Found duplicate Computer entry for '$Filter'.  Ignoring."
+                return
+            }
+        }
+
         [Void]$dsTabExpansionDatabase.Tables['Custom'].Rows.Add($Filter, $Text, $Type)
 
         trap [System.Management.Automation.PipelineStoppedException] {
