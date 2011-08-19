@@ -100,7 +100,7 @@ Function Resolve-Command {
     process {
         $Command = ""
 
-        ## Get command info, the where clause prevents problems with "?" wildcard
+        ## Get command info
         if ($Name -match "\\") {
             ## Full name usage
             $Module = $Name.Substring(0, $Name.Indexof("\"))
@@ -121,10 +121,18 @@ Function Resolve-Command {
             }
         }
         if (-not $Command) {
-            if ($Name.Contains("?")) {
-                $Command = @(Get-Command $Name | Where-Object {$_.Name -eq $Name})[0]
-            } else {
-                $Command = @(Get-Command $Name)[0]
+            try {
+                ## This try is to provide a second chance to catch automatic aliases for Get-* commands
+                if ($Name.Contains("?")) {
+                    ## The where clause prevents problems with "?" wildcard
+                    $Command = @(Get-Command $Name | Where-Object {$_.Name -eq $Name})[0]
+                } else {
+                    $Command = @(Get-Command $Name)[0]
+                }
+            } catch {
+                if (-not ($Command = try {@(Get-Command "Get-$Name")[0]} catch {})) {
+                    throw $_
+                }
             }
         }
 
