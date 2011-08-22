@@ -968,6 +968,18 @@ Function Invoke-PowerTab {
         $PowerTabFileSystemMode = $true
         $LastWord = $LastWord -replace '`'
 
+        $PathSlices = [Regex]::Split($LastWord, '\\|/')
+        if ($PathSlices.Count -eq 1) {
+            if ($PathSlices[0] -like "*:") {
+                $LastWord = $PathSlices[0] + "\"
+                $PathSlices = $PathSlices,""
+            } else {
+                $PathSlices = ,"." + $PathSlices
+            }
+        }
+        $Container = [String]::Join('\', $PathSlices[0..($PathSlices.Count - 2)])
+        $LastPath = $Container + "\$([Regex]::Split($LastWord,'\\|/|:')[-1])"
+
         if (("Push-Location","Set-Location") -contains $Context.Command) {
             $ChildItems = @(Get-ChildItem "$LastWord*" | Where-Object {$_.PSIsContainer})
         } else {
@@ -976,11 +988,6 @@ Function Invoke-PowerTab {
         if (-not $ChildItems) {$LastWord; return}
 
         #if ((@($childitems).count -eq 1) -and ($lastword.endswith('\')) ) {$childitems = $childitems,@{name='..'}}
-        $PathSlices = [Regex]::Split($LastWord, '\\|/')
-        if ($PathSlices.Count -eq 1) {$PathSlices = ,"." + $PathSlices}
-        $Container = [String]::Join('\', $PathSlices[0..($PathSlices.Count -2)])
-
-        $LastPath = $Container + "\$([Regex]::Split($LastWord,'\\|/|:')[-1])"
 
         ## Fixes paths for registry keys, certificates and other unusual paths
         ## Improved fix for a problem identified by idvorkin (http://poshcode.org/1586)
