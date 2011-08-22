@@ -1049,6 +1049,9 @@ Function Invoke-PowerTab {
                     $_.Value = "$Invoke$Quote$($_.Value)$Quote"
                     $_
                 }
+            } else {
+                ## Need to return the value if we are not quoting
+                $_
             }
         }
     }
