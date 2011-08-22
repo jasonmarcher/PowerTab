@@ -106,6 +106,13 @@ Function Invoke-TabItemSelector {
     end {
         Write-Debug "Invoke-TabItemSelector parameter set: $($PSCmdlet.ParameterSetName)"
 
+        if (($Objects.Count -eq 0) -and ($Values.Count -eq 0)) {
+            if ($ReturnWord) {
+                $ReturnWord
+            }
+            return
+        }
+
         ## If dynamic, select an appropriate handler based on the current host
         if ($SelectionHandler -eq "Dynamic") {
             switch -exact ($Host.Name) {
@@ -164,7 +171,6 @@ Function Invoke-TabItemSelector {
         if ($IncompatibleHandlers -contains $SelectionHandler) {$SelectionHandler = "Default"}
 
         ## List of selection handlers that can handle objects
-        ## TODO: Upgrade ConsoleList
         $ObjectHandlers = @("ConsoleList","ObjectDefault")
 
         if (($ObjectHandlers -contains $SelectionHandler) -and ($PSCmdlet.ParameterSetName -eq "Values")) {
