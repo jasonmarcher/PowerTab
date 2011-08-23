@@ -579,10 +579,10 @@ Register-TabExpansion "Out-Printer" -Type "Command" {
                 $QuoteSpaces.Value = $false
                 if ($Argument -match '^[0-9]+$') {
                     Get-Process | Where-Object {$_.Id.ToString() -like "$Argument*"} |
-                        New-TabItem -Value {$_.Id} -Text {"{0:-4} {1}" -f ([String]$_.Id),$_.Name} -Type Process
+                        New-TabItem -Value {$_.Id} -Text {"{0,-4} {1}" -f ([String]$_.Id),$_.Name} -Type Process
                 } else {
                     Get-Process | Where-Object {$_.Name -like "$Argument*"} |
-                        New-TabItem -Value {$_.Id} -Text {"{0:-4} {1}" -f ([String]$_.Id),$_.Name} -Type Process
+                        New-TabItem -Value {$_.Id} -Text {"{0,-4} {1}" -f ([String]$_.Id),$_.Name} -Type Process
                 }
             }
             'Name' {
@@ -605,10 +605,10 @@ Register-TabExpansion "Out-Printer" -Type "Command" {
                 }
                 if ($Argument -match '^[0-9]+$') {
                     Get-Process @Parameters | Where-Object {$_.Id.ToString() -like "$Argument*"} |
-                        New-TabItem -Value {$_.Id} -Text {"{0:-4} <# {1} #>" -f ([String]$_.Id),$_.Name} -Type Process
+                        New-TabItem -Value {$_.Id} -Text {"{0,-4} <# {1} #>" -f ([String]$_.Id),$_.Name} -Type Process
                 } else {
                     Get-Process @Parameters | Where-Object {$_.Name -like "$Argument*"} |
-                        New-TabItem -Value {$_.Id} -Text {"{0:-4} <# {1} #>" -f ([String]$_.Id),$_.Name} -Type Process
+                        New-TabItem -Value {$_.Id} -Text {"{0,-4} <# {1} #>" -f ([String]$_.Id),$_.Name} -Type Process
                 }
             }
             'Name' {
@@ -621,7 +621,7 @@ Register-TabExpansion "Out-Printer" -Type "Command" {
             }
         }
     }.GetNewClosure()
-    
+
     Register-TabExpansion "Debug-Process" $ProcessHandler -Type "Command"
     Register-TabExpansion "Get-Process" $GetProcessHandler -Type "Command"
     Register-TabExpansion "Stop-Process" $ProcessHandler -Type "Command"
