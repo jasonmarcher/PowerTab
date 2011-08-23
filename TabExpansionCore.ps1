@@ -1018,7 +1018,7 @@ Function Invoke-PowerTab {
             $Quote = ''
             $Invoke = ''
 
-            if ($LastBlock -notmatch ".*['`"]`$") {  ## Don't quote if it looks like the path is already quoted
+            if (($LastBlock -notmatch ".*['`"]`$") -and (-not $NestedPowerTab)) {  ## Don't quote if it looks like the path is already quoted
                 if ($_ -is [String]) {
                     ## Remove quotes from beginning and end of string
                     $_ = $_ -replace '^"|"$'

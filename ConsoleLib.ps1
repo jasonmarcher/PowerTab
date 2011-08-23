@@ -27,6 +27,7 @@ Function Out-ConsoleList {
 
     begin {
         [Object[]]$Content = @()
+        $NestedPowerTab = $true
     }
 
     process {
