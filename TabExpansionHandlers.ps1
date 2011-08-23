@@ -100,10 +100,13 @@ Register-TabExpansion "Reset-ComputerMachinePassword" -Type "Command" {
             'RestorePoint' {
                 $TabExpansionHasOutput.Value = $true
                 $QuoteSpaces.Value = $false
-                ## TODO: Display more info
-                ## TODO: [workitem:10]
-                foreach ($Point in Get-ComputerRestorePoint -EA Stop) {
-                    $Text = "{0}: {1}" -f ([String]$Point.SequenceNumber),[DateTime]::ParseExact($Point.CreationTime, "yyyyMMddHHmmss.ffffff-000", $null)
+                foreach ($Point in Get-ComputerRestorePoint -ErrorAction Stop) {
+                    if ($Point.Description.Length -gt 50) {
+                        $Description = $Point.Description.SubString(0, 50)
+                    } else {
+                        $Description = $Point.Description
+                    }
+                    $Text = "{0}: {1} ({2})" -f $Point.SequenceNumber,[DateTime]::ParseExact($Point.CreationTime, "yyyyMMddHHmmss.ffffff-000", $null),$Description
                     New-TabItem -Value $Point.SequenceNumber -Text $Text -Type ComputerRestorePoint
                 }
             }
