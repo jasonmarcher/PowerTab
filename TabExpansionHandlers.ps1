@@ -631,24 +631,76 @@ Register-TabExpansion "Out-Printer" -Type "Command" {
 ## PSBreakpoint
 & {
     $PSBreakpointHandler = {
-        param($Context, [ref]$TabExpansionHasOutput)
+        param($Context, [ref]$TabExpansionHasOutput, [ref]$QuoteSpaces)
         $Argument = $Context.Argument
         switch -exact ($Context.Parameter) {
             'Breakpoint' {
-                ## TODO:
-                ## TODO: [workitem:15]
+                ## TODO:  More info in display text
+                $TabExpansionHasOutput.Value = $true
+                $QuoteSpaces.Value = $false
+                $DisplayText = {
+                    $Text = "{0,-2} " -f $_.Id
+                    if ($_.Command) {
+                        $Text += $_.Command
+                        if ($_.Script) {
+                            $Text += " ({0})" -f $_.Script
+                        }
+                    } elseif ($_.Variable) {
+                        $Text += '$' + $_.Variable
+                        if ($_.Script) {
+                            $Text += " ({0})" -f $_.Script
+                        }
+                    } elseif ($_.Line) {
+                        if ($_.Script.Length -ge 60) {
+                            $Script = $_.Script.SubString(0, 60)
+                        } else {
+                            $Script = $_.Script
+                        }
+                        $Text += "{0}:{1}" -f $Script,$_.Line
+                    }
+                    $Text
+                }
+                Get-PSBreakpoint | Sort-Object Id | New-TabItem -Value {"(Get-PSBreakPoint -Id {0})" -f $_.Id} -Text $DisplayText -Type BreakPoint
             }
             'Command' {
-                ## TODO:
-                ## TODO: [workitem:15]
+                $TabExpansionHasOutput.Value = $true
+                ## TODO:  Filter command list based on what is used in a script?!
+                ## TODO:  Set object types
+                Get-Command "$Argument*" -CommandType Function,Filter,Cmdlet,ExternalScript | New-TabItem -Value {$_.Name} -Text {$_.Name}
             }
             'Id' {
-                ## TODO:
-                Get-PSBreakpoint | Select-Object -ExpandProperty Id
+                ## TODO:  More info in display text
+                $TabExpansionHasOutput.Value = $true
+                $DisplayText = {
+                    $Text = "{0,-2} " -f $_.Id
+                    if ($_.Command) {
+                        $Text += $_.Command
+                        if ($_.Script) {
+                            $Text += " ({0})" -f $_.Script
+                        }
+                    } elseif ($_.Variable) {
+                        $Text += '$' + $_.Variable
+                        if ($_.Script) {
+                            $Text += " ({0})" -f $_.Script
+                        }
+                    } elseif ($_.Line) {
+                        if ($_.Script.Length -ge 60) {
+                            $Script = $_.Script.SubString(0, 60)
+                        } else {
+                            $Script = $_.Script
+                        }
+                        $Text += "{0}:{1}" -f $Script,$_.Line
+                    }
+                    $Text
+                }
+                Get-PSBreakpoint | Sort-Object Id | New-TabItem -Value {$_.Id} -Text $DisplayText -Type BreakPoint
             }
             'Line' {
-                ## TODO:
-                ## TODO: [workitem:15]
+                ## TODO:  Show line contents?
+                $TabExpansionHasOutput.Value = $true
+                if ($Context.OtherParameters["Script"]) {
+                    1..(Get-Content $Context.OtherParameters["Script"]).Count | New-TabItem -Value {$_} -Text {$_}
+                }
             }
             'Script' {
                 ## TODO: Display relative paths
@@ -667,10 +719,11 @@ Register-TabExpansion "Out-Printer" -Type "Command" {
         }
     }.GetNewClosure()
     
-    Register-TabExpansion "Disable-PSBreakpoint" $PSBreakpointHandler -Type "Command"
-    Register-TabExpansion "Enable-PSBreakpoint" $PSBreakpointHandler -Type "Command"
-    Register-TabExpansion "Get-PSBreakpoint" $PSBreakpointHandler -Type "Command"
-    Register-TabExpansion "Set-PSBreakpoint" $PSBreakpointHandler -Type "Command"
+    Register-TabExpansion "Disable-PSBreakpoint" $PSBreakpointHandler -Type Command
+    Register-TabExpansion "Enable-PSBreakpoint" $PSBreakpointHandler -Type Command
+    Register-TabExpansion "Get-PSBreakpoint" $PSBreakpointHandler -Type Command
+    Register-TabExpansion "Set-PSBreakpoint" $PSBreakpointHandler -Type Command
+    Register-TabExpansion "Remove-PSBreakpoint" $PSBreakpointHandler -Type Command
 }
 
 ## PSDrive
