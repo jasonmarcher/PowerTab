@@ -1072,8 +1072,17 @@ Register-TabExpansion "Get-WinEvent" -Type "Command" {
                         New-TabItem -Value {$_.LCID} -Text {$_.Name} -Type Locale
             }
             'Name' {
-                ## TODO: ??? (Method Name)
-                ## TODO: [workitem:17]
+                $TabExpansionHasOutput.Value = $true
+                if ($Context.OtherParameters["Class"]) {
+                    $Class = [WmiClass]($Context.OtherParameters["Class"])
+                } elseif ($Context.OtherParameters["Path"]) {
+                    $Class = [WmiClass]($Context.OtherParameters["Path"] -replace '\.\w.+')
+                } elseif ($Context.PositionalParameters[0]) {
+                    $Class = [WmiClass]($Context.PositionalParameters[0])
+                }
+                if ($Class) {
+                    $Class.Methods | Where-Object {$_.Name -like "$Argument*"} | New-TabItem -Value {$_.Name} -Text {$_.Name} -Type Method
+                }
             }
             'Namespace' {
                 $TabExpansionHasOutput.Value = $true
@@ -1093,11 +1102,17 @@ Register-TabExpansion "Get-WinEvent" -Type "Command" {
             }
             'Path' {
                 ## TODO: ???
-                ## TODO: [workitem:17]
             }
             'Property' {
-                ## TODO: ???
-                ## TODO: [workitem:17]
+                $TabExpansionHasOutput.Value = $true
+                if ($Context.OtherParameters["Class"]) {
+                    $Class = [WmiClass]($Context.OtherParameters["Class"])
+                } elseif ($Context.PositionalParameters[0]) {
+                    $Class = [WmiClass]($Context.PositionalParameters[0])
+                }
+                if ($Class) {
+                    $Class.Properties | Where-Object {$_.Name -like "$Argument*"} | New-TabItem -Value {$_.Name} -Text {$_.Name} -Type Property
+                }
             }
         }
     }.GetNewClosure()
