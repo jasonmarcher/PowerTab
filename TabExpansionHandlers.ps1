@@ -308,9 +308,9 @@ Register-TabExpansion "Get-FormatData" -Type "Command" {
             'Parameter' {
                 $TabExpansionHasOutput.Value = $true
                 if ($Context.OtherParameters["Name"]) {
-                    $Command = $Context.OtherParameters["Name"]
+                    $Command = Resolve-TabExpansionParameterValue $Context.OtherParameters["Name"]
                 } else {
-                    $Command = $Context.PositionalParameters[0]
+                    $Command = Resolve-TabExpansionParameterValue $Context.PositionalParameters[0]
                 }
                 $CommandInfo = try {& (Get-Module PowerTab) Resolve-Command $Command -CommandInfo -ErrorAction "Stop"} catch {}
                 if ($CommandInfo) {
@@ -702,7 +702,8 @@ Register-TabExpansion "Out-Printer" -Type "Command" {
                 ## TODO:  Show line contents?
                 $TabExpansionHasOutput.Value = $true
                 if ($Context.OtherParameters["Script"]) {
-                    1..(Get-Content $Context.OtherParameters["Script"]).Count | New-TabItem -Value {$_} -Text {$_}
+                    1..(Get-Content (Resolve-TabExpansionParameterValue $Context.OtherParameters["Script"])).Count |
+                        New-TabItem -Value {$_} -Text {$_}
                 }
             }
             'Script' {
@@ -1074,11 +1075,11 @@ Register-TabExpansion "Get-WinEvent" -Type "Command" {
             'Name' {
                 $TabExpansionHasOutput.Value = $true
                 if ($Context.OtherParameters["Class"]) {
-                    $Class = [WmiClass]($Context.OtherParameters["Class"])
+                    $Class = [WmiClass](Resolve-TabExpansionParameterValue $Context.OtherParameters["Class"])
                 } elseif ($Context.OtherParameters["Path"]) {
-                    $Class = [WmiClass]($Context.OtherParameters["Path"] -replace '\.\w.+')
+                    $Class = [WmiClass]((Resolve-TabExpansionParameterValue $Context.OtherParameters["Path"]) -replace '\.\w.+')
                 } elseif ($Context.PositionalParameters[0]) {
-                    $Class = [WmiClass]($Context.PositionalParameters[0])
+                    $Class = [WmiClass](Resolve-TabExpansionParameterValue $Context.PositionalParameters[0])
                 }
                 if ($Class) {
                     $Class.Methods | Where-Object {$_.Name -like "$Argument*"} | New-TabItem -Value {$_.Name} -Text {$_.Name} -Type Method
@@ -1106,9 +1107,9 @@ Register-TabExpansion "Get-WinEvent" -Type "Command" {
             'Property' {
                 $TabExpansionHasOutput.Value = $true
                 if ($Context.OtherParameters["Class"]) {
-                    $Class = [WmiClass]($Context.OtherParameters["Class"])
+                    $Class = [WmiClass](Resolve-TabExpansionParameterValue $Context.OtherParameters["Class"])
                 } elseif ($Context.PositionalParameters[0]) {
-                    $Class = [WmiClass]($Context.PositionalParameters[0])
+                    $Class = [WmiClass](Resolve-TabExpansionParameterValue $Context.PositionalParameters[0])
                 }
                 if ($Class) {
                     $Class.Properties | Where-Object {$_.Name -like "$Argument*"} | New-TabItem -Value {$_.Name} -Text {$_.Name} -Type Property
