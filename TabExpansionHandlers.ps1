@@ -403,8 +403,8 @@ Register-TabExpansion "ConvertTo-HTML" -Type "Command" {
                 Get-Job | Select-Object -ExpandProperty InstanceId
             }
             'Location' {
-                ## TODO: Receive-Job
-                ## TODO: [workitem:12]
+                $TabExpansionHasOutput.Value = $true
+                Get-TabExpansion "$Argument*" Computer | New-TabItem -Value {$_.Text} -Text {$_.Text} -Type Computer
             }
             'Name' {
                 $TabExpansionHasOutput.Value = $true
