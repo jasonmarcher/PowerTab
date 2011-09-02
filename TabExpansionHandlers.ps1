@@ -198,13 +198,12 @@ Register-TabExpansion "Reset-ComputerMachinePassword" -Type "Command" {
                 $Namespaces | Where-Object {$_ -like "$Argument*"} | Sort-Object
             }
             'SourceIdentifier' {
-                ## TODO:
-                ## TODO: [workitem:11]
+                $TabExpansionHasOutput.Value = $true
+                Get-Event "$Argument*" | Select-Object -ExpandProperty SourceIdentifier | Sort-Object
             }
         }
     }.GetNewClosure()
-    
-    ## TODO: Needs work
+
     Register-TabExpansion "Get-Event" $GetEventHandler -Type "Command"
     Register-TabExpansion "Get-EventSubscriber" $EventHandler -Type "Command"
     Register-TabExpansion "New-Event" $EventHandler -Type "Command"
