@@ -657,8 +657,8 @@ Function Update-TabExpansionWmi {
         $i = 0 ; Write-Progress $Resources.update_tabexpansiondatabase_wmi_activity $i
         foreach ($Class in (([WmiClass]'').PSBase.GetSubclasses($Options))) {
             $i++ ; if ($i % 10 -eq 0) {Write-Progress $Resources.update_tabexpansiondatabase_wmi_activity $i}
-            $Description = try { $Class.GetQualifierValue('Description') } catch { }
-            [Void]$dsTabExpansionDatabase.Tables['WMI'].Rows.Add($Class.Name, $Description )
+            $Description = try { $Class.GetQualifierValue('Description') } catch {""}
+            [Void]$dsTabExpansionDatabase.Tables['WMI'].Rows.Add($Class.Name, $Description)
         }
         Write-Progress $Resources.update_tabexpansiondatabase_wmi_activity $i -Completed
     }
