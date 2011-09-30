@@ -371,6 +371,12 @@ Function Invoke-TabExpansion {
                     $TabExpansionHasOutput = $true
                 }
             }
+
+            $PossibleValues = foreach ($Value in $PossibleValues) {
+                if ($CurrentContext.OtherParameters.Keys -notcontains $Value.Value.Substring(1)) {
+                    $Value
+                }
+            }
         } elseif ($LastToken.Type -eq $_TokenTypes::GroupStart) {
             ## Tab complete method signatures
             $MethodTokens = @([System.Management.Automation.PSParser]::Tokenize($LastWord, [ref]$ParseErrors))
