@@ -43,8 +43,14 @@ Function Invoke-TabExpansion {
     $CurrentContext = New-TabContext
     $LastToken = $null
     $LastParameter = ""
+    $OnNextToken = $null
     ## TODO: Save all values from a list for a parameter
     foreach ($Token in $Tokens) {
+        if ($OnNextToken) {
+            . $OnNextToken
+            $OnNextToken = $null
+        }
+
         if (($Token.Type -eq $_TokenTypes::Command) -and !($CurrentContext.Command)) {
             $CurrentContext.CommandInfo = try {Resolve-Command $Token.Content -CommandInfo -ErrorAction "Stop"} catch {}
             if ($CurrentContext.CommandInfo) {
@@ -98,7 +104,8 @@ Function Invoke-TabExpansion {
                     $Parameter = Resolve-Parameter $CurrentContext.CommandInfo $CurrentContext.Parameter -ParameterInfo
                 }
                 if ($Parameter.ParameterType -eq [System.Management.Automation.SwitchParameter]) {
-                    $CurrentContext.OtherParameters[$CurrentContext.Parameter] = $true
+                    $ParameterName = $Parameter.Name
+                    $OnNextToken = {$CurrentContext.OtherParameters[$ParameterName] = $true}.GetNewClosure()
                     $CurrentContext.Parameter = ""
                     $CurrentContext.Argument = ""
                     $CurrentContext.isParameterValue = $false
