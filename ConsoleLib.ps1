@@ -166,7 +166,7 @@ Function Out-ConsoleList {
                     $New = $Items.Length
                     if ($New -lt 1) {
                         ## If new filter results in no items, sound error beep and remove character
-                        Write-Host "`a" -NoNewline
+                        [System.Console]::Beep()
                         $Filter = $Filter.SubString(0, $Filter.Length - 1)
                     } else {
                         if ($Old -ne $New) {
@@ -210,7 +210,7 @@ Function Out-ConsoleList {
                             $Key.VirtualKeyCode = 27
                             $Continue = $false
                         } else {
-                            Write-Host "`a" -NoNewline
+                            [System.Console]::Beep()
                         }
                     }
                     break
@@ -298,7 +298,7 @@ Function Out-ConsoleList {
                             return "$ReturnWord$Filter"
                         } else {
                             ## Sound error beep and remove character
-                            Write-Host "`a" -NoNewline
+                            [System.Console]::Beep()
                             $Filter = $Filter.SubString(0, $Filter.Length - 1)
                         }
                     } else {
