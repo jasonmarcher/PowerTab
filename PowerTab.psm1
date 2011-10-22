@@ -70,6 +70,7 @@ Import-LocalizedData -BindingVariable "Resources" -FileName "Resources" -ErrorAc
 . (Join-Path $PSScriptRoot "TabExpansionUtil.ps1")
 . (Join-Path $PSScriptRoot "TabExpansionHandlers.ps1")
 . (Join-Path $PSScriptRoot "ConsoleLib.ps1")
+. (Join-Path $PSScriptRoot "Readline.ps1")
 . (Join-Path $PSScriptRoot "Handlers\PSClientManager.ps1")
 . (Join-Path $PSScriptRoot "Handlers\Robocopy.ps1")
 . (Join-Path $PSScriptRoot "Handlers\Utilities.ps1")

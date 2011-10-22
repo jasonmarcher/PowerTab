@@ -66,7 +66,7 @@ Function Invoke-TabItemSelector {
         [String]
         $LastWord
         ,
-        [ValidateSet("ConsoleList","Intellisense","Dynamic","Default","ObjectDefault")]
+        [ValidateSet("ConsoleList","Intellisense","CommonPrefix","Dynamic","Default","ObjectDefault")]
         [String]
         $SelectionHandler = "Default"
         ,
@@ -171,7 +171,7 @@ Function Invoke-TabItemSelector {
         if ($IncompatibleHandlers -contains $SelectionHandler) {$SelectionHandler = "Default"}
 
         ## List of selection handlers that can handle objects
-        $ObjectHandlers = @("ConsoleList","ObjectDefault")
+        $ObjectHandlers = @("ConsoleList","CommonPrefix","ObjectDefault")
 
         if (($ObjectHandlers -contains $SelectionHandler) -and ($PSCmdlet.ParameterSetName -eq "Values")) {
             $Objects = foreach ($Item in $Values) {New-TabItem -Value $Item -Text $Item -Type Unknown}
@@ -182,6 +182,7 @@ Function Invoke-TabItemSelector {
         switch -exact ($SelectionHandler) {
             'ConsoleList' {$Objects | Out-ConsoleList $LastWord $ReturnWord -ForceList:$ForceList}
             'Intellisense' {$Values | Invoke-Intellisense $LastWord}
+            'CommonPrefix' {$Objects | Show-CommonPrefix $LastWord}
             'ObjectDefault' {$Objects}
             'Default' {$Values}
         }
