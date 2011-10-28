@@ -64,7 +64,7 @@ $PowerTabError = New-Object System.Collections.ArrayList
 
 Import-Module (Join-Path $PSScriptRoot "Lerch.PowerShell.dll")
 . (Join-Path $PSScriptRoot "TabExpansionResources.ps1")
-Import-LocalizedData -BindingVariable "Resources" -FileName "Resources" -ErrorAction SilentlyContinue
+Import-LocalizedData -BindingVariable Resources -FileName Resources -ErrorAction SilentlyContinue
 . (Join-Path $PSScriptRoot "TabExpansionCore.ps1")
 . (Join-Path $PSScriptRoot "TabExpansionLib.ps1")
 . (Join-Path $PSScriptRoot "TabExpansionUtil.ps1")
@@ -167,6 +167,7 @@ if ($ConfigurationPathParam) {
 
         ## Profile text
         ## TODO: Ask to update profile
+        ## TODO: Localize this text?
         $ProfileText = @"
 
 <############### Start of PowerTab Initialization Code ########################
@@ -224,6 +225,7 @@ if ($PowerTabConfig.Enabled) {
 
 if ($PowerTabConfig.ShowBanner) {
     $CurVersion = (Parse-Manifest).ModuleVersion
+    ## TODO:  Localize?
     Write-Host -ForegroundColor 'Yellow' "PowerTab version ${CurVersion} PowerShell TabExpansion Library"
     Write-Host -ForegroundColor 'Yellow' "Host: $($Host.Name)"
     Write-Host -ForegroundColor 'Yellow' "PowerTab Enabled: $($PowerTabConfig.Enabled)"
@@ -233,22 +235,4 @@ if ($PowerTabConfig.ShowBanner) {
 ## Exported functions, variables, etc.
 $ExcludedFuctions = @("Initialize-TabExpansion")
 $Functions = Get-Command "*-TabExpansion*","New-TabItem" | Where-Object {$ExcludedFuctions -notcontains $_.Name}
-#$Functions = Get-Command "*-*" | Where-Object {$ExcludedFuctions -notcontains $_.Name}
 Export-ModuleMember -Function $Functions -Variable PowerTabConfig, PowerTabError -Alias *
-
-<#
-TODOs
-- Support variables in path:  $test = "C:"; $test\<TAB>
-~ Expand items in a list:  Get-Command -CommandType Cm<TAB>,Fun<TAB>
-- Assignment to strongly type variables:  $ErrorActionPreference = <TAB>
-- Alias and Variable replace:  ls^A  or  $test^A
-
-Just ideas:
-- DateTime formats:  ^D<TAB>  or  2008/01/20^D<TAB>
-- Paste clipboard:  ^V<TAB>
-- Cut line:  Get-Foo -Bar something^X<TAB>  -->  
-- Cut word:  Get-Foo -Bar something^Z<TAB>  -->  Get-Foo -Bar
-
-- handle group start tokens ('{', '(', etc.)
-~ Not detecting possitional parameters bound from pipeline
-#>

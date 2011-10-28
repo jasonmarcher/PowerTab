@@ -1033,13 +1033,13 @@ Function UpgradeTabExpansionDatabase {
 
     if ($Version -lt [System.Version]'0.99.3.0') {
         ## Upgrade versions from the first version of PowerTab
-        Write-Host "Upgrading from version $Version"
+        Write-Host "Upgrading from version $Version"  ## TODO:  Localize
         UpgradePowerTab99 $Config $Database
         $Version = '0.99.3.0'
     }
     if ($Version -lt [System.Version]'0.99.5.0') {
         ## Upgrade versions from the first version of PowerTab
-        Write-Host "Upgrading from version $Version"
+        Write-Host "Upgrading from version $Version"  ## TODO:  Localize
         UpgradePowerTab993 $Config $Database
         $Version = '0.99.5.0'
     }

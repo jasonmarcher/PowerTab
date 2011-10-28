@@ -471,8 +471,8 @@ Function Out-ConsoleList {
             'OldContent' = $OldBuffer
             'Location' = $BufferTop
         }
-        Add-Member -InputObject $Handle -MemberType 'ScriptMethod' -Name 'Clear' -Value {$Host.UI.RawUI.SetBufferContents($This.Location, $This.OldContent)}
-        Add-Member -InputObject $Handle -MemberType 'ScriptMethod' -Name 'Show' -Value {$Host.UI.RawUI.SetBufferContents($This.Location, $This.Content)}
+        Add-Member -InputObject $Handle -MemberType ScriptMethod -Name Clear -Value {$Host.UI.RawUI.SetBufferContents($This.Location, $This.OldContent)}
+        Add-Member -InputObject $Handle -MemberType ScriptMethod -Name Show -Value {$Host.UI.RawUI.SetBufferContents($This.Location, $This.Content)}
         $Handle
     }
 
@@ -603,8 +603,8 @@ Function Out-ConsoleList {
             'LastItem' = ($Listconfig.ListHeight - 3)
             'MaxItems' = $Listconfig.MaxItems
         }
-        Add-Member -InputObject $Handle -MemberType 'ScriptMethod' -Name 'Clear' -Value {$This.Box.Clear()}
-        Add-Member -InputObject $Handle -MemberType 'ScriptMethod' -Name 'Show' -Value {$This.Box.Show(); $This.Content.Show()}
+        Add-Member -InputObject $Handle -MemberType ScriptMethod -Name Clear -Value {$This.Box.Clear()}
+        Add-Member -InputObject $Handle -MemberType ScriptMethod -Name Show -Value {$This.Box.Show(); $This.Content.Show()}
         $Handle
     }
 
