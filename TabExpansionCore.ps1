@@ -545,7 +545,7 @@ Function Invoke-PowerTab {
         $Pattern = $Pattern.Split('.')[($LevelCount -1)] + '*'
         . {
             if ('PSBase' -like $Pattern) {$Object + '.PSBase'}
-            Invoke-Expression "$Object | Get-Member" | Where-Object {
+            Invoke-Expression "Get-Member -InputObject ($Object)" | Where-Object {
                 $n = $_.Name
                 if (-not $PowerTabConfig.ShowAccessorMethods) {
                     $n -like $Pattern -and $n -notmatch '^[gs]et_'
