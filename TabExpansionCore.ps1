@@ -990,6 +990,9 @@ Function Invoke-PowerTab {
                 $PathSlices = ,"." + $PathSlices
             }
         }
+        if ($PathSlices[0] -eq "~") {
+            $PathSlices[0] = try {Resolve-Path "~"} catch {$PathSlices[0]}
+        }
         $Container = [String]::Join('\', $PathSlices[0..($PathSlices.Count - 2)])
         $LastPath = $Container + "\$([Regex]::Split($LastWord,'\\|/|:')[-1])"
 
