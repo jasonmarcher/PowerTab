@@ -35,7 +35,7 @@ Function Out-ConsoleList {
     }
 
     end {
-        if (-not $ReturnWord) {$ReturnWord = $LastWord}
+        if (-not $PSBoundParameters.ContainsKey("ReturnWord")) {$ReturnWord = $LastWord}
 
         ## If contents contains less than minimum options, then forward contents without displaying console list
         if (($Content.Length -lt $PowerTabConfig.MinimumListItems) -and (-not $ForceList)) {
