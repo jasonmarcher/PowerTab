@@ -43,6 +43,12 @@ Function Out-ConsoleList {
             return
         }
 
+        ## If the shift key is pressed, then output the first result without displaying console list
+        if (Get-KeyState 0x10) {
+            $Content[0].Value
+            return
+        }
+
         ## Create console list
         $Filter = ''
         $ListHandle = New-ConsoleList $Content $PowerTabConfig.Colors.BorderColor $PowerTabConfig.Colors.BorderBackColor `
