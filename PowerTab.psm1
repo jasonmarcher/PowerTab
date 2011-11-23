@@ -63,7 +63,7 @@ New-Variable PowerTabLog -Value (
         Trace = New-Object System.Collections.ArrayList
         TraceEnabled = $false
     }
-) -Option ReadOnly
+)
 
 
 #########################
