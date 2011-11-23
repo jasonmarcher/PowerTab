@@ -22,7 +22,10 @@ Function Invoke-TabExpansion {
     )
 
     try {
-    $TraceId = [System.Guid]::NewGuid()
+    ## Generate new GUID if this is a new (ie non nested) tab expand execution
+    if (-not $NestedPowerTab) {
+        $TraceId = [System.Guid]::NewGuid()
+    }
     Write-Trace "Entering PowerTab."
 
     ## Save global errors in the script scoped Error ( doesn't appear to be used )
