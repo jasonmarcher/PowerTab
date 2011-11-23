@@ -239,7 +239,7 @@ Function Invoke-TabExpansion {
     Add-Member -InputObject $CurrentContext -Name LastToken -Value $LastToken.Type -MemberType NoteProperty
     ##  Special debug logging
     if ($PowerTabLog.DebugEnabled) {
-        $PowerTabLog.Debug.Insert(0, ($CurrentContext | Select-Object Line,LastWord,LastToken,Command,Parameter,Argument,
+        $PowerTabLog.Debug.Insert(0, ($CurrentContext | Select-Object @{n="TraceId";e={$TraceId}},Line,LastWord,LastToken,Command,Parameter,Argument,
             PositionalParameter,PositionalParameters,OtherParameters,isCommandMode,isAssignment,isParameterValue,CommandInfo))
     }
 
