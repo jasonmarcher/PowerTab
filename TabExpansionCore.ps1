@@ -811,8 +811,12 @@ Function Invoke-PowerTab {
                             $Parameters = foreach ($Parameter in $_.GetParameters()) {
                                 '[{0}] ${1}' -f ($Parameter.ParameterType -replace '^System\.'), $Parameter.Name
                             }
-                            $Param = [String]::Join(', ',$Parameters)
-                            "New-Object $($LastType.Trim('[]')) ($Param)".Replace('([])','()')
+                            if ($Parameters) {
+                                $Param = [String]::Join(', ',$Parameters)
+                                "New-Object $($LastType.Trim('[]')) ($Param)".Replace('([])','()')
+                            } else {
+                                "New-Object $($LastType.Trim('[]'))".Replace('([])','()')
+                            }
                         }
                         if ($Constructors) {
                             $Constructors | New-TabItem -Value {$_} -Text {$_} -Type Constructor |

@@ -515,9 +515,13 @@ Register-TabExpansion "New-Object" -Type "Command" {
                 $Parameters = foreach ($Parameter in $_.GetParameters()) {
                     '[{0}] ${1}' -f ($Parameter.ParameterType -replace '^System\.'), $Parameter.Name
                 }
-                $Param = [String]::Join(', ',$Parameters)
-                "($Param)".Replace('([])','()')
-            } | New-TabItem -Value {$_} -Text {$_} -Type Constructor
+                if ($Parameters) {
+                    $Param = "({0})" -f [String]::Join(', ',$Parameters)
+                    New-TabItem -Value $Param -Text $Param -Type Constructor
+                } else {
+                    New-TabItem -Value "()" -Text "() <Empty Constructor>" -Type Constructor
+                }
+            }
         }
         'ComObject' {
             ## TODO: Maybe cache these like we do with .NET types and WMI object names?
