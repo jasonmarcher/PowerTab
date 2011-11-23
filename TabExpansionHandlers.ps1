@@ -495,9 +495,30 @@ Register-TabExpansion "Group-Object" -Type "Command" {
 
 ## New-Object
 Register-TabExpansion "New-Object" -Type "Command" {
-    param($Context, [ref]$TabExpansionHasOutput)
+    param($Context, [ref]$TabExpansionHasOutput, [ref]$QuoteSpaces)
     $Argument = $Context.Argument
     switch -exact ($Context.Parameter) {
+        'ArgumentList' {
+            $TabExpansionHasOutput.Value = $true
+            $QuoteSpaces.Value = $false
+
+            if ($Context.OtherParameters["TypeName"]) {
+                $TypeName = Resolve-TabExpansionParameterValue $Context.OtherParameters["TypeName"]
+            } elseif ($Context.PositionalParameter -ge 0) {
+                $TypeName = Resolve-TabExpansionParameterValue $Context.PositionalParameters[0]
+            } else {
+                ## TODO: Localize
+                throw "No TypeName specified."
+            }
+
+            Invoke-Expression "[$TypeName].GetConstructors()" | ForEach-Object {
+                $Parameters = foreach ($Parameter in $_.GetParameters()) {
+                    '[{0}] ${1}' -f ($Parameter.ParameterType -replace '^System\.'), $Parameter.Name
+                }
+                $Param = [String]::Join(', ',$Parameters)
+                "($Param)".Replace('([])','()')
+            } | New-TabItem -Value {$_} -Text {$_} -Type Constructor
+        }
         'ComObject' {
             ## TODO: Maybe cache these like we do with .NET types and WMI object names?
             ## TODO: [workitem:13]
