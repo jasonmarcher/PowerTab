@@ -174,7 +174,6 @@ if ($ConfigurationPathParam) {
         CreatePowerTabConfig
 
         ## Profile text
-        ## TODO: Ask to update profile
         ## TODO: Localize this text?
         $ProfileText = @"
 
@@ -187,9 +186,20 @@ Import-Module "PowerTab" -ArgumentList "$(Join-Path $SetupConfigurationPath $Con
 ################ End of PowerTab Initialization Code ##########################
 
 "@
-        Write-Host ""
-        Write-Host $Resources.setup_wizard_add_to_profile
-        Write-Host $ProfileText
+        if (-not (Select-String "Start of PowerTab Initialization Code" $PROFILE)) {
+            $Answer = $Host.UI.PromptForChoice($Resources.setup_wizard_update_profile_caption, $Resources.setup_wizard_update_profile_message, $YesNoChoices, 1)
+
+            if ($Answer) {
+                $Text = $ProfileText + "`r`n" + (Get-Content $PROFILE -Delimiter `0 -ErrorAction SilentlyContinue)
+                $Encoding = Get-FileEncoding $PROFILE
+                Set-Content $PROFILE $Text -Encoding $Encoding
+            } else {
+                Write-Host ""
+                Write-Host $Resources.setup_wizard_add_to_profile
+                Write-Host $ProfileText
+            }
+        }
+        ## TODO: Check if import of PowerTab code needs to be updated?
 
         ## Create new database or load existing database
         if ($SetupConfigurationPath -eq "IsolatedStorage") {

@@ -475,10 +475,8 @@ Function Get-GuiDate {
     # -modified $FirstDayOfWeek so casts don't occur until after Forms library loaded.
 }
 
-############
-
 ## http://rubli.info/t-blog/2011/06/29/querying-key-states-in-powershell/
-function Get-KeyState {
+Function Get-KeyState {
     param(
         [UInt16]$KeyCode
     )
@@ -486,6 +484,78 @@ function Get-KeyState {
     $Signature = '[DllImport("user32.dll")]public static extern short GetKeyState(int nVirtKey);'
     $Type = Add-Type -MemberDefinition $Signature -Name User32PowerTab -Namespace GetKeyState -PassThru
     return [Bool]($Type::GetKeyState($KeyCode) -band 0x80)
+}
+
+Function Write-Trace {
+    param(
+        [String]$message = "Entering function."  ## TODO: localize
+    )
+
+    if ($PowerTabLog.TraceEnabled) {
+        $TraceEntry = New-Object PSObject -Property @{
+            TraceId = $TraceId
+            Time = Get-Date
+            Location = @(Get-PSCallStack)[1]
+            Message = $Message
+        }
+        $TraceEntry.PSObject.TypeNames.Insert(0, ”PowerTabTraceEntry”)
+
+        $PowerTabLog.Trace.Insert(0, $TraceEntry)
+    }
+}
+
+## Modified slightly for specific use in PowerTab
+function Get-FileEncoding {
+<#
+.SYNOPSIS
+Gets file encoding.
+.DESCRIPTION
+The Get-FileEncoding function determines encoding by looking at Byte Order Mark (BOM).
+Based on port of C# code from http://www.west-wind.com/Weblog/posts/197245.aspx
+.EXAMPLE
+Get-ChildItem  *.ps1 | select FullName, @{n='Encoding';e={Get-FileEncoding $_.FullName}} | where {$_.Encoding -ne 'ASCII'}
+This command gets ps1 files in current directory where encoding is not ASCII
+.EXAMPLE
+Get-ChildItem  *.ps1 | select FullName, @{n='Encoding';e={Get-FileEncoding $_.FullName}} | where {$_.Encoding -ne 'ASCII'} | foreach {(get-content $_.FullName) | set-content $_.FullName -Encoding ASCII}
+Same as previous example but fixes encoding using set-content
+.NOTES
+Version History
+v1.0   - 2010/08/10, Chad Miller - Initial release
+v1.1   - 2010/08/16, Jason Archer - Improved pipeline support and added detection of little endian BOMs.
+#>
+    [CmdletBinding()]
+    param (
+        [Alias("PSPath")]
+        [Parameter(Mandatory = $True, ValueFromPipelineByPropertyName = $True)]
+        [String]$Path
+    )
+
+    process {
+        $Encoding = "ASCII"
+        [Byte[]]$byte = Get-Content -Encoding Byte -ReadCount 4 -TotalCount 4 -Path $Path -ErrorAction SilentlyContinue
+
+        if ($byte) {
+            if ($byte[0] -eq 0xEF -and $byte[1] -eq 0xBB -and $byte[2] -eq 0xBF) {
+                $Encoding = "UTF8"
+            } elseif ($byte[0] -eq 0 -and $byte[1] -eq 0 -and $byte[2] -eq 0xFE -and $byte[3] -eq 0xFF) {
+                ## UTF-32 Big-Endian
+                $Encoding = "BigEndianUnicode"
+            } elseif ($byte[0] -eq 0xFF -and $byte[1] -eq 0xFE -and $byte[2] -eq 0 -and $byte[3] -eq 0) {
+                ## UTF-32 Little-Endian
+                $Encoding = "Unicode"
+            } elseif ($byte[0] -eq 0xFE -and $byte[1] -eq 0xFF) {
+                ## 1201 UTF-16 Big-Endian
+                $Encoding = "BigEndianUnicode"
+            } elseif ($byte[0] -eq 0xFF -and $byte[1] -eq 0xFE) {
+                ## 1200 UTF-16 Little-Endian
+                $Encoding = "Unicode"
+            } elseif ($byte[0] -eq 0x2B -and $byte[1] -eq 0x2F -and $byte[2] -eq 0x76) {
+                $Encoding = "UTF7"
+            }
+        }
+
+        $Encoding
+    }
 }
 
 ############
