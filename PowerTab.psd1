@@ -15,7 +15,7 @@
 	## Public Interface
 	CmdletsToExport    = ''
 	FunctionsToExport  = @('*-*')
-	VariablesToExport  = @('PowerTabConfig','PowerTabError')
+	VariablesToExport  = @('PowerTabConfig','PowerTabLog')
 	AliasesToExport    = '*'
 
 	## Requirements

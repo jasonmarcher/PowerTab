@@ -55,7 +55,15 @@ $ConfigFileName = "PowerTabConfig.xml"
 
 $PowerTabConfig = New-Object System.Management.Automation.PSObject
 
-$PowerTabError = New-Object System.Collections.ArrayList	
+New-Variable PowerTabLog -Value (
+    New-Object PSObject -Property @{
+        Error = New-Object System.Collections.ArrayList
+        Debug = New-Object System.Collections.ArrayList
+        DebugEnabled = $false
+        Trace = New-Object System.Collections.ArrayList
+        TraceEnabled = $false
+    }
+) -Option ReadOnly
 
 
 #########################
@@ -235,4 +243,4 @@ if ($PowerTabConfig.ShowBanner) {
 ## Exported functions, variables, etc.
 $ExcludedFuctions = @("Initialize-TabExpansion")
 $Functions = Get-Command "*-TabExpansion*","New-TabItem" | Where-Object {$ExcludedFuctions -notcontains $_.Name}
-Export-ModuleMember -Function $Functions -Variable PowerTabConfig, PowerTabError -Alias *
+Export-ModuleMember -Function $Functions -Variable PowerTabConfig, PowerTabLog -Alias *

@@ -86,6 +86,8 @@ Function Invoke-TabItemSelector {
     )
 
     begin {
+        Write-Trace "Invoking Tab Item Selector."
+
         [String[]]$Values = @()
         [Object[]]$Objects = @()
     }
@@ -178,6 +180,8 @@ Function Invoke-TabItemSelector {
         } elseif (($ObjectHandlers -notcontains $SelectionHandler) -and ($PSCmdlet.ParameterSetName -eq "Objects")) {
             $Values = foreach ($Item in $Objects) {$Item.Value}
         }
+
+        Write-Trace "Decided to invoke $SelectionHandler."
 
         switch -exact ($SelectionHandler) {
             'ConsoleList' {$Objects | Out-ConsoleList $LastWord $ReturnWord -ForceList:$ForceList}

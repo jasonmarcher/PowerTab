@@ -22,12 +22,15 @@ Function Invoke-TabExpansion {
     )
 
     try {
+    $TraceId = [System.Guid]::NewGuid()
+    Write-Trace "Entering PowerTab."
+
     ## Save global errors in the script scoped Error ( doesn't appear to be used )
     # This also addresses the problem of $Error[0].<TAB> not working since it uses the script scoped $Error as well.
     $script:Error.Clear()
     $script:Error.AddRange($global:Error)
     $global:Error.Clear()
-    $global:Error.AddRange($PowerTabError)
+    $global:Error.AddRange($PowerTabLog.Error)
 
     if ($PowerTabConfig -eq $null) {
         ## Something happened to the PowerTabConfig object, recreate it
@@ -232,10 +235,9 @@ Function Invoke-TabExpansion {
     Add-Member -InputObject $CurrentContext -Name LastWord -Value $LastWord -MemberType NoteProperty
     Add-Member -InputObject $CurrentContext -Name LastToken -Value $LastToken.Type -MemberType NoteProperty
     ##  Special debug logging
-    if ($PowerTabLog) {
-        $CurrentContext | Select-Object Line,LastWord,LastToken,Command,Parameter,Argument,PositionalParameter,
-            PositionalParameters,OtherParameters,isCommandMode,isAssignment,isParameterValue,CommandInfo | Out-String |
-            Add-Content (Join-Path $env:USERPROFILE "PowerTab.log")
+    if ($PowerTabLog.DebugEnabled) {
+        $PowerTabLog.Debug.Insert(0, ($CurrentContext | Select-Object Line,LastWord,LastToken,Command,Parameter,Argument,
+            PositionalParameter,PositionalParameters,OtherParameters,isCommandMode,isAssignment,isParameterValue,CommandInfo))
     }
 
     ## Indicate we are busy
@@ -277,16 +279,22 @@ Function Invoke-TabExpansion {
 
             ## Command registry
             if ((-not $TabExpansionHasOutput) -and $TabExpansionCommandRegistry[$FullCommandName]) {
+                Write-Trace "Found entry in Command registry for FullCommandName."
+
                 $ScriptBlock = $TabExpansionCommandRegistry[$FullCommandName]
                 $PossibleValues = & $ScriptBlock $CurrentContext ([ref]$TabExpansionHasOutput) ([ref]$QuoteSpaces)
             }
             if ((-not $TabExpansionHasOutput) -and $TabExpansionCommandRegistry[$InternalCommandName]) {
+                Write-Trace "Found entry in Command registry for InternalCommandName."
+
                 $ScriptBlock = $TabExpansionCommandRegistry[$InternalCommandName]
                 $PossibleValues = & $ScriptBlock $CurrentContext ([ref]$TabExpansionHasOutput) ([ref]$QuoteSpaces)
             }
 
             ## Parameter registry
             if ((-not $TabExpansionHasOutput) -and $TabExpansionParameterRegistry[$CurrentContext.Parameter]) {
+                Write-Trace "Found entry in Parameter registry."
+
                 $ScriptBlock = $TabExpansionParameterRegistry[$CurrentContext.Parameter]
                 $PossibleValues = & $ScriptBlock $CurrentContext.Argument ([ref]$TabExpansionHasOutput) ([ref]$QuoteSpaces)
             }
@@ -296,6 +304,8 @@ Function Invoke-TabExpansion {
                 try {
                     ## Get parameter info
                     if ($TabExpansionCommandInfoRegistry[$InternalCommandName]) {
+                        Write-Trace "Found entry in CommandInfo registry."
+
                         $ScriptBlock = $TabExpansionCommandInfoRegistry[$InternalCommandName]
                         $CommandInfo = & $ScriptBlock $CurrentContext
                         if ($CommandInfo) {
@@ -344,6 +354,8 @@ Function Invoke-TabExpansion {
 
             ## Parameter name registry
             if ((-not $TabExpansionHasOutput) -and $TabExpansionParameterNameRegistry[$FullCommandName]) {
+                Write-Trace "Found entry in ParameterName registry for FullCommandName."
+
                 $ScriptBlock = $TabExpansionParameterNameRegistry[$FullCommandName]
                 $PossibleValues = & $ScriptBlock $CurrentContext $LastWord | ForEach-Object {
                     if ($_ -is [System.String]) {New-TabItem -Value $_ -Text $_ -Type Parameter}
@@ -354,6 +366,8 @@ Function Invoke-TabExpansion {
                 }
             }
             if ((-not $TabExpansionHasOutput) -and $TabExpansionParameterNameRegistry[$InternalCommandName]) {
+                Write-Trace "Found entry in ParameterName registry for InternalCommandName."
+
                 $ScriptBlock = $TabExpansionParameterNameRegistry[$InternalCommandName]
                 $PossibleValues = & $ScriptBlock $CurrentContext $LastWord | ForEach-Object {
                     if ($_ -is [System.String]) {New-TabItem -Value $_ -Text $_ -Type Parameter}
@@ -367,6 +381,8 @@ Function Invoke-TabExpansion {
             ## Command info
             if (-not $TabExpansionHasOutput) {
                 if ($CurrentContext.CommandInfo) {
+                    Write-Trace "Evaluating parameter names based on CommandInfo object."
+
                     $ParameterName = $LastWord -replace "^-"
                     $PossibleValues = foreach ($Parameter in $CurrentContext.CommandInfo.Parameters.Values) {
                         ##if ($Parameter.Name -like "$ParameterName*" -and $CurrentContext.OtherParameters.Keys -notcontains $Parameter.Name) {
@@ -388,6 +404,8 @@ Function Invoke-TabExpansion {
             ## Tab complete method signatures
             $MethodTokens = @([System.Management.Automation.PSParser]::Tokenize($LastWord, [ref]$ParseErrors))
             if ($MethodTokens[-2].Type -eq $_TokenTypes::Member) {
+                Write-Trace "Evaluating method signatures."
+
                 $MethodObject = $LastWord.SubString(0, $MethodTokens[-1].Start)
                 $PossibleValues = foreach ($Overload in Invoke-Expression "$MethodObject.OverloadDefinitions") {
                     $Parameters = $Overload -replace '^\S+ .+\((.+)?\)','$1'
@@ -480,7 +498,7 @@ Function Invoke-TabExpansion {
 
     } finally {
         ## Save PowerTab errors and replace global errors
-        $script:PowerTabError = $global:Error.Clone()
+        $script:PowerTabLog.Error = $global:Error.Clone()
         $global:Error.Clear()
         $global:Error.AddRange($script:Error)
     }
@@ -513,6 +531,8 @@ Function Invoke-PowerTab {
     ) 
 
     &{
+    Write-Trace "Entering core handler."
+
     $TabExpansionHasOutput = $false
 
     if ($PowerTabConfig.IgnoreConfirmPreference) {
@@ -596,6 +616,8 @@ Function Invoke-PowerTab {
         switch -regex ($LastBlock)  {
             ## Handle multilevel property and method expansion on simple () Blocks
             '(^| )\((.+)\)\.(.*)' {
+                Write-Trace "Core Handler: Evaluating nested statements."
+
                 &{ trap {continue}
                     Resolve-Member -Object "($($Matches[2]))" -Pattern $Matches[3] |
                         Invoke-TabItemSelector $LastBlock -SelectionHandler $SelectionHandler | ForEach-Object {
@@ -618,6 +640,8 @@ Function Invoke-PowerTab {
         switch -regex ($LastWord)  {
             ## Handle inline type search, e.g. new-object .identityreference<tab> or .identityre<tab> (oisin) 
             '^(\[*?)\.(\w+)$' {
+                Write-Trace "Core Handler: Evaluating inline type search."
+
                 $TypeName = $Matches[2]
                 Get-TabExpansion "*.${TypeName}*" Types | New-TabItem -Value {$_.Name} -Text {$_.Name} -Type Type |
                     Invoke-TabItemSelector $LastWord.Replace('[', '') -SelectionHandler $SelectionHandler |
@@ -625,8 +649,10 @@ Function Invoke-PowerTab {
                 break
             }
 
-            ## Members of script block
+            ## Members of scriptblock
             '(.*\})\.([^\.]*)$' {
+                Write-Trace "Core Handler: Evaluating members of a scriptblock."
+
                 $ScriptBlock = $Matches[1]
                 $Member = $Matches[2]
                 {} | Get-Member | Where-Object {
@@ -652,6 +678,8 @@ Function Invoke-PowerTab {
 
             ## Completion on Shares (commented lines without DLL but need admin rights )
             '^(\\\\|//)(?<Computer>[^\\/]+)[\\/](?<Share>[^\\/]*)$' {
+                Write-Trace "Core Handler: Evaluating file shares."
+
                 #gwmi win32_share -computer $ComputerName -filter "name like '$($ShareName)%'" | Foreach-Object {"\\$($ComputerName)\$($_.name)"}
                 #([adsi]"WinNT://$($ComputerName)/LanmanServer,FileService" ).psbase.children |? {$_.name -like "$($ShareName)*"}  |% {$_.name}
                 $ComputerName = $Matches.Computer
@@ -664,6 +692,8 @@ Function Invoke-PowerTab {
 
             ## Completion on computers in database            
 			'^(\\\\|//)(?<Computer>[^\\/]*)$' {
+                Write-Trace "Core Handler: Evaluating computer names from database."
+
                 $Computers = foreach ($Computer in Get-TabExpansion "$($Matches.Computer)*" Computer) {
                     $Value = "\\" + $Computer.Text
                     New-TabItem -Value $Value -Text $Value -Type Computer
@@ -674,22 +704,32 @@ Function Invoke-PowerTab {
 
             ## Variable "In-Place" expansion on \[tab]
             '.*(\$[^\\]+)\\$' {
+                Write-Trace "Core Handler: Evaluating variable for inplace expansion."
+
                 $val = $ExecutionContext.InvokeCommand.ExpandString($Matches[1])
                 ($Matches[0] -replace ([Regex]::Escape($Matches[1])), $val).TrimEnd('\')
                 break
             }
 
             ## Replace <command>-? with call to Get-Help
-            '.*\-\?' {"Get-Help " + $LastWord.Replace('-?', ' -')}
+            '.*\-\?' {
+                Write-Trace "Core Handler: Evaluating use of -? short hand."
+
+                "Get-Help " + $LastWord.Replace('-?', ' -')
+            }
 
             ## PSDrive expansion on :[tab]
             '^:$' {
+                Write-Trace "Core Handler: Evaluating PSDrive names."
+
                 Get-PSDrive | New-TabItem -Value {$_.Name + ':'} -Text {$_.Name + ':'} -Type PSDrive |
                     Invoke-TabItemSelector '' -SelectionHandler $SelectionHandler
             }
 
             ## History completion against either #<pattern> or #<id>
             '^#(.*)' {
+                Write-Trace "Core Handler: Evaluating command history."
+
                 ## Only do history if there is not a command in the current context
                 if (-not $Context.isCommandMode) {
                     $Pattern = $Matches[1]
@@ -706,6 +746,8 @@ Function Invoke-PowerTab {
 
             ## About Topics completion
             'about_(.*)' {
+                Write-Trace "Core Handler: Evaluating 'about' help topics."
+
                 Get-Help "about_$($Matches[1])*" | New-TabItem -Value {$_.Name} -Text {$_.Name} -Type Help |
                     Invoke-TabItemSelector $LastWord -SelectionHandler $SelectionHandler
                 break
@@ -727,6 +769,9 @@ Function Invoke-PowerTab {
 
             ## WMI completion
             '(win32_.*|cim_.*|MSFT_.*)' {
+                ## TODO:  Should this be removed from the core handler?
+                Write-Trace "Core Handler: Evaluating WMI class names."
+
                 Get-TabExpansion "$($Matches[1])*" WMI | New-TabItem -Value {$_.Name} -Text {$_.Name} -Type WMIObject |
                     Invoke-TabItemSelector $LastWord -SelectionHandler $SelectionHandler
                 break
@@ -734,19 +779,25 @@ Function Invoke-PowerTab {
 
             ## Handle property and method expansion on variables
             '\$(.+)\.(.*)' {
+                Write-Trace "Core Handler: Evaluating members of a variable."
+
                 Resolve-Member -Object ('$' + $Matches[1]) -Pattern $Matches[2] |
                     Invoke-TabItemSelector $LastWord -SelectionHandler $SelectionHandler
                 break
             }
 
-            ## Translate typename to New-Object statement  [String][tab]
+            ## Translate typename to New-Object statement (ex: [String]=<TAB>)
             '^(\[.*\])=(\w*)$' {
+                Write-Trace "Core Handler: Evaluating short hand for new object creation."
+
                 "New-Object $($Matches[1].Replace('[','').Replace(']',''))"
                 break
             }
 
             ## Handle Static methods of Types
-            '(\[.*\])::(.*)$' { 
+            '(\[.*\])::(.*)$' {
+                Write-Trace "Core Handler: Evaluating static members of a type."
+
                 $LastType = $Matches[1]
                 $Level = $Matches[2].Split('.').Count
 
@@ -772,6 +823,8 @@ Function Invoke-PowerTab {
 
             ## Handle Static methods of types in Variables
             '(\$.*)::(.*)$' {
+                Write-Trace "Core Handler: Evaluating static members of a variable."
+
                 $LastType = $Matches[1]
                 $Level = $Matches[2].Split('.').Count
                 $gt = ''
@@ -799,6 +852,8 @@ Function Invoke-PowerTab {
 
             ## Handle enums and Constructors of Types
             '(\[.*\]):*$' {
+                Write-Trace "Core Handler: Evaluating enum values and constructors for types."
+
                 $LastType = $Matches[1].Split(',')[-1]
                 $BaseType = (Invoke-Expression "$LastType.BaseType.FullName")
                 . {
@@ -831,6 +886,8 @@ Function Invoke-PowerTab {
 
             ## Handle members of Types (runtype)
             '^(\[.*\]).(\w*)$' {
+                Write-Trace "Core Handler: Evaluating non-static members of a type."
+
                 $LastType = $Matches[1].Split(',')[-1]
                 Invoke-Expression "$LastType | Get-Member" | Where-Object {$_.Name -like "$($Matches[2])*"} | ForEach-Object {
                     if ($_.MemberType -band $_Method) {
@@ -846,6 +903,8 @@ Function Invoke-PowerTab {
 
             ## Handle namespace and type names 
             '^\[(.*)$' {
+                Write-Trace "Core Handler: Evaluating namespaces or type names."
+
                 $Matched = $Matches[1]
                 $Dots = $Matches[1].Split(".").Count - 1
                 $res = @()
@@ -875,6 +934,8 @@ Function Invoke-PowerTab {
 
             ## Handle expansions for both "Scope Variable Name" and "Type Variable Names"
             '^\$(\w+):(\w*)$' {
+                Write-Trace "Core Handler: Evaluating variable scope or type."
+
                 $Type = $Matches[1]     # function, variable, global, etc.
                 $TypeName = $Matches[2] # e.g. in '$function:C', value will be 'C'
 
@@ -895,6 +956,8 @@ Function Invoke-PowerTab {
 
             ## Handle variable name expansion
             '^([\$@])(\w*)$' {
+                Write-Trace "Core Handler: Evaluating variable name."
+
                 $VarName = $Matches[2]
                 $Variables = foreach ($Variable in Get-Variable "$VarName*" -Scope Global) {
                     $Matches[1] + (QuoteVariable $Variable.Name)
@@ -907,6 +970,8 @@ Function Invoke-PowerTab {
 
             ## Native commands / scripts in path
             "(.*)$([Regex]::Escape($PowerTabConfig.ShortcutChars.Native))`$" { 
+                Write-Trace "Core Handler: Evaluating native commands and scripts only (special character)."
+
                 & {
                     Get-Command -CommandType ExternalScript -Name "$($Matches[1])*" |
                         New-TabItem -Value {$_.Name} -Text {$_.Name} -Type Script
@@ -919,6 +984,8 @@ Function Invoke-PowerTab {
 
             ## Aliases
             "(.+)$([Regex]::Escape($PowerTabConfig.ShortcutChars.Alias))`$" {
+                Write-Trace "Core Handler: Evaluating aliases only (special character)."
+
                 & {
                     Get-Command -CommandType Alias -Name $Matches[1] | New-TabItem -Value {$_.Definition} -Text {$_.Definition} -Type Alias
                     Get-TabExpansion $Matches[1] Alias | New-TabItem -Value {$_.Text} -Text {$_.Text} -Type Alias
@@ -928,6 +995,8 @@ Function Invoke-PowerTab {
 
             ## Custom
             "(.*)$([Regex]::Escape($PowerTabConfig.ShortcutChars.Custom))`$" {
+                Write-Trace "Core Handler: Evaluating custon results from database only (special character)."
+
                 Get-TabExpansion "$($Matches[1])*" Custom | New-TabItem -Value {$_.Text} -Text {$_.Text} -Type Unknown |
                     Invoke-TabItemSelector $Matches[1] -SelectionHandler $SelectionHandler
                 break
@@ -935,6 +1004,8 @@ Function Invoke-PowerTab {
 
             ## Invoke
             "(.+)$([Regex]::Escape($PowerTabConfig.ShortcutChars.Invoke))`$" {
+                Write-Trace "Core Handler: Evaluating invoke results from database only (special character)."
+
                 Get-TabExpansion "$($Matches[1])*" Invoke | ForEach-Object {
                     $ExecutionContext.InvokeCommand.InvokeScript($_.Text) | New-TabItem -Value {$_} -Text {$_} -Type Unknown
                 } | Invoke-TabItemSelector $Matches[1] -SelectionHandler $SelectionHandler
@@ -943,6 +1014,8 @@ Function Invoke-PowerTab {
 
             ## Call function
             "(.*)$([Regex]::Escape($PowerTabConfig.ShortcutChars.CustomFunction))`$" {
+                Write-Trace "Core Handler: Calling custom user function."
+
                 if ($PowerTabConfig.CustomFunctionEnabled) {
                     & $PowerTabConfig.CustomUserFunction $Context | 
                         New-TabItem -Value {$_} -Text {$_} -Type Unknown |
@@ -953,6 +1026,8 @@ Function Invoke-PowerTab {
 
             ## Partial functions or cmdlets
             "(.*)$([Regex]::Escape($PowerTabConfig.ShortcutChars.Partial))`$" {
+                Write-Trace "Core Handler: Evaluating cmdlet and function names based on partial name."
+
                 ## TODO: Give different types?
                 Get-Command -CommandType Function,ExternalScript,Filter,Cmdlet -Name "$($Matches[1])*" |
                     New-TabItem -Value {$_.Name} -Text {$_.Name} -Type Command |
@@ -962,6 +1037,8 @@ Function Invoke-PowerTab {
 
             ## Functions or cmdlets on dash
             '(.+-.*)' {
+                Write-Trace "Core Handler: Evaluating cmdlet and function names."
+
                 ## TODO: Give different types?
                 Get-Command -CommandType Function,ExternalScript,Filter,Cmdlet -Name "$($Matches[1])*" |
                     New-TabItem -Value {$_.Name} -Text {$_.Name} -Type Command |
@@ -971,6 +1048,8 @@ Function Invoke-PowerTab {
 
             ## Alternate alias
             '(.+)$' {
+                Write-Trace "Core Handler: Evaluating aliases."
+
                 if ($DoubleTab -or $PowerTabConfig.AliasQuickExpand) {
                     & {
                         Get-Command -CommandType Alias -Name $Matches[1] | New-TabItem -Value {$_.Definition} -Text {$_.Definition} -Type Alias
@@ -987,6 +1066,8 @@ Function Invoke-PowerTab {
 
     ## Filesystem Completion
     if ((-not $TabExpansionHasOutput) -and $PowerTabConfig.FileSystemExpand) {
+        Write-Trace "Executing FileSystem completion."
+
         $PowerTabFileSystemMode = $true
         $LastWord = $LastWord -replace '`'
 
