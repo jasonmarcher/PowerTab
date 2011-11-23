@@ -393,7 +393,7 @@ Function Invoke-TabExpansion {
                     $Parameters = $Overload -replace '^\S+ .+\((.+)?\)','$1'
                     if ($Parameters) {
                         $Parameters = foreach ($Parameter in ($Parameters -split ", ")) {
-                            $Type = ($Parameter -split " ")[0]
+                            $Type = ($Parameter -split " ")[0] -replace '^System\.'
                             $Name = ($Parameter -split " ")[1]
                             '[{0}] ${1}' -f $Type,$Name
                         }
@@ -808,12 +808,11 @@ Function Invoke-PowerTab {
                             Invoke-TabItemSelector ($LastType + '::') -SelectionHandler $SelectionHandler
                     } else {
                         $Constructors = Invoke-Expression "$LastType.GetConstructors()" | ForEach-Object {
-                            $Regex = New-Object Regex('\((.*)\)')
-                            $ParamTypes = foreach ($Type in $Regex.Match($_).Groups[1].Value.Split(',')) {
-                                "[$($Type.Trim())]"
+                            $Parameters = foreach ($Parameter in $_.GetParameters()) {
+                                '[{0}] ${1}' -f ($Parameter.ParameterType -replace '^System\.'), $Parameter.Name
                             }
-                            $Param = [String]::Join(' , ',$ParamTypes)
-                            "New-Object $($LastType.Trim('[]'))($Param)".Replace('([])','()')
+                            $Param = [String]::Join(', ',$Parameters)
+                            "New-Object $($LastType.Trim('[]')) ($Param)".Replace('([])','()')
                         }
                         if ($Constructors) {
                             $Constructors | New-TabItem -Value {$_} -Text {$_} -Type Constructor |
