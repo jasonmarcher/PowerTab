@@ -530,7 +530,6 @@ Function Invoke-PowerTab {
         [Switch]$ForceList
     ) 
 
-    &{
     Write-Trace "Entering core handler."
 
     $TabExpansionHasOutput = $false
@@ -609,460 +608,472 @@ Function Invoke-PowerTab {
         }
     }
 
-    &{
-        ## Main tabcompletion , check line for patterns, select completion method and invoke handler
+    ## Main tabcompletion , check line for patterns, select completion method and invoke handler
 
-        ## Evaluate last block
-        switch -regex ($LastBlock)  {
-            ## Handle multilevel property and method expansion on simple () Blocks
-            '(^| )\((.+)\)\.(.*)' {
-                Write-Trace "Core Handler: Evaluating nested statements."
+    ## Evaluate last block
+    switch -regex ($LastBlock)  {
+        ## Handle multilevel property and method expansion on simple () Blocks
+        '(^| )\((.+)\)\.(.*)' {
+            Write-Trace "Core Handler: Evaluating nested statements."
 
-                &{ trap {continue}
-                    Resolve-Member -Object "($($Matches[2]))" -Pattern $Matches[3] |
-                        Invoke-TabItemSelector $LastBlock -SelectionHandler $SelectionHandler | ForEach-Object {
-                            $TabExpansionHasOutput = $true
-                            if ($_.IndexOf(' ') -ge 0 ) {
-                                ([Regex]::Split($_,' '))[-1].Trim()
-                            } else {
-                                $_
-                            }
+            &{ trap {continue}
+                Resolve-Member -Object "($($Matches[2]))" -Pattern $Matches[3] |
+                    Invoke-TabItemSelector $LastBlock -SelectionHandler $SelectionHandler | ForEach-Object {
+                        $TabExpansionHasOutput = $true
+                        if ($_.IndexOf(' ') -ge 0 ) {
+                            ([Regex]::Split($_,' '))[-1].Trim()
+                        } else {
+                            $_
                         }
+                    }
+            }
+            if ($TabExpansionHasOutput) {
+                ## Tab expansion handled, don't do anything more
+                return
+            }
+        }
+    }
+
+    ## Evaluate last word
+    [Object[]]$PossibleValues = @()
+    $PossibleValues = switch -regex ($LastWord)  {
+        ## Handle inline type search, e.g. new-object .identityreference<tab> or .identityre<tab> (oisin) 
+        '^(\[*?)\.(\w+)$' {
+            Write-Trace "Core Handler: Evaluating inline type search."
+
+            $TypeName = $Matches[2]
+            Get-TabExpansion "*.${TypeName}*" Types |
+                New-TabItem -Value {if ($Matches[1] -eq '[') {"[$($_.Name)]"} else {$_.Name}} -Text {$_.Name} -Type Type
+            $SelectorLastWord = $LastWord.Replace('[', '')
+            break
+        }
+
+        ## Members of scriptblock
+        '(.*\})\.([^\.]*)$' {
+            Write-Trace "Core Handler: Evaluating members of a scriptblock."
+
+            $ScriptBlock = $Matches[1]
+            $Member = $Matches[2]
+            {} | Get-Member | Where-Object {
+                $n = $_.Name
+                if (-not $PowerTabConfig.ShowAccessorMethods) {
+                    $n -like "$Member*" -and $n -notmatch '^[gs]et_'
+                } else {
+                    $n -like "$Member*"
                 }
-                if ($TabExpansionHasOutput) {
-                    ## Tab expansion handled, don't do anything more
-                    return
+            } | ForEach-Object {
+                if ($_.MemberType -band $_Method) {
+                    ## Return a method...
+                    $Value = $ScriptBlock + '.' + $_.Name + '('
+                    New-TabItem -Value $Value -Text $Value -Type Method
+                } else {
+                    ## Return a property...
+                    $Value = $ScriptBlock + '.' + $_.Name
+                    New-TabItem -Value $Value -Text $Value -Type Property
                 }
+            }
+            $SelectorLastWord = "$ScriptBlock.$Member"
+            break
+        }
+
+        ## Completion on Shares (commented lines without DLL but need admin rights )
+        '^(\\\\|//)(?<Computer>[^\\/]+)[\\/](?<Share>[^\\/]*)$' {
+            Write-Trace "Core Handler: Evaluating file shares."
+
+            #gwmi win32_share -computer $ComputerName -filter "name like '$($ShareName)%'" | Foreach-Object {"\\$($ComputerName)\$($_.name)"}
+            #([adsi]"WinNT://$($ComputerName)/LanmanServer,FileService" ).psbase.children |? {$_.name -like "$($ShareName)*"}  |% {$_.name}
+            $ComputerName = $Matches.Computer
+            $ShareName = $Matches.Share
+            [Trinet.Networking.ShareCollection]::GetShares($ComputerName) | Where-Object {$_.NetName -like "$ShareName*"} |
+                Sort-Object NetName | New-TabItem -Value {"\\$ComputerName\" + $_.NetName} -Text {"\\$ComputerName\" + $_.NetName} -Type Share
+            $SelectorLastWord = $LastWord
+            break
+        }
+
+        ## Completion on computers in database            
+			'^(\\\\|//)(?<Computer>[^\\/]*)$' {
+            Write-Trace "Core Handler: Evaluating computer names from database."
+
+            foreach ($Computer in Get-TabExpansion "$($Matches.Computer)*" Computer) {
+                $Value = "\\" + $Computer.Text
+                New-TabItem -Value $Value -Text $Value -Type Computer
+            }
+            $SelectorLastWord = $LastWord
+            break
+        }
+
+        ## Variable "In-Place" expansion on \[tab]
+        '.*(\$[^\\]+)\\$' {
+            Write-Trace "Core Handler: Evaluating variable for inplace expansion."
+
+            $val = $ExecutionContext.InvokeCommand.ExpandString($Matches[1])
+            ($Matches[0] -replace ([Regex]::Escape($Matches[1])), $val).TrimEnd('\')
+            break
+        }
+
+        ## Replace <command>-? with call to Get-Help
+        '.*\-\?' {
+            Write-Trace "Core Handler: Evaluating use of -? short hand."
+
+            "Get-Help " + $LastWord.Replace('-?', ' -')
+        }
+
+        ## PSDrive expansion on :[tab]
+        '^:$' {
+            Write-Trace "Core Handler: Evaluating PSDrive names."
+
+            Get-PSDrive | New-TabItem -Value {$_.Name + ':'} -Text {$_.Name + ':'} -Type PSDrive
+            $SelectorLastWord = ''
+        }
+
+        ## History completion against either #<pattern> or #<id>
+        '^#(.*)' {
+            Write-Trace "Core Handler: Evaluating command history."
+
+            ## Only do history if there is not a command in the current context
+            if (-not $Context.isCommandMode) {
+                $Pattern = $Matches[1]
+                if ($Pattern -match '^[0-9]+$') {
+                    @(Get-History -Id $Pattern -ErrorAction SilentlyContinue)[0].CommandLine
+                } else {
+					Get-History -Count 32767 | Where-Object {$_.CommandLine -like "*$Pattern*"} | Sort Id -Descending |
+                        Select-Object -ExpandProperty CommandLine -Unique | New-TabItem -Value {$_} -Text {$_} -Type History
+                    $SelectorLastWord = $Pattern
+                }
+                break
             }
         }
 
-        ## Evaluate last word 
-        switch -regex ($LastWord)  {
-            ## Handle inline type search, e.g. new-object .identityreference<tab> or .identityre<tab> (oisin) 
-            '^(\[*?)\.(\w+)$' {
-                Write-Trace "Core Handler: Evaluating inline type search."
+        ## About Topics completion
+        'about_(.*)' {
+            Write-Trace "Core Handler: Evaluating 'about' help topics."
 
-                $TypeName = $Matches[2]
-                Get-TabExpansion "*.${TypeName}*" Types | New-TabItem -Value {$_.Name} -Text {$_.Name} -Type Type |
-                    Invoke-TabItemSelector $LastWord.Replace('[', '') -SelectionHandler $SelectionHandler |
-                    ForEach-Object {if ($Matches[1] -eq '[') {"[$_]"} else {$_}}
-                break
-            }
+            Get-Help "about_$($Matches[1])*" | New-TabItem -Value {$_.Name} -Text {$_.Name} -Type Help
+            $SelectorLastWord = $LastWord
+            break
+        }
 
-            ## Members of scriptblock
-            '(.*\})\.([^\.]*)$' {
-                Write-Trace "Core Handler: Evaluating members of a scriptblock."
+        ## DataGrid GUI Shortcuts
+        '^a_(.*)' {Get-Help "about_$($Matches[1])*" | Select-Object Name,Synopsis,Length | Out-DataGridView Name |
+            Foreach-Object {Get-Help $_}}
+        ## TODO: Add description?
+        '^w_(.*)' {Get-TabExpansion "win32_$($Matches[1])*" WMI | Select-Object Name | Out-DataGridView Name}
+        '^t_(.*)' {Get-TabExpansion "*$($Matches[1])*" Types | Where-Object {$_.Name -ne "Dummy"} |
+            Select-Object Name | Out-DataGridView Name}
+        '^c_(.*)' {Get-TabExpansion "$($Matches[1])*" | Select-Object Text | Out-DataGridView Text}
+        ## TODO: Add synopsis?
+        '^f_' {Get-ChildItem function: | Select-Object Name | Out-DataGridView Name}
+        ## TODO: I think this needs some work
+        '^d_' {Get-ChildItem | Select-Object Mode,LastWriteTime,Length,Name,FullName | Out-DataGridView FullName}
+        '^h_' {Get-History -Count 100 | Out-DataGridView Commandline}
 
-                $ScriptBlock = $Matches[1]
-                $Member = $Matches[2]
-                {} | Get-Member | Where-Object {
-                    $n = $_.Name
-                    if (-not $PowerTabConfig.ShowAccessorMethods) {
-                        $n -like "$Member*" -and $n -notmatch '^[gs]et_'
-                    } else {
-                        $n -like "$Member*"
-                    }
-                } | ForEach-Object {
-                    if ($_.MemberType -band $_Method) {
-                        ## Return a method...
-                        $Value = $ScriptBlock + '.' + $_.Name + '('
-                        New-TabItem -Value $Value -Text $Value -Type Method
-                    } else {
-                        ## Return a property...
-                        $Value = $ScriptBlock + '.' + $_.Name
-                        New-TabItem -Value $Value -Text $Value -Type Property
-                    }
-                } | Invoke-TabItemSelector "$ScriptBlock.$Member" -SelectionHandler $SelectionHandler
-                break
-            }
+        ## WMI completion
+        '(win32_.*|cim_.*|MSFT_.*)' {
+            ## TODO:  Should this be removed from the core handler?
+            Write-Trace "Core Handler: Evaluating WMI class names."
 
-            ## Completion on Shares (commented lines without DLL but need admin rights )
-            '^(\\\\|//)(?<Computer>[^\\/]+)[\\/](?<Share>[^\\/]*)$' {
-                Write-Trace "Core Handler: Evaluating file shares."
+            Get-TabExpansion "$($Matches[1])*" WMI | New-TabItem -Value {$_.Name} -Text {$_.Name} -Type WMIObject
+            $SelectorLastWord = $LastWord
+            break
+        }
 
-                #gwmi win32_share -computer $ComputerName -filter "name like '$($ShareName)%'" | Foreach-Object {"\\$($ComputerName)\$($_.name)"}
-                #([adsi]"WinNT://$($ComputerName)/LanmanServer,FileService" ).psbase.children |? {$_.name -like "$($ShareName)*"}  |% {$_.name}
-                $ComputerName = $Matches.Computer
-                $ShareName = $Matches.Share
-                [Trinet.Networking.ShareCollection]::GetShares($ComputerName) | Where-Object {$_.NetName -like "$ShareName*"} |
-                    Sort-Object NetName | New-TabItem -Value {"\\$ComputerName\" + $_.NetName} -Text {"\\$ComputerName\" + $_.NetName} -Type Share |
-                    Invoke-TabItemSelector $LastWord -SelectionHandler $SelectionHandler
-                break
-            }
+        ## Handle property and method expansion on variables
+        '\$(.+)\.(.*)' {
+            Write-Trace "Core Handler: Evaluating members of a variable."
 
-            ## Completion on computers in database            
-			'^(\\\\|//)(?<Computer>[^\\/]*)$' {
-                Write-Trace "Core Handler: Evaluating computer names from database."
+            Resolve-Member -Object ('$' + $Matches[1]) -Pattern $Matches[2]
+            $SelectorLastWord = $LastWord
+            break
+        }
 
-                $Computers = foreach ($Computer in Get-TabExpansion "$($Matches.Computer)*" Computer) {
-                    $Value = "\\" + $Computer.Text
-                    New-TabItem -Value $Value -Text $Value -Type Computer
-                }
-                $Computers | Invoke-TabItemSelector $LastWord -SelectionHandler $SelectionHandler
-                break
-            }
+        ## Translate typename to New-Object statement (ex: [String]=<TAB>)
+        '^(\[.*\])=(\w*)$' {
+            Write-Trace "Core Handler: Evaluating short hand for new object creation."
 
-            ## Variable "In-Place" expansion on \[tab]
-            '.*(\$[^\\]+)\\$' {
-                Write-Trace "Core Handler: Evaluating variable for inplace expansion."
+            "New-Object $($Matches[1].Replace('[','').Replace(']',''))"
+            break
+        }
 
-                $val = $ExecutionContext.InvokeCommand.ExpandString($Matches[1])
-                ($Matches[0] -replace ([Regex]::Escape($Matches[1])), $val).TrimEnd('\')
-                break
-            }
+        ## Handle Static methods of Types
+        '(\[.*\])::(.*)$' {
+            Write-Trace "Core Handler: Evaluating static members of a type."
 
-            ## Replace <command>-? with call to Get-Help
-            '.*\-\?' {
-                Write-Trace "Core Handler: Evaluating use of -? short hand."
+            $LastType = $Matches[1]
+            $Level = $Matches[2].Split('.').Count
 
-                "Get-Help " + $LastWord.Replace('-?', ' -')
-            }
-
-            ## PSDrive expansion on :[tab]
-            '^:$' {
-                Write-Trace "Core Handler: Evaluating PSDrive names."
-
-                Get-PSDrive | New-TabItem -Value {$_.Name + ':'} -Text {$_.Name + ':'} -Type PSDrive |
-                    Invoke-TabItemSelector '' -SelectionHandler $SelectionHandler
-            }
-
-            ## History completion against either #<pattern> or #<id>
-            '^#(.*)' {
-                Write-Trace "Core Handler: Evaluating command history."
-
-                ## Only do history if there is not a command in the current context
-                if (-not $Context.isCommandMode) {
-                    $Pattern = $Matches[1]
-                    if ($Pattern -match '^[0-9]+$') {
-                        @(Get-History -Id $Pattern -ErrorAction SilentlyContinue)[0].CommandLine
-                    } else {
-    					Get-History -Count 32767 | Where-Object {$_.CommandLine -like "*$Pattern*"} | Sort Id -Descending |
-                            Select-Object -ExpandProperty CommandLine -Unique | New-TabItem -Value {$_} -Text {$_} -Type History |
-                            Invoke-TabItemSelector $Pattern -SelectionHandler $SelectionHandler
-                    }
-                    break
-                }
-            }
-
-            ## About Topics completion
-            'about_(.*)' {
-                Write-Trace "Core Handler: Evaluating 'about' help topics."
-
-                Get-Help "about_$($Matches[1])*" | New-TabItem -Value {$_.Name} -Text {$_.Name} -Type Help |
-                    Invoke-TabItemSelector $LastWord -SelectionHandler $SelectionHandler
-                break
-            }
-
-            ## DataGrid GUI Shortcuts
-            '^a_(.*)' {Get-Help "about_$($Matches[1])*" | Select-Object Name,Synopsis,Length | Out-DataGridView Name |
-                Foreach-Object {Get-Help $_}}
-            ## TODO: Add description?
-            '^w_(.*)' {Get-TabExpansion "win32_$($Matches[1])*" WMI | Select-Object Name | Out-DataGridView Name}
-            '^t_(.*)' {Get-TabExpansion "*$($Matches[1])*" Types | Where-Object {$_.Name -ne "Dummy"} |
-                Select-Object Name | Out-DataGridView Name}
-            '^c_(.*)' {Get-TabExpansion "$($Matches[1])*" | Select-Object Text | Out-DataGridView Text}
-            ## TODO: Add synopsis?
-            '^f_' {Get-ChildItem function: | Select-Object Name | Out-DataGridView Name}
-            ## TODO: I think this needs some work
-            '^d_' {Get-ChildItem | Select-Object Mode,LastWriteTime,Length,Name,FullName | Out-DataGridView FullName}
-            '^h_' {Get-History -Count 100 | Out-DataGridView Commandline}
-
-            ## WMI completion
-            '(win32_.*|cim_.*|MSFT_.*)' {
-                ## TODO:  Should this be removed from the core handler?
-                Write-Trace "Core Handler: Evaluating WMI class names."
-
-                Get-TabExpansion "$($Matches[1])*" WMI | New-TabItem -Value {$_.Name} -Text {$_.Name} -Type WMIObject |
-                    Invoke-TabItemSelector $LastWord -SelectionHandler $SelectionHandler
-                break
-            }
-
-            ## Handle property and method expansion on variables
-            '\$(.+)\.(.*)' {
-                Write-Trace "Core Handler: Evaluating members of a variable."
-
-                Resolve-Member -Object ('$' + $Matches[1]) -Pattern $Matches[2] |
-                    Invoke-TabItemSelector $LastWord -SelectionHandler $SelectionHandler
-                break
-            }
-
-            ## Translate typename to New-Object statement (ex: [String]=<TAB>)
-            '^(\[.*\])=(\w*)$' {
-                Write-Trace "Core Handler: Evaluating short hand for new object creation."
-
-                "New-Object $($Matches[1].Replace('[','').Replace(']',''))"
-                break
-            }
-
-            ## Handle Static methods of Types
-            '(\[.*\])::(.*)$' {
-                Write-Trace "Core Handler: Evaluating static members of a type."
-
-                $LastType = $Matches[1]
-                $Level = $Matches[2].Split('.').Count
-
-                if ($Level -gt 1) {
-                    $LastType += '::' + $Matches[2].SubString(0, $Matches[2].LastIndexOf('.'))
-                    $Pattern = $Matches[2].Split('.')[-1]
-                    Resolve-Member -Object $LastType -Pattern $Pattern | Invoke-TabItemSelector $LastWord -SelectionHandler $SelectionHandler
-                } else {
-                    $Pattern = $Matches[2].Split('.')[($Level -1)] + '*'
-                    Invoke-Expression "$($Matches[1]) | Get-Member -Static" | Where-Object {
-                        $_.Name -like $Pattern -and $_.Name -notmatch '^[ge]et_'} | ForEach-Object {
-                            if ($_.MemberType -band $_Method) {
-                                $Value = "${LastType}::$($_.Name)" + '('
-                                New-TabItem -Value $Value -Text $Value -Type StaticMethod
-                            } else {
-                                $Value = "${LastType}::$($_.Name)"
-                                New-TabItem -Value $Value -Text $Value -Type StaticProperty
-                            }
-                        } | Invoke-TabItemSelector $LastWord -SelectionHandler $SelectionHandler
-                }
-                break
-            }
-
-            ## Handle Static methods of types in Variables
-            '(\$.*)::(.*)$' {
-                Write-Trace "Core Handler: Evaluating static members of a variable."
-
-                $LastType = $Matches[1]
-                $Level = $Matches[2].Split('.').Count
-                $gt = ''
-
-                if ((Invoke-Expression "$LastType.GetType().Name") -ne 'RuntimeType') {$gt = '.GetType'}
-                if ($Level -gt 1) {
-                    $LastType += '::' + $Matches[2].SubString(0, $Matches[2].LastIndexOf('.'))
-                    $Pattern = $Matches[2].Split('.')[-1]
-                    Resolve-Member -Object $LastType -Pattern $Pattern | Invoke-TabItemSelector $LastWord -SelectionHandler $SelectionHandler
-                } else {
-                    $Pattern = $Matches[2].Split('.')[($Level -1)] + '*'
-                    Invoke-Expression "$($Matches[1]) | Get-Member -Static" | Where-Object {
-                        $_.Name -like $Pattern -and $_.Name -notmatch '^[ge]et_'} | ForEach-Object {
-                            if ($_.MemberType -band $_Method) {
-                                $Value = "${LastType}${gt}::$($_.Name)" + '('
-                                New-TabItem -Value $Value -Text $Value -Type StaticMethod
-                            } else {
-                                $Value = "${LastType}${gt}::$($_.Name)"
-                                New-TabItem -Value $Value -Text $Value -Type StaticProperty
-                            }
-                        } | Invoke-TabItemSelector $LastWord.Replace('::',"${gt}::") -SelectionHandler $SelectionHandler
-                }
-                break
-            }
-
-            ## Handle enums and Constructors of Types
-            '(\[.*\]):*$' {
-                Write-Trace "Core Handler: Evaluating enum values and constructors for types."
-
-                $LastType = $Matches[1].Split(',')[-1]
-                $BaseType = (Invoke-Expression "$LastType.BaseType.FullName")
-                . {
-                    if ($BaseType -eq 'System.Enum') {
-                        $Names = Invoke-Expression "[Enum]::GetNames($LastType)" |
-                            New-TabItem -Value {"${LastType}::$_"} -Text {"${LastType}::$_"} -Type Enum |
-                            Invoke-TabItemSelector ($LastType + '::') -SelectionHandler $SelectionHandler
-                    } else {
-                        $Constructors = Invoke-Expression "$LastType.GetConstructors()" | ForEach-Object {
-                            $Parameters = foreach ($Parameter in $_.GetParameters()) {
-                                '[{0}] ${1}' -f ($Parameter.ParameterType -replace '^System\.'), $Parameter.Name
-                            }
-                            if ($Parameters) {
-                                $Param = [String]::Join(', ',$Parameters)
-                                "New-Object $($LastType.Trim('[]')) ($Param)".Replace('([])','()')
-                            } else {
-                                "New-Object $($LastType.Trim('[]'))".Replace('([])','()')
-                            }
-                        }
-                        if ($Constructors) {
-                            $Constructors | New-TabItem -Value {$_} -Text {$_} -Type Constructor |
-                                Invoke-TabItemSelector $LastType -SelectionHandler $SelectionHandler
+            if ($Level -gt 1) {
+                $LastType += '::' + $Matches[2].SubString(0, $Matches[2].LastIndexOf('.'))
+                $Pattern = $Matches[2].Split('.')[-1]
+                Resolve-Member -Object $LastType -Pattern $Pattern
+            } else {
+                $Pattern = $Matches[2].Split('.')[($Level -1)] + '*'
+                Invoke-Expression "$($Matches[1]) | Get-Member -Static" |
+                    Where-Object {$_.Name -like $Pattern -and $_.Name -notmatch '^[ge]et_'} |
+                    ForEach-Object {
+                        if ($_.MemberType -band $_Method) {
+                            $Value = "${LastType}::$($_.Name)" + '('
+                            New-TabItem -Value $Value -Text $Value -Type StaticMethod
                         } else {
-                            $LastWord
+                            $Value = "${LastType}::$($_.Name)"
+                            New-TabItem -Value $Value -Text $Value -Type StaticProperty
                         }
                     }
-                }
-                break
             }
+            $SelectorLastWord = $LastWord
+            break
+        }
 
-            ## Handle members of Types (runtype)
-            '^(\[.*\]).(\w*)$' {
-                Write-Trace "Core Handler: Evaluating non-static members of a type."
+        ## Handle Static methods of types in Variables
+        '(\$.*)::(.*)$' {
+            Write-Trace "Core Handler: Evaluating static members of a variable."
 
-                $LastType = $Matches[1].Split(',')[-1]
-                Invoke-Expression "$LastType | Get-Member" | Where-Object {$_.Name -like "$($Matches[2])*"} | ForEach-Object {
-                    if ($_.MemberType -band $_Method) {
-                        $Value = "$LastType.$($_.Name)" + '('
-                        New-TabItem -Value $Value -Text $Value -Type Method
+            $LastType = $Matches[1]
+            $Level = $Matches[2].Split('.').Count
+            $gt = ''
+
+            if ((Invoke-Expression "$LastType.GetType().Name") -ne 'RuntimeType') {$gt = '.GetType'}
+            if ($Level -gt 1) {
+                $LastType += '::' + $Matches[2].SubString(0, $Matches[2].LastIndexOf('.'))
+                $Pattern = $Matches[2].Split('.')[-1]
+                Resolve-Member -Object $LastType -Pattern $Pattern
+                $SelectorLastWord = $LastWord
+            } else {
+                $Pattern = $Matches[2].Split('.')[($Level -1)] + '*'
+                Invoke-Expression "$($Matches[1]) | Get-Member -Static" |
+                    Where-Object {$_.Name -like $Pattern -and $_.Name -notmatch '^[ge]et_'} |
+                    ForEach-Object {
+                        if ($_.MemberType -band $_Method) {
+                            $Value = "${LastType}${gt}::$($_.Name)" + '('
+                            New-TabItem -Value $Value -Text $Value -Type StaticMethod
+                        } else {
+                            $Value = "${LastType}${gt}::$($_.Name)"
+                            New-TabItem -Value $Value -Text $Value -Type StaticProperty
+                        }
+                    }
+                $SelectorLastWord = $LastWord.Replace('::',"${gt}::")
+            }
+            break
+        }
+
+        ## Handle enums and Constructors of Types
+        '(\[.*\]):*$' {
+            Write-Trace "Core Handler: Evaluating enum values and constructors for types."
+
+            $LastType = $Matches[1].Split(',')[-1]
+            $BaseType = (Invoke-Expression "$LastType.BaseType.FullName")
+            if ($BaseType -eq 'System.Enum') {
+                Invoke-Expression "[Enum]::GetNames($LastType)" |
+                    New-TabItem -Value {"${LastType}::$_"} -Text {"${LastType}::$_"} -Type Enum
+                $SelectorLastWord = ($LastType + '::')
+            } else {
+                $Constructors = Invoke-Expression "$LastType.GetConstructors()" | ForEach-Object {
+                    $Parameters = foreach ($Parameter in $_.GetParameters()) {
+                        '[{0}] ${1}' -f ($Parameter.ParameterType -replace '^System\.'), $Parameter.Name
+                    }
+                    if ($Parameters) {
+                        $Param = [String]::Join(', ',$Parameters)
+                        "New-Object $($LastType.Trim('[]')) ($Param)".Replace('([])','()')
                     } else {
-                        $Value = "$LastType.$($_.Name)"
-                        New-TabItem -Value $Value -Text $Value -Type Property
-                    }
-                } | Invoke-TabItemSelector $LastWord -SelectionHandler $SelectionHandler
-                break
-            } 
-
-            ## Handle namespace and type names 
-            '^\[(.*)$' {
-                Write-Trace "Core Handler: Evaluating namespaces or type names."
-
-                $Matched = $Matches[1]
-                $Dots = $Matches[1].Split(".").Count - 1
-                $res = @()
-                $res += foreach ($Namespace in $dsTabExpansionDatabase.Tables['Types'].Select("NS like '$($Matched)%' and DC = $($Dots + 1)") |
-                        Select-Object -Unique NS) {
-                    $Value = "[$($Namespace.NS)"
-                    New-TabItem -Value $Value -Text $Value -Type Namespace
-                }
-                $res += foreach ($Namespace in $dsTabExpansionDatabase.Tables['Types'].Select("NS like 'System.$($Matched)%' and DC = $($Dots + 2)") |
-                        Select-Object -Unique NS) {
-                    $Value = "[$($Namespace.NS)"
-                    New-TabItem -Value $Value -Text $Value -Type Namespace
-                }
-                if ($Dots -gt 0) {
-                    $res += foreach ($Type in $dsTabExpansionDatabase.Tables['Types'].Select("Name like '$($Matched)%' and DC = $Dots")) {
-                        $Value = "[$($Type.Name)]"
-                        New-TabItem -Value $Value -Text $Value -Type Type
-                    }
-                    $res += foreach ($Type in $dsTabExpansionDatabase.Tables['Types'].Select("Name like 'System.$($Matched)%' and DC = $($Dots + 1)")) {
-                        $Value = "[$($Type.Name)]"
-                        New-TabItem -Value $Value -Text $Value -Type Type
+                        "New-Object $($LastType.Trim('[]'))".Replace('([])','()')
                     }
                 }
-                $res | Where-Object {$_} | Invoke-TabItemSelector $LastWord -SelectionHandler $SelectionHandler -ForceList:$ForceList
-                break
-            }
-
-            ## Handle expansions for both "Scope Variable Name" and "Type Variable Names"
-            '^\$(\w+):(\w*)$' {
-                Write-Trace "Core Handler: Evaluating variable scope or type."
-
-                $Type = $Matches[1]     # function, variable, global, etc.
-                $TypeName = $Matches[2] # e.g. in '$function:C', value will be 'C'
-
-                if ($_ScopeNames -contains $Type) {
-                    # Scope variable name expansion ($global:, $script:, etc.)
-                    $Variables = foreach ($ScopeVariable in (Get-Variable "$TypeName*" -Scope $Type)) {
-                        '$' + (QuoteVariable ($Type + ":" + $ScopeVariable.Name))
-                    }
+                if ($Constructors) {
+                    $Constructors | New-TabItem -Value {$_} -Text {$_} -Type Constructor
+                    $SelectorLastWord = $LastType
                 } else {
-                    # Type variable name expansion ($function:, $variable:, $env:, etc.)
-                    $Variables = foreach ($t in (Get-ChildItem ($Type + ":" + $TypeName + '*') | Sort-Object Name)) {
-                        '$' + (QuoteVariable ($Type + ":" + $t.Name))
-                    }
+                    $LastWord
                 }
-                $Variables | New-TabItem -Value {$_} -Text {$_} -Type Variable | Invoke-TabItemSelector $LastWord -SelectionHandler $SelectionHandler
-                break
             }
+            break
+        }
 
-            ## Handle variable name expansion
-            '^([\$@])(\w*)$' {
-                Write-Trace "Core Handler: Evaluating variable name."
+        ## Handle members of Types (runtype)
+        '^(\[.*\]).(\w*)$' {
+            Write-Trace "Core Handler: Evaluating non-static members of a type."
 
-                $VarName = $Matches[2]
-                $Variables = foreach ($Variable in Get-Variable "$VarName*" -Scope Global) {
-                    $Matches[1] + (QuoteVariable $Variable.Name)
-                }
-                $Variables | New-TabItem -Value {$_} -Text {$_} -Type Variable | Invoke-TabItemSelector $LastWord -SelectionHandler $SelectionHandler
-                break
-            }
-
-            ## Completion on cmdlets, function, aliases and native commands with defined shortcuts and custom additions from database
-
-            ## Native commands / scripts in path
-            "(.*)$([Regex]::Escape($PowerTabConfig.ShortcutChars.Native))`$" { 
-                Write-Trace "Core Handler: Evaluating native commands and scripts only (special character)."
-
-                & {
-                    Get-Command -CommandType ExternalScript -Name "$($Matches[1])*" |
-                        New-TabItem -Value {$_.Name} -Text {$_.Name} -Type Script
-                    Get-Command -CommandType Application -Name "$($Matches[1])*" |
-                        Where-Object {($env:PATHEXT).Split(";") -contains $_.Extension} |
-                        New-TabItem -Value {$_.Name} -Text {$_.Name} -Type Application
-                } | Invoke-TabItemSelector $Matches[1] -SelectionHandler $SelectionHandler
-                break
-            }
-
-            ## Aliases
-            "(.+)$([Regex]::Escape($PowerTabConfig.ShortcutChars.Alias))`$" {
-                Write-Trace "Core Handler: Evaluating aliases only (special character)."
-
-                & {
-                    Get-Command -CommandType Alias -Name $Matches[1] | New-TabItem -Value {$_.Definition} -Text {$_.Definition} -Type Alias
-                    Get-TabExpansion $Matches[1] Alias | New-TabItem -Value {$_.Text} -Text {$_.Text} -Type Alias
-                } | Invoke-TabItemSelector $Matches[1] -SelectionHandler $SelectionHandler
-                break
-            }
-
-            ## Custom
-            "(.*)$([Regex]::Escape($PowerTabConfig.ShortcutChars.Custom))`$" {
-                Write-Trace "Core Handler: Evaluating custon results from database only (special character)."
-
-                Get-TabExpansion "$($Matches[1])*" Custom | New-TabItem -Value {$_.Text} -Text {$_.Text} -Type Unknown |
-                    Invoke-TabItemSelector $Matches[1] -SelectionHandler $SelectionHandler
-                break
-            }
-
-            ## Invoke
-            "(.+)$([Regex]::Escape($PowerTabConfig.ShortcutChars.Invoke))`$" {
-                Write-Trace "Core Handler: Evaluating invoke results from database only (special character)."
-
-                Get-TabExpansion "$($Matches[1])*" Invoke | ForEach-Object {
-                    $ExecutionContext.InvokeCommand.InvokeScript($_.Text) | New-TabItem -Value {$_} -Text {$_} -Type Unknown
-                } | Invoke-TabItemSelector $Matches[1] -SelectionHandler $SelectionHandler
-                break
-            }
-
-            ## Call function
-            "(.*)$([Regex]::Escape($PowerTabConfig.ShortcutChars.CustomFunction))`$" {
-                Write-Trace "Core Handler: Calling custom user function."
-
-                if ($PowerTabConfig.CustomFunctionEnabled) {
-                    & $PowerTabConfig.CustomUserFunction $Context | 
-                        New-TabItem -Value {$_} -Text {$_} -Type Unknown |
-                        Invoke-TabItemSelector $Matches[1] -SelectionHandler $SelectionHandler
-                }
-                break
-            }
-
-            ## Partial functions or cmdlets
-            "(.*)$([Regex]::Escape($PowerTabConfig.ShortcutChars.Partial))`$" {
-                Write-Trace "Core Handler: Evaluating cmdlet and function names based on partial name."
-
-                ## TODO: Give different types?
-                Get-Command -CommandType Function,ExternalScript,Filter,Cmdlet -Name "$($Matches[1])*" |
-                    New-TabItem -Value {$_.Name} -Text {$_.Name} -Type Command |
-                    Invoke-TabItemSelector $Matches[1] -SelectionHandler $SelectionHandler
-                break
-            }
-
-            ## Functions or cmdlets on dash
-            '(.+-.*)' {
-                Write-Trace "Core Handler: Evaluating cmdlet and function names."
-
-                ## TODO: Give different types?
-                Get-Command -CommandType Function,ExternalScript,Filter,Cmdlet -Name "$($Matches[1])*" |
-                    New-TabItem -Value {$_.Name} -Text {$_.Name} -Type Command |
-                    Invoke-TabItemSelector $LastWord -SelectionHandler $SelectionHandler
-                break
-            }
-
-            ## Alternate alias
-            '(.+)$' {
-                Write-Trace "Core Handler: Evaluating aliases."
-
-                if ($DoubleTab -or $PowerTabConfig.AliasQuickExpand) {
-                    & {
-                        Get-Command -CommandType Alias -Name $Matches[1] | New-TabItem -Value {$_.Definition} -Text {$_.Definition} -Type Alias
-                        Get-TabExpansion $Matches[1] Alias | New-TabItem -Value {$_.Text} -Text {$_.Text} -Type Alias
-                    } | Invoke-TabItemSelector $LastWord -SelectionHandler $SelectionHandler
+            $LastType = $Matches[1].Split(',')[-1]
+            Invoke-Expression "$LastType | Get-Member" | Where-Object {$_.Name -like "$($Matches[2])*"} | ForEach-Object {
+                if ($_.MemberType -band $_Method) {
+                    $Value = "$LastType.$($_.Name)" + '('
+                    New-TabItem -Value $Value -Text $Value -Type Method
                 } else {
-                    Get-TabExpansion $Matches[1] Alias | New-TabItem -Value {$_.Text} -Text {$_.Text} -Type Alias |
-                        Invoke-TabItemSelector -SelectionHandler $SelectionHandler
+                    $Value = "$LastType.$($_.Name)"
+                    New-TabItem -Value $Value -Text $Value -Type Property
                 }
-                break
             }
-        } ## End of switch -regex $LastWord
-    } | Where-Object {$_} | ForEach-Object {$TabExpansionHasOutput = $true; $_}
+            $SelectorLastWord = $LastWord
+            break
+        } 
+
+        ## Handle namespace and type names 
+        '^\[(.*)$' {
+            Write-Trace "Core Handler: Evaluating namespaces or type names."
+
+            $Matched = $Matches[1]
+            $Dots = $Matches[1].Split(".").Count - 1
+            $res = @()
+            $res += foreach ($Namespace in $dsTabExpansionDatabase.Tables['Types'].Select("NS like '$($Matched)%' and DC = $($Dots + 1)") |
+                    Select-Object -Unique NS) {
+                $Value = "[$($Namespace.NS)"
+                New-TabItem -Value $Value -Text $Value -Type Namespace
+            }
+            $res += foreach ($Namespace in $dsTabExpansionDatabase.Tables['Types'].Select("NS like 'System.$($Matched)%' and DC = $($Dots + 2)") |
+                    Select-Object -Unique NS) {
+                $Value = "[$($Namespace.NS)"
+                New-TabItem -Value $Value -Text $Value -Type Namespace
+            }
+            if ($Dots -gt 0) {
+                $res += foreach ($Type in $dsTabExpansionDatabase.Tables['Types'].Select("Name like '$($Matched)%' and DC = $Dots")) {
+                    $Value = "[$($Type.Name)]"
+                    New-TabItem -Value $Value -Text $Value -Type Type
+                }
+                $res += foreach ($Type in $dsTabExpansionDatabase.Tables['Types'].Select("Name like 'System.$($Matched)%' and DC = $($Dots + 1)")) {
+                    $Value = "[$($Type.Name)]"
+                    New-TabItem -Value $Value -Text $Value -Type Type
+                }
+            }
+            $res | Where-Object {$_} | Invoke-TabItemSelector $LastWord -SelectionHandler $SelectionHandler -ForceList:$ForceList
+            break
+        }
+
+        ## Handle expansions for both "Scope Variable Name" and "Type Variable Names"
+        '^\$(\w+):(\w*)$' {
+            Write-Trace "Core Handler: Evaluating variable scope or type."
+
+            $Type = $Matches[1]     # function, variable, global, etc.
+            $TypeName = $Matches[2] # e.g. in '$function:C', value will be 'C'
+
+            if ($_ScopeNames -contains $Type) {
+                # Scope variable name expansion ($global:, $script:, etc.)
+                $Variables = foreach ($ScopeVariable in (Get-Variable "$TypeName*" -Scope $Type)) {
+                    '$' + (QuoteVariable ($Type + ":" + $ScopeVariable.Name))
+                }
+            } else {
+                # Type variable name expansion ($function:, $variable:, $env:, etc.)
+                $Variables = foreach ($t in (Get-ChildItem ($Type + ":" + $TypeName + '*') | Sort-Object Name)) {
+                    '$' + (QuoteVariable ($Type + ":" + $t.Name))
+                }
+            }
+            $Variables | New-TabItem -Value {$_} -Text {$_} -Type Variable
+            $SelectorLastWord = $LastWord
+            break
+        }
+
+        ## Handle variable name expansion
+        '^([\$@])(\w*)$' {
+            Write-Trace "Core Handler: Evaluating variable name."
+
+            $VarName = $Matches[2]
+            $Variables = foreach ($Variable in Get-Variable "$VarName*" -Scope Global) {
+                $Matches[1] + (QuoteVariable $Variable.Name)
+            }
+            $Variables | New-TabItem -Value {$_} -Text {$_} -Type Variable
+            $SelectorLastWord = $LastWord
+            break
+        }
+
+        ## Completion on cmdlets, function, aliases and native commands with defined shortcuts and custom additions from database
+
+        ## Native commands / scripts in path
+        "(.*)$([Regex]::Escape($PowerTabConfig.ShortcutChars.Native))`$" { 
+            Write-Trace "Core Handler: Evaluating native commands and scripts only (special character)."
+
+            Get-Command -CommandType ExternalScript -Name "$($Matches[1])*" |
+                New-TabItem -Value {$_.Name} -Text {$_.Name} -Type Script
+            Get-Command -CommandType Application -Name "$($Matches[1])*" |
+                Where-Object {($env:PATHEXT).Split(";") -contains $_.Extension} |
+                New-TabItem -Value {$_.Name} -Text {$_.Name} -Type Application
+            $SelectorLastWord = $Matches[1]
+            break
+        }
+
+        ## Aliases
+        "(.+)$([Regex]::Escape($PowerTabConfig.ShortcutChars.Alias))`$" {
+            Write-Trace "Core Handler: Evaluating aliases only (special character)."
+
+            Get-Command -CommandType Alias -Name $Matches[1] | New-TabItem -Value {$_.Definition} -Text {$_.Definition} -Type Alias
+            Get-TabExpansion $Matches[1] Alias | New-TabItem -Value {$_.Text} -Text {$_.Text} -Type Alias
+            $SelectorLastWord = $Matches[1]
+            break
+        }
+
+        ## Custom
+        "(.*)$([Regex]::Escape($PowerTabConfig.ShortcutChars.Custom))`$" {
+            Write-Trace "Core Handler: Evaluating custon results from database only (special character)."
+
+            Get-TabExpansion "$($Matches[1])*" Custom | New-TabItem -Value {$_.Text} -Text {$_.Text}
+            $SelectorLastWord = $Matches[1]
+            break
+        }
+
+        ## Invoke
+        "(.+)$([Regex]::Escape($PowerTabConfig.ShortcutChars.Invoke))`$" {
+            Write-Trace "Core Handler: Evaluating invoke results from database only (special character)."
+
+            Get-TabExpansion "$($Matches[1])*" Invoke | ForEach-Object {
+                $ExecutionContext.InvokeCommand.InvokeScript($_.Text) | New-TabItem -Value {$_} -Text {$_}
+            }
+            $SelectorLastWord = $Matches[1]
+            break
+        }
+
+        ## Call function
+        "(.*)$([Regex]::Escape($PowerTabConfig.ShortcutChars.CustomFunction))`$" {
+            Write-Trace "Core Handler: Calling custom user function."
+
+            if ($PowerTabConfig.CustomFunctionEnabled) {
+                & $PowerTabConfig.CustomUserFunction $Context | 
+                    New-TabItem -Value {$_} -Text {$_}
+                $SelectorLastWord = $Matches[1]
+            }
+            break
+        }
+
+        ## Partial functions or cmdlets
+        "(.*)$([Regex]::Escape($PowerTabConfig.ShortcutChars.Partial))`$" {
+            Write-Trace "Core Handler: Evaluating cmdlet and function names based on partial name."
+
+            ## TODO: Give different types?
+            Get-Command -CommandType Function,ExternalScript,Filter,Cmdlet -Name "$($Matches[1])*" |
+                New-TabItem -Value {$_.Name} -Text {$_.Name} -Type Command
+            $SelectorLastWord = $Matches[1]
+            break
+        }
+
+        ## Functions or cmdlets on dash
+        '(.+-.*)' {
+            Write-Trace "Core Handler: Evaluating cmdlet and function names."
+
+            ## TODO: Give different types?
+            Get-Command -CommandType Function,ExternalScript,Filter,Cmdlet -Name "$($Matches[1])*" |
+                New-TabItem -Value {$_.Name} -Text {$_.Name} -Type Command
+            $SelectorLastWord = $LastWord
+            break
+        }
+
+        ## Alternate alias
+        '(.+)$' {
+            Write-Trace "Core Handler: Evaluating aliases."
+
+            if ($DoubleTab -or $PowerTabConfig.AliasQuickExpand) {
+                Get-Command -CommandType Alias -Name $Matches[1] | New-TabItem -Value {$_.Definition} -Text {$_.Definition} -Type Alias
+                Get-TabExpansion $Matches[1] Alias | New-TabItem -Value {$_.Text} -Text {$_.Text} -Type Alias
+                $SelectorLastWord = $LastWord
+            } else {
+                Get-TabExpansion $Matches[1] Alias | New-TabItem -Value {$_.Text} -Text {$_.Text} -Type Alias
+                $SelectorLastWord = $null
+            }
+            break
+        }
+    } ## End of switch -regex $LastWord
+
+    ## Make sure PossibleValues is not null
+    if ($PossibleValues -eq $null) {$PossibleValues = @()}
+    ## If we have possible values, we certainly handled the user input
+    if ($PossibleValues) {$TabExpansionHasOutput = $true}
+    if ($TabExpansionHasOutput) {
+        $PossibleValues | Invoke-TabItemSelector $LastWord -SelectionHandler $SelectionHandler
+    }
 
     ## Filesystem Completion
     if ((-not $TabExpansionHasOutput) -and $PowerTabConfig.FileSystemExpand) {
@@ -1161,8 +1172,6 @@ Function Invoke-PowerTab {
             }
         }
     }
-
-    } ## End of outer script block
 
     if ($PowerTabConfig.IgnoreConfirmPreference) {
         $ConfirmPreference = $OriginalConfirmPreference
