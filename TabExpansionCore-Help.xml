@@ -12,7 +12,7 @@
       <dev:version />
     </command:details>
     <maml:description>
-      <maml:para>TODO Add Long description</maml:para>
+      <maml:para>This function should be called just like the built-in TabExpansion() function of PowerShell.</maml:para>
     </maml:description>
     <command:syntax>
       <command:syntaxItem>
@@ -37,7 +37,7 @@
       <command:parameter required="false" globbing="false" pipelineInput="false" position="named">
         <maml:name>ForceList</maml:name>
         <maml:description>
-          <maml:para>TODO Add ForceList Description</maml:para>
+          <maml:para>Forces ConsoleList to display the list control regardless of the value of MinimumListItems. This is intended for recursive tab expansion support.</maml:para>
         </maml:description>
         <command:parameterValue required="true">SwitchParameter</command:parameterValue>
         <dev:defaultValue />
@@ -45,7 +45,7 @@
       <command:parameter required="true" globbing="true" pipelineInput="false" position="2">
         <maml:name>LastWord</maml:name>
         <maml:description>
-          <maml:para>TODO Add LastWord Description</maml:para>
+          <maml:para>Specifies the last word, or the text that should be replaced by tab expansion.</maml:para>
         </maml:description>
         <command:parameterValue required="true">String</command:parameterValue>
         <dev:defaultValue />
@@ -53,7 +53,7 @@
       <command:parameter required="true" globbing="false" pipelineInput="false" position="1">
         <maml:name>Line</maml:name>
         <maml:description>
-          <maml:para>TODO Add Line Description</maml:para>
+          <maml:para>Specifies the whole command line string.</maml:para>
         </maml:description>
         <command:parameterValue required="true">String</command:parameterValue>
         <dev:defaultValue />
@@ -78,7 +78,7 @@
         </dev:type>
         <maml:description>
           <maml:para>
-            Zero, one or more tab expansion options.
+            Zero, one or more tab expansion results.
           </maml:para>
         </maml:description>
       </command:returnValue>
@@ -97,13 +97,11 @@
         <maml:introduction>
           <maml:para>C:\PS&gt;</maml:para>
         </maml:introduction>
-        <dev:code>TODO Add Invoke-TabExpansion Example code</dev:code>
+        <dev:code>Invoke-TabExpansion "Get-Process -" "-"</dev:code>
         <dev:remarks>
-          <maml:para>TODO Add Invoke-TabExpansion Example Comment</maml:para>
-          <maml:para />
-          <maml:para />
-          <maml:para />
-          <maml:para />
+          <maml:para>Description</maml:para>
+          <maml:para>-----------</maml:para>
+          <maml:para>In this example, PowerTab will interpret the query as looking for a parameter name to Get-Process.</maml:para>
         </dev:remarks>
         <command:commandLines>
           <command:commandLine>

@@ -12,7 +12,8 @@
       <dev:version />
     </command:details>
     <maml:description>
-      <maml:para>TODO Add Long description</maml:para>
+      <maml:para>This command is used to add computer names to the tab expansion database. The computer names can then be used to tab expand contexts that use computer names, for example the -ComputerName parameter.</maml:para>
+	  <maml:para>Changes to the database need to be saved using Export-TabExpansionDatabase.</maml:para>
     </maml:description>
     <command:syntax>
       <command:syntaxItem>
@@ -47,7 +48,7 @@
       <command:parameter required="true" globbing="false" pipelineInput="true (ByValue)" position="1">
         <maml:name>ComputerName</maml:name>
         <maml:description>
-          <maml:para>TODO Add ComputerName Description</maml:para>
+          <maml:para>A computer name to add to the database.</maml:para>
         </maml:description>
         <command:parameterValue required="true">String</command:parameterValue>
         <dev:defaultValue />
@@ -55,7 +56,7 @@
       <command:parameter required="false" globbing="false" pipelineInput="false" position="named">
         <maml:name>NetView</maml:name>
         <maml:description>
-          <maml:para>TODO Add NetView Description</maml:para>
+          <maml:para>Causes this command to gather computer names using "net view".</maml:para>
         </maml:description>
         <command:parameterValue required="true">SwitchParameter</command:parameterValue>
         <dev:defaultValue />
@@ -63,7 +64,7 @@
       <command:parameter required="true" globbing="false" pipelineInput="true (ByValue)" position="1">
         <maml:name>OU</maml:name>
         <maml:description>
-          <maml:para>TODO Add OU Description</maml:para>
+          <maml:para>Specifies an Organizational Unit (OU) from Active Directory containing computers that should be added to the tab expansion database.</maml:para>
         </maml:description>
         <command:parameterValue required="true">DirectoryEntry</command:parameterValue>
         <dev:defaultValue />
@@ -105,12 +106,11 @@
         <maml:introduction>
           <maml:para>C:\PS&gt;</maml:para>
         </maml:introduction>
-        <dev:code>Add-TabExpansionComputer -ComputerName "Server1"</dev:code>
+        <dev:code>Get-Content .\servers.txt | Add-TabExpansionComputer</dev:code>
         <dev:remarks>
           <maml:para>Description</maml:para>
           <maml:para>-----------</maml:para>
-          <maml:para>TODO Add Add-TabExpansionComputer Example Comment</maml:para>
-          <maml:para />
+          <maml:para>In this example a list of computer names is stored in the "servers.txt" file. Then the file is read and the names added to the tab expansion database by piping into this command.</maml:para>
         </dev:remarks>
         <command:commandLines>
           <command:commandLine>
@@ -127,8 +127,8 @@
         <dev:remarks>
           <maml:para>Description</maml:para>
           <maml:para>-----------</maml:para>
-          <maml:para>TODO Add Add-TabExpansionComputer Example Comment</maml:para>
-          <maml:para />
+          <maml:para>This example will use "net view" to add a list of computer names to the tab expansion database. This is the same command used by Update-TabExpansionDatabase</maml:para>
+          <maml:para>NOTE: It is strongly suggest to run Remove-TabExpansionComputer before this command to prevent duplicate entries in the tab expansion database.</maml:para>
         </dev:remarks>
         <command:commandLines>
           <command:commandLine>
@@ -157,6 +157,7 @@
     </command:details>
     <maml:description>
       <maml:para>TODO Add Long description</maml:para>
+	  <maml:para>Changes to the database need to be saved using Export-TabExpansionDatabase.</maml:para>
     </maml:description>
     <command:syntax>
       <command:syntaxItem>
@@ -270,7 +271,7 @@
     <command:details>
       <command:name>Add-TabExpansionType</command:name>
       <maml:description>
-        <maml:para>Add type names from an assembly to the tab expansion database.</maml:para>
+        <maml:para>Add type names from an Assembly to the tab expansion database.</maml:para>
       </maml:description>
       <maml:copyright/>
       <command:verb>Add</command:verb>
@@ -278,7 +279,8 @@
       <dev:version />
     </command:details>
     <maml:description>
-      <maml:para>TODO Add Long description</maml:para>
+      <maml:para>This command will add a list of .NET type names that are part of an Assembly to the tab expansion database.</maml:para>
+	  <maml:para>Changes to the database need to be saved using Export-TabExpansionDatabase.</maml:para>
     </maml:description>
     <command:syntax>
       <command:syntaxItem>
@@ -294,7 +296,7 @@
       <command:parameter required="true" globbing="false" pipelineInput="true (ByValue)" position="1">
         <maml:name>Assembly</maml:name>
         <maml:description>
-          <maml:para>TODO Add Assembly Description</maml:para>
+          <maml:para>The Assembly object represent a .NET assembly with types to be added to the tab expansion database.</maml:para>
         </maml:description>
         <command:parameterValue required="true">Assembly</command:parameterValue>
         <dev:defaultValue />
@@ -336,14 +338,11 @@
         <maml:introduction>
           <maml:para>C:\PS&gt;</maml:para>
         </maml:introduction>
-        <dev:code>TODO Add Add-TabExpansionType Example code</dev:code>
+        <dev:code>Add-Type -Path .\myassembly.dll -PassThru | Select-Object -ExpandProperty Assembly -Unique | Add-TabExpansionType</dev:code>
         <dev:remarks>
           <maml:para>Description</maml:para>
           <maml:para>-----------</maml:para>
-          <maml:para>TODO Add Add-TabExpansionType Example Comment</maml:para>
-          <maml:para />
-          <maml:para />
-          <maml:para />
+          <maml:para>This example will first load the assembly "myassembly." Then the assembly object is gathered by combining the "-PassThru" parameter of Add-Type with "Select-Object -ExpandProperty" to pipe into Add-TabExpansionType to add the contained types to the tab expansion database.</maml:para>
           <maml:para />
         </dev:remarks>
         <command:commandLines>
@@ -1497,7 +1496,8 @@
       <dev:version />
     </command:details>
     <maml:description>
-      <maml:para>TODO Add Long description</maml:para>
+      <maml:para>This command will remove all computer name entries from the tab expansion database.</maml:para>
+	  <maml:para>Changes to the database need to be saved using Export-TabExpansionDatabase.</maml:para>
     </maml:description>
     <command:syntax>
       <command:syntaxItem>
@@ -1543,11 +1543,7 @@
         <dev:remarks>
           <maml:para>Description</maml:para>
           <maml:para>-----------</maml:para>
-          <maml:para>TODO Add Remove-TabExpansionComputer Example Comment</maml:para>
-          <maml:para />
-          <maml:para />
-          <maml:para />
-          <maml:para />
+          <maml:para>This example will remove all computer name entries from the tab expansion database.</maml:para>
         </dev:remarks>
         <command:commandLines>
           <command:commandLine>
@@ -1576,6 +1572,7 @@
     </command:details>
     <maml:description>
       <maml:para>TODO Add Long description</maml:para>
+	  <maml:para>Changes to the database need to be saved using Export-TabExpansionDatabase.</maml:para>
     </maml:description>
     <command:syntax>
       <command:syntaxItem>
@@ -1671,7 +1668,8 @@
       <dev:version />
     </command:details>
     <maml:description>
-      <maml:para>TODO Add Long description</maml:para>
+      <maml:para>This command will update all parts of the tab expansion database. The database stores source information that takes a long time to gather, such as a list of computer names on the network.</maml:para>
+      <maml:para>Changes to the database need to be saved using Export-TabExpansionDatabase.</maml:para>
     </maml:description>
     <command:syntax>
       <command:syntaxItem>
@@ -1686,7 +1684,7 @@
       <command:parameter required="false" globbing="false" pipelineInput="false" position="named">
         <maml:name>Force</maml:name>
         <maml:description>
-          <maml:para>TODO Add Force Description</maml:para>
+          <maml:para>Forces an update of the tab expansion database.</maml:para>
         </maml:description>
         <command:parameterValue required="true">SwitchParameter</command:parameterValue>
         <dev:defaultValue />
@@ -1730,10 +1728,7 @@
         <dev:remarks>
           <maml:para>Description</maml:para>
           <maml:para>-----------</maml:para>
-          <maml:para>TODO Add Update-TabExpansionDataBase Example Comment</maml:para>
-          <maml:para />
-          <maml:para />
-          <maml:para />
+          <maml:para>This example will update the tab expansion database, but prompt for each step of the update.</maml:para>
         </dev:remarks>
         <command:commandLines>
           <command:commandLine>
@@ -1761,7 +1756,7 @@
     <command:details>
       <command:name>Update-TabExpansionType</command:name>
       <maml:description>
-        <maml:para>Updates the tab expansion database with a fresh list of type names.</maml:para>
+        <maml:para>Updates the tab expansion database with a fresh list of .NET type names.</maml:para>
       </maml:description>
       <maml:copyright/>
       <command:verb>Update</command:verb>
@@ -1769,7 +1764,8 @@
       <dev:version />
     </command:details>
     <maml:description>
-      <maml:para>TODO Add Long description</maml:para>
+      <maml:para>This command will update the list of .NET types in the tab expansion database.</maml:para>
+	  <maml:para>Changes to the database need to be saved using Export-TabExpansionDatabase.</maml:para>
     </maml:description>
     <command:syntax>
       <command:syntaxItem>
@@ -1815,11 +1811,7 @@
         <dev:remarks>
           <maml:para>Description</maml:para>
           <maml:para>-----------</maml:para>
-          <maml:para>TODO Add Update-TabExpansionType Example Comment</maml:para>
-          <maml:para />
-          <maml:para />
-          <maml:para />
-          <maml:para />
+          <maml:para>Updates the list of .NET types.</maml:para>
         </dev:remarks>
         <command:commandLines>
           <command:commandLine>
@@ -1851,7 +1843,8 @@
       <dev:version />
     </command:details>
     <maml:description>
-      <maml:para>TODO Add Long description</maml:para>
+      <maml:para>This command will update the list of ProgIDs for COM objects in the tab expansion database.</maml:para>
+	  <maml:para>Changes to the database need to be saved using Export-TabExpansionDatabase.</maml:para>
     </maml:description>
     <command:syntax>
       <command:syntaxItem>
@@ -1897,11 +1890,7 @@
         <dev:remarks>
           <maml:para>Description</maml:para>
           <maml:para>-----------</maml:para>
-          <maml:para>TODO Add Update-TabExpansionCom Example Comment</maml:para>
-          <maml:para />
-          <maml:para />
-          <maml:para />
-          <maml:para />
+          <maml:para>Updates the list of ProgIDs for COM objects.</maml:para>
         </dev:remarks>
         <command:commandLines>
           <command:commandLine>
@@ -1929,7 +1918,8 @@
       <dev:version />
     </command:details>
     <maml:description>
-      <maml:para>TODO Add Long description</maml:para>
+      <maml:para>This command will update the list of WMI classes in the tab expansion database.</maml:para>
+	  <maml:para>Changes to the database need to be saved using Export-TabExpansionDatabase.</maml:para>
     </maml:description>
     <command:syntax>
       <command:syntaxItem>
@@ -1975,11 +1965,7 @@
         <dev:remarks>
           <maml:para>Description</maml:para>
           <maml:para>-----------</maml:para>
-          <maml:para>TODO Add Update-TabExpansionWmi Example Comment</maml:para>
-          <maml:para />
-          <maml:para />
-          <maml:para />
-          <maml:para />
+          <maml:para>Updates the list of WMI classes.</maml:para>
         </dev:remarks>
         <command:commandLines>
           <command:commandLine>
