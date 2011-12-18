@@ -679,7 +679,8 @@ Function Update-TabExpansionCom {
         $dsTabExpansionDatabase.Tables['COM'].Clear()
 
         $i = 0 ; Write-Progress $Resources.update_tabexpansiondatabase_com_activity $i
-        foreach ($Class in (Get-WmiObject Win32_ClassicCOMClassSetting -Filter "VersionIndependentProgId LIKE '%'" | Sort-Object VersionIndependentProgId)) {
+        foreach ($Class in (Get-WmiObject Win32_ClassicCOMClassSetting -Filter "VersionIndependentProgId LIKE '%'" |
+                Sort-Object VersionIndependentProgId)) {
             $i++ ; if ($i % 10 -eq 0) {Write-Progress $Resources.update_tabexpansiondatabase_com_activity $i}
             [Void]$dsTabExpansionDatabase.Tables['COM'].Rows.Add($Class.VersionIndependentProgId, $Class.Description)
         }
