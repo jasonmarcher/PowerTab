@@ -244,10 +244,6 @@
           <maml:para>Description</maml:para>
           <maml:para>-----------</maml:para>
           <maml:para>TODO Add Add-TabExpansion Example Comment</maml:para>
-          <maml:para />
-          <maml:para />
-          <maml:para />
-          <maml:para />
         </dev:remarks>
         <command:commandLines>
           <command:commandLine>
@@ -343,7 +339,6 @@
           <maml:para>Description</maml:para>
           <maml:para>-----------</maml:para>
           <maml:para>This example will first load the assembly "myassembly." Then the assembly object is gathered by combining the "-PassThru" parameter of Add-Type with "Select-Object -ExpandProperty" to pipe into Add-TabExpansionType to add the contained types to the tab expansion database.</maml:para>
-          <maml:para />
         </dev:remarks>
         <command:commandLines>
           <command:commandLine>
@@ -375,7 +370,8 @@
       <dev:version />
     </command:details>
     <maml:description>
-      <maml:para>TODO Add Long description</maml:para>
+      <maml:para>This command will export the PowerTab configuration settings to a file. Configuration changes are not automatically saved and must be manually exported.</maml:para>
+	  <maml:para>By default this command will export to the path specified in $PowerTabConfig.Setup.ConfigurationPath.</maml:para>
     </maml:description>
     <command:syntax>
       <command:syntaxItem>
@@ -391,7 +387,8 @@
       <command:parameter required="false" globbing="false" pipelineInput="true (ByValue)" position="1">
         <maml:name>LiteralPath</maml:name>
         <maml:description>
-          <maml:para>TODO Add LiteralPath Description</maml:para>
+          <maml:para>The path to the file to store the PowerTab configuration in.</maml:para>
+          <maml:para>The special value "IsolatedStorage" can be specified and PowerTab will safely choose a file unique to the current user.</maml:para>
         </maml:description>
         <command:parameterValue required="true">String</command:parameterValue>
         <dev:defaultValue>$PowerTabConfig.Setup.ConfigurationPath</dev:defaultValue>
@@ -433,15 +430,11 @@
         <maml:introduction>
           <maml:para>C:\PS&gt;</maml:para>
         </maml:introduction>
-        <dev:code>TODO Add Export-TabExpansionConfig Example code</dev:code>
+        <dev:code>Export-TabExpansionConfig (Join-Path $HOME "Config.xml")</dev:code>
         <dev:remarks>
           <maml:para>Description</maml:para>
           <maml:para>-----------</maml:para>
-          <maml:para>TODO Add Export-TabExpansionConfig Example Comment</maml:para>
-          <maml:para />
-          <maml:para />
-          <maml:para />
-          <maml:para />
+          <maml:para>This example will save the PowerTab configuration to an XML file in the home directory of the current user.</maml:para>
         </dev:remarks>
         <command:commandLines>
           <command:commandLine>
@@ -473,7 +466,8 @@
       <dev:version />
     </command:details>
     <maml:description>
-      <maml:para>TODO Add Long description</maml:para>
+      <maml:para>This command will export the tab expansion database to a file. Updates to the tab expansion database are not automatically saved and must be manually exported.</maml:para>
+	  <maml:para>By default this command will export to the path specified in $PowerTabConfig.Setup.DatabasePath.</maml:para>
     </maml:description>
     <command:syntax>
       <command:syntaxItem>
@@ -489,7 +483,8 @@
       <command:parameter required="false" globbing="false" pipelineInput="true (ByValue)" position="1">
         <maml:name>LiteralPath</maml:name>
         <maml:description>
-          <maml:para>TODO Add LiteralPath Description</maml:para>
+          <maml:para>The path to the file to store the tab expansion database in.</maml:para>
+          <maml:para>The special value "IsolatedStorage" can be specified and PowerTab will safely choose a file unique to the current user.</maml:para>
         </maml:description>
         <command:parameterValue required="true">String</command:parameterValue>
         <dev:defaultValue>$PowerTabConfig.Setup.DatabasePath</dev:defaultValue>
@@ -531,15 +526,11 @@
         <maml:introduction>
           <maml:para>C:\PS&gt;</maml:para>
         </maml:introduction>
-        <dev:code>TODO Add Export-TabExpansionDatabase Example code</dev:code>
+        <dev:code>Export-TabExpansionDatabase (Join-Path $HOME "database.xml")</dev:code>
         <dev:remarks>
           <maml:para>Description</maml:para>
           <maml:para>-----------</maml:para>
-          <maml:para>TODO Add Export-TabExpansionDatabase Example Comment</maml:para>
-          <maml:para />
-          <maml:para />
-          <maml:para />
-          <maml:para />
+          <maml:para>This example will save the tab expansion database to an XML file in the home directory of the current user.</maml:para>
         </dev:remarks>
         <command:commandLines>
           <command:commandLine>
@@ -575,7 +566,7 @@
       <dev:version />
     </command:details>
     <maml:description>
-      <maml:para>TODO Add Long description</maml:para>
+      <maml:para>This command can be used to save the current color settings as a named theme for PowerTab, or to a separate file. Current color settings are stored in the PowerTab configuration settings.</maml:para>
     </maml:description>
     <command:syntax>
       <command:syntaxItem>
@@ -599,7 +590,7 @@
       <command:parameter required="false" globbing="false" pipelineInput="true (ByValue)" position="named">
         <maml:name>LiteralPath</maml:name>
         <maml:description>
-          <maml:para>TODO Add LiteralPath Description</maml:para>
+          <maml:para>The path to the file to store the color settings in.</maml:para>
         </maml:description>
         <command:parameterValue required="true">String</command:parameterValue>
         <dev:defaultValue />
@@ -607,7 +598,7 @@
       <command:parameter required="true" globbing="false" pipelineInput="false" position="1">
         <maml:name>Name</maml:name>
         <maml:description>
-          <maml:para>TODO Add Name Description</maml:para>
+          <maml:para>Specifies the name of the theme to save the current color settings to. Themes can be imported by name.</maml:para>
         </maml:description>
         <command:parameterValue required="true">String</command:parameterValue>
         <dev:defaultValue />
@@ -649,15 +640,11 @@
         <maml:introduction>
           <maml:para>C:\PS&gt;</maml:para>
         </maml:introduction>
-        <dev:code>TODO Add Export-TabExpansionTheme Example code</dev:code>
+        <dev:code>Export-TabExpansionTheme -Name TheColorsDuke</dev:code>
         <dev:remarks>
           <maml:para>Description</maml:para>
           <maml:para>-----------</maml:para>
-          <maml:para>TODO Add Export-TabExpansionTheme Example Comment</maml:para>
-          <maml:para />
-          <maml:para />
-          <maml:para />
-          <maml:para />
+          <maml:para>This example will create a new named color theme. Themes are stored in files within the install location of PowerTab.</maml:para>
         </dev:remarks>
         <command:commandLines>
           <command:commandLine>
@@ -761,10 +748,6 @@
           <maml:para>Description</maml:para>
           <maml:para>-----------</maml:para>
           <maml:para>TODO Add Get-TabExpansion Example Comment</maml:para>
-          <maml:para />
-          <maml:para />
-          <maml:para />
-          <maml:para />
         </dev:remarks>
         <command:commandLines>
           <command:commandLine>
@@ -796,7 +779,8 @@
       <dev:version />
     </command:details>
     <maml:description>
-      <maml:para>TODO Add Long description</maml:para>
+      <maml:para>This command will import the PowerTab configuration settings from a file. The current onfiguration will be replaced by the contents of the config file.</maml:para>
+	  <maml:para>By default this command will import from the path specified in $PowerTabConfig.Setup.ConfigurationPath.</maml:para>
     </maml:description>
     <command:syntax>
       <command:syntaxItem>
@@ -812,7 +796,8 @@
       <command:parameter required="false" globbing="false" pipelineInput="true (ByPropertyName)" position="1">
         <maml:name>LiteralPath</maml:name>
         <maml:description>
-          <maml:para>TODO Add LiteralPath Description</maml:para>
+          <maml:para>The path to the file to load the PowerTab configuration from.</maml:para>
+          <maml:para>The special value "IsolatedStorage" can be specified and PowerTab will safely choose a file unique to the current user.</maml:para>
         </maml:description>
         <command:parameterValue required="true">String</command:parameterValue>
         <dev:defaultValue>$PowerTabConfig.Setup.ConfigurationPath</dev:defaultValue>
@@ -854,15 +839,11 @@
         <maml:introduction>
           <maml:para>C:\PS&gt;</maml:para>
         </maml:introduction>
-        <dev:code>TODO Add Import-TabExpansionConfig Example code</dev:code>
+        <dev:code>Import-TabExpansionConfig</dev:code>
         <dev:remarks>
           <maml:para>Description</maml:para>
           <maml:para>-----------</maml:para>
-          <maml:para>TODO Add Import-TabExpansionConfig Example Comment</maml:para>
-          <maml:para />
-          <maml:para />
-          <maml:para />
-          <maml:para />
+          <maml:para>This example will reset the current configuration to the last saved set of settings from the PowerTab config file.</maml:para>
         </dev:remarks>
         <command:commandLines>
           <command:commandLine>
@@ -894,7 +875,8 @@
       <dev:version />
     </command:details>
     <maml:description>
-      <maml:para>TODO Add Long description</maml:para>
+      <maml:para>This command will import the tab expansion database from a file. The current tab expansion database will be replaced by the contents of the specified file.</maml:para>
+	  <maml:para>By default this command will import from the path specified in $PowerTabConfig.Setup.DatabasePath.</maml:para>
     </maml:description>
     <command:syntax>
       <command:syntaxItem>
@@ -910,7 +892,8 @@
       <command:parameter required="false" globbing="false" pipelineInput="true (ByPropertyName)" position="1">
         <maml:name>LiteralPath</maml:name>
         <maml:description>
-          <maml:para>TODO Add LiteralPath Description</maml:para>
+          <maml:para>The path to the file to load the tab expansion database from.</maml:para>
+          <maml:para>The special value "IsolatedStorage" can be specified and PowerTab will safely choose a file unique to the current user.</maml:para>
         </maml:description>
         <command:parameterValue required="true">String</command:parameterValue>
         <dev:defaultValue>$PowerTabConfig.Setup.DatabasePath</dev:defaultValue>
@@ -952,15 +935,11 @@
         <maml:introduction>
           <maml:para>C:\PS&gt;</maml:para>
         </maml:introduction>
-        <dev:code>TODO Add Import-TabExpansionDataBase Example code</dev:code>
+        <dev:code>Import-TabExpansionDataBase IsolatedStorage</dev:code>
         <dev:remarks>
           <maml:para>Description</maml:para>
           <maml:para>-----------</maml:para>
-          <maml:para>TODO Add Import-TabExpansionDataBase Example Comment</maml:para>
-          <maml:para />
-          <maml:para />
-          <maml:para />
-          <maml:para />
+          <maml:para>This example will load the tab expansion database from a file safely stored in Isolated Storage.</maml:para>
         </dev:remarks>
         <command:commandLines>
           <command:commandLine>
@@ -992,7 +971,7 @@
       <dev:version />
     </command:details>
     <maml:description>
-      <maml:para>TODO Add Long description</maml:para>
+      <maml:para>This command will import color settings from a named theme or from a file.</maml:para>
     </maml:description>
     <command:syntax>
       <command:syntaxItem>
@@ -1016,7 +995,7 @@
       <command:parameter required="false" globbing="false" pipelineInput="true (ByPropertyName)" position="named">
         <maml:name>LiteralPath</maml:name>
         <maml:description>
-          <maml:para>TODO Add LiteralPath Description</maml:para>
+          <maml:para>The path to the file to load the color settings from.</maml:para>
         </maml:description>
         <command:parameterValue required="true">String</command:parameterValue>
         <dev:defaultValue />
@@ -1024,7 +1003,7 @@
       <command:parameter required="true" globbing="false" pipelineInput="false" position="1">
         <maml:name>Name</maml:name>
         <maml:description>
-          <maml:para>TODO Add Name Description</maml:para>
+          <maml:para>Specifies the name of the theme to import color settings from.</maml:para>
         </maml:description>
         <command:parameterValue required="true">String</command:parameterValue>
         <dev:defaultValue />
@@ -1066,15 +1045,11 @@
         <maml:introduction>
           <maml:para>C:\PS&gt;</maml:para>
         </maml:introduction>
-        <dev:code>TODO Add Import-TabExpansionTheme Example code</dev:code>
+        <dev:code>Import-TabExpansionTheme -Name Digital</dev:code>
         <dev:remarks>
           <maml:para>Description</maml:para>
           <maml:para>-----------</maml:para>
-          <maml:para>TODO Add Import-TabExpansionTheme Example Comment</maml:para>
-          <maml:para />
-          <maml:para />
-          <maml:para />
-          <maml:para />
+          <maml:para>This example will load the color theme named "Digital." Tab expansion of theme names is supported.</maml:para>
         </dev:remarks>
         <command:commandLines>
           <command:commandLine>
@@ -1149,10 +1124,6 @@
           <maml:para>Description</maml:para>
           <maml:para>-----------</maml:para>
           <maml:para>TODO Add Invoke-TabExpansionEditor Example Comment</maml:para>
-          <maml:para />
-          <maml:para />
-          <maml:para />
-          <maml:para />
         </dev:remarks>
         <command:commandLines>
           <command:commandLine>
@@ -1180,7 +1151,7 @@
       <dev:version />
     </command:details>
     <maml:description>
-      <maml:para>TODO Add Long description</maml:para>
+      <maml:para>This command will reset the configuration settings of PowerTab to their default values.</maml:para>
     </maml:description>
     <command:syntax>
       <command:syntaxItem>
@@ -1243,10 +1214,6 @@
           <maml:para>Description</maml:para>
           <maml:para>-----------</maml:para>
           <maml:para>TODO Add New-TabExpansionConfig Example Comment</maml:para>
-          <maml:para />
-          <maml:para />
-          <maml:para />
-          <maml:para />
         </dev:remarks>
         <command:commandLines>
           <command:commandLine>
@@ -1325,10 +1292,6 @@
           <maml:para>Description</maml:para>
           <maml:para>-----------</maml:para>
           <maml:para>TODO Add New-TabExpansionDatabase Example Comment</maml:para>
-          <maml:para />
-          <maml:para />
-          <maml:para />
-          <maml:para />
         </dev:remarks>
         <command:commandLines>
           <command:commandLine>
@@ -1465,10 +1428,6 @@
           <maml:para>Description</maml:para>
           <maml:para>-----------</maml:para>
           <maml:para>TODO Add Register-TabExpansion Example Comment</maml:para>
-          <maml:para />
-          <maml:para />
-          <maml:para />
-          <maml:para />
         </dev:remarks>
         <command:commandLines>
           <command:commandLine>
@@ -1633,10 +1592,6 @@
           <maml:para>Description</maml:para>
           <maml:para>-----------</maml:para>
           <maml:para>TODO Add Remove-TabExpansion Example Comment</maml:para>
-          <maml:para />
-          <maml:para />
-          <maml:para />
-          <maml:para />
         </dev:remarks>
         <command:commandLines>
           <command:commandLine>
