@@ -498,7 +498,7 @@ Function Write-Trace {
             Location = @(Get-PSCallStack)[1]
             Message = $Message
         }
-        $TraceEntry.PSObject.TypeNames.Insert(0, ”PowerTabTraceEntry”)
+        $TraceEntry.PSObject.TypeNames.Insert(0, ”PowerTab.TraceEntry”)
 
         $PowerTabLog.Trace.Insert(0, $TraceEntry)
     }
