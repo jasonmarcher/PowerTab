@@ -24,7 +24,7 @@ LONG DESCRIPTION
           Import-Module PowerTab
 
       With no arguments, PowerTab will offer to run the setup wizard which will
-      help setup a location to save the PowerTab config file. The config file
+      help define a location to save the PowerTab config file. The config file
       is required to persist configuration settings for PowerTab, and cached
       values for .NET type, WMI class and computer name expansion.
 
