@@ -2,7 +2,7 @@ TOPIC
     about_PowerTab_handlers
 
 SHORT DESCRIPTION
-    Tab expansion suppose in PowerTab can be extended with plug-ins by
+    Tab expansion support in PowerTab can be extended with plug-ins by
     following the steps in this topic.
 
 LONG DESCRIPTION

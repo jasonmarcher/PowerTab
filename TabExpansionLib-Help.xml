@@ -13,6 +13,7 @@
     </command:details>
     <maml:description>
       <maml:para>This command is used to add computer names to the tab expansion database. The computer names can then be used to tab expand contexts that use computer names, for example the -ComputerName parameter.</maml:para>
+      <maml:para/>
 	  <maml:para>Changes to the database need to be saved using Export-TabExpansionDatabase.</maml:para>
     </maml:description>
     <command:syntax>
@@ -111,6 +112,7 @@
           <maml:para>Description</maml:para>
           <maml:para>-----------</maml:para>
           <maml:para>In this example a list of computer names is stored in the "servers.txt" file. Then the file is read and the names added to the tab expansion database by piping into this command.</maml:para>
+          <maml:para/>
         </dev:remarks>
         <command:commandLines>
           <command:commandLine>
@@ -128,7 +130,9 @@
           <maml:para>Description</maml:para>
           <maml:para>-----------</maml:para>
           <maml:para>This example will use "net view" to add a list of computer names to the tab expansion database. This is the same command used by Update-TabExpansionDatabase</maml:para>
+          <maml:para/>
           <maml:para>NOTE: It is strongly suggest to run Remove-TabExpansionComputer before this command to prevent duplicate entries in the tab expansion database.</maml:para>
+          <maml:para/>
         </dev:remarks>
         <command:commandLines>
           <command:commandLine>
@@ -157,6 +161,7 @@
     </command:details>
     <maml:description>
       <maml:para>TODO Add Long description</maml:para>
+      <maml:para/>
 	  <maml:para>Changes to the database need to be saved using Export-TabExpansionDatabase.</maml:para>
     </maml:description>
     <command:syntax>
@@ -244,6 +249,7 @@
           <maml:para>Description</maml:para>
           <maml:para>-----------</maml:para>
           <maml:para>TODO Add Add-TabExpansion Example Comment</maml:para>
+          <maml:para/>
         </dev:remarks>
         <command:commandLines>
           <command:commandLine>
@@ -276,6 +282,7 @@
     </command:details>
     <maml:description>
       <maml:para>This command will add a list of .NET type names that are part of an Assembly to the tab expansion database.</maml:para>
+      <maml:para/>
 	  <maml:para>Changes to the database need to be saved using Export-TabExpansionDatabase.</maml:para>
     </maml:description>
     <command:syntax>
@@ -339,6 +346,7 @@
           <maml:para>Description</maml:para>
           <maml:para>-----------</maml:para>
           <maml:para>This example will first load the assembly "myassembly." Then the assembly object is gathered by combining the "-PassThru" parameter of Add-Type with "Select-Object -ExpandProperty" to pipe into Add-TabExpansionType to add the contained types to the tab expansion database.</maml:para>
+          <maml:para/>
         </dev:remarks>
         <command:commandLines>
           <command:commandLine>
@@ -371,6 +379,7 @@
     </command:details>
     <maml:description>
       <maml:para>This command will export the PowerTab configuration settings to a file. Configuration changes are not automatically saved and must be manually exported.</maml:para>
+      <maml:para/>
 	  <maml:para>By default this command will export to the path specified in $PowerTabConfig.Setup.ConfigurationPath.</maml:para>
     </maml:description>
     <command:syntax>
@@ -388,6 +397,7 @@
         <maml:name>LiteralPath</maml:name>
         <maml:description>
           <maml:para>The path to the file to store the PowerTab configuration in.</maml:para>
+          <maml:para/>
           <maml:para>The special value "IsolatedStorage" can be specified and PowerTab will safely choose a file unique to the current user.</maml:para>
         </maml:description>
         <command:parameterValue required="true">String</command:parameterValue>
@@ -435,6 +445,7 @@
           <maml:para>Description</maml:para>
           <maml:para>-----------</maml:para>
           <maml:para>This example will save the PowerTab configuration to an XML file in the home directory of the current user.</maml:para>
+          <maml:para/>
         </dev:remarks>
         <command:commandLines>
           <command:commandLine>
@@ -467,6 +478,7 @@
     </command:details>
     <maml:description>
       <maml:para>This command will export the tab expansion database to a file. Updates to the tab expansion database are not automatically saved and must be manually exported.</maml:para>
+      <maml:para/>
 	  <maml:para>By default this command will export to the path specified in $PowerTabConfig.Setup.DatabasePath.</maml:para>
     </maml:description>
     <command:syntax>
@@ -484,6 +496,7 @@
         <maml:name>LiteralPath</maml:name>
         <maml:description>
           <maml:para>The path to the file to store the tab expansion database in.</maml:para>
+          <maml:para/>
           <maml:para>The special value "IsolatedStorage" can be specified and PowerTab will safely choose a file unique to the current user.</maml:para>
         </maml:description>
         <command:parameterValue required="true">String</command:parameterValue>
@@ -531,6 +544,7 @@
           <maml:para>Description</maml:para>
           <maml:para>-----------</maml:para>
           <maml:para>This example will save the tab expansion database to an XML file in the home directory of the current user.</maml:para>
+          <maml:para/>
         </dev:remarks>
         <command:commandLines>
           <command:commandLine>
@@ -645,6 +659,7 @@
           <maml:para>Description</maml:para>
           <maml:para>-----------</maml:para>
           <maml:para>This example will create a new named color theme. Themes are stored in files within the install location of PowerTab.</maml:para>
+          <maml:para/>
         </dev:remarks>
         <command:commandLines>
           <command:commandLine>
@@ -748,6 +763,7 @@
           <maml:para>Description</maml:para>
           <maml:para>-----------</maml:para>
           <maml:para>TODO Add Get-TabExpansion Example Comment</maml:para>
+          <maml:para/>
         </dev:remarks>
         <command:commandLines>
           <command:commandLine>
@@ -780,6 +796,7 @@
     </command:details>
     <maml:description>
       <maml:para>This command will import the PowerTab configuration settings from a file. The current onfiguration will be replaced by the contents of the config file.</maml:para>
+      <maml:para/>
 	  <maml:para>By default this command will import from the path specified in $PowerTabConfig.Setup.ConfigurationPath.</maml:para>
     </maml:description>
     <command:syntax>
@@ -797,6 +814,7 @@
         <maml:name>LiteralPath</maml:name>
         <maml:description>
           <maml:para>The path to the file to load the PowerTab configuration from.</maml:para>
+          <maml:para/>
           <maml:para>The special value "IsolatedStorage" can be specified and PowerTab will safely choose a file unique to the current user.</maml:para>
         </maml:description>
         <command:parameterValue required="true">String</command:parameterValue>
@@ -844,6 +862,7 @@
           <maml:para>Description</maml:para>
           <maml:para>-----------</maml:para>
           <maml:para>This example will reset the current configuration to the last saved set of settings from the PowerTab config file.</maml:para>
+          <maml:para/>
         </dev:remarks>
         <command:commandLines>
           <command:commandLine>
@@ -876,6 +895,7 @@
     </command:details>
     <maml:description>
       <maml:para>This command will import the tab expansion database from a file. The current tab expansion database will be replaced by the contents of the specified file.</maml:para>
+      <maml:para/>
 	  <maml:para>By default this command will import from the path specified in $PowerTabConfig.Setup.DatabasePath.</maml:para>
     </maml:description>
     <command:syntax>
@@ -893,6 +913,7 @@
         <maml:name>LiteralPath</maml:name>
         <maml:description>
           <maml:para>The path to the file to load the tab expansion database from.</maml:para>
+          <maml:para/>
           <maml:para>The special value "IsolatedStorage" can be specified and PowerTab will safely choose a file unique to the current user.</maml:para>
         </maml:description>
         <command:parameterValue required="true">String</command:parameterValue>
@@ -940,6 +961,7 @@
           <maml:para>Description</maml:para>
           <maml:para>-----------</maml:para>
           <maml:para>This example will load the tab expansion database from a file safely stored in Isolated Storage.</maml:para>
+          <maml:para/>
         </dev:remarks>
         <command:commandLines>
           <command:commandLine>
@@ -1050,6 +1072,7 @@
           <maml:para>Description</maml:para>
           <maml:para>-----------</maml:para>
           <maml:para>This example will load the color theme named "Digital." Tab expansion of theme names is supported.</maml:para>
+          <maml:para/>
         </dev:remarks>
         <command:commandLines>
           <command:commandLine>
@@ -1077,7 +1100,7 @@
       <dev:version />
     </command:details>
     <maml:description>
-      <maml:para>TODO Add Long description</maml:para>
+      <maml:para>This command will open a simple interface for editing the tab expansion database.</maml:para>
     </maml:description>
     <command:syntax>
       <command:syntaxItem>
@@ -1123,7 +1146,8 @@
         <dev:remarks>
           <maml:para>Description</maml:para>
           <maml:para>-----------</maml:para>
-          <maml:para>TODO Add Invoke-TabExpansionEditor Example Comment</maml:para>
+          <maml:para>Opens an editor for the tab expansion database.</maml:para>
+          <maml:para/>
         </dev:remarks>
         <command:commandLines>
           <command:commandLine>
@@ -1167,13 +1191,23 @@
       <command:parameter required="false" globbing="false" pipelineInput="true (ByPropertyName)" position="1">
         <maml:name>LiteralPath</maml:name>
         <maml:description>
-          <maml:para>TODO Add LiteralPath Description</maml:para>
+          <maml:para>Specifies the value for ConfigurationPath, but a file is not created.</maml:para>
         </maml:description>
         <command:parameterValue required="true">String</command:parameterValue>
         <dev:defaultValue>$PowerTabConfig.Setup.ConfigurationPath</dev:defaultValue>
       </command:parameter>
     </command:parameters>
     <command:inputTypes>
+      <command:inputType>
+        <dev:type>
+          <maml:name>System.IO.FileInfo</maml:name>
+          <maml:uri />
+          <maml:description/>
+        </dev:type>
+        <maml:description>
+          <maml:para>You can pipe a FileInfo object (or any object with a path) to New-TabExpansionConfig.</maml:para>
+        </maml:description>
+      </command:inputType>
       <command:inputType>
         <dev:type>
           <maml:name>System.String</maml:name>
@@ -1209,11 +1243,12 @@
         <maml:introduction>
           <maml:para>C:\PS&gt;</maml:para>
         </maml:introduction>
-        <dev:code>TODO Add New-TabExpansionConfig Example code</dev:code>
+        <dev:code>New-TabExpansionConfig</dev:code>
         <dev:remarks>
           <maml:para>Description</maml:para>
           <maml:para>-----------</maml:para>
-          <maml:para>TODO Add New-TabExpansionConfig Example Comment</maml:para>
+          <maml:para>This example will reset the PowerTab configuration to defaults.</maml:para>
+          <maml:para/>
         </dev:remarks>
         <command:commandLines>
           <command:commandLine>
@@ -1245,7 +1280,7 @@
       <dev:version />
     </command:details>
     <maml:description>
-      <maml:para>TODO Add Long description</maml:para>
+      <maml:para>This command clean the tab expansion database and refil it with a few default values.</maml:para>
     </maml:description>
     <command:syntax>
       <command:syntaxItem>
@@ -1291,7 +1326,8 @@
         <dev:remarks>
           <maml:para>Description</maml:para>
           <maml:para>-----------</maml:para>
-          <maml:para>TODO Add New-TabExpansionDatabase Example Comment</maml:para>
+          <maml:para>This example will clean the tab expansion database.</maml:para>
+          <maml:para/>
         </dev:remarks>
         <command:commandLines>
           <command:commandLine>
@@ -1327,7 +1363,7 @@
       <dev:version />
     </command:details>
     <maml:description>
-      <maml:para>TODO Add Long description</maml:para>
+      <maml:para>This command allows for the creation of handlers that extend PowerTab to support unique command or parameter usage.</maml:para>
     </maml:description>
     <command:syntax>
       <command:syntaxItem>
@@ -1357,7 +1393,7 @@
       <command:parameter required="false" globbing="false" pipelineInput="false" position="named">
         <maml:name>Force</maml:name>
         <maml:description>
-          <maml:para>TODO Add Force Description</maml:para>
+          <maml:para>Register the new handler even if a similar handler already exists.</maml:para>
         </maml:description>
         <command:parameterValue required="true">SwitchParameter</command:parameterValue>
         <dev:defaultValue />
@@ -1365,7 +1401,7 @@
       <command:parameter required="true" globbing="false" pipelineInput="true (ByPropertyName)" position="2">
         <maml:name>Handler</maml:name>
         <maml:description>
-          <maml:para>TODO Add Handler Description</maml:para>
+          <maml:para>A ScriptBlock defining the body of the handler.</maml:para>
         </maml:description>
         <command:parameterValue required="true">ScriptBlock</command:parameterValue>
         <dev:defaultValue />
@@ -1373,7 +1409,7 @@
       <command:parameter required="true" globbing="false" pipelineInput="true (ByPropertyName)" position="1">
         <maml:name>Name</maml:name>
         <maml:description>
-          <maml:para>TODO Add Name Description</maml:para>
+          <maml:para>The name of the command or parameter that the handler will target.</maml:para>
         </maml:description>
         <command:parameterValue required="true">String</command:parameterValue>
         <dev:defaultValue />
@@ -1381,7 +1417,12 @@
       <command:parameter required="false" globbing="false" pipelineInput="false" position="named">
         <maml:name>Type</maml:name>
         <maml:description>
-          <maml:para>TODO Add Type Description</maml:para>
+          <maml:para>The type of handler to register. Valid values for Type are:</maml:para>
+          <maml:para/>
+          <maml:para>-- Command: Handler will have first chance at any expansion involving the registered command.
+-- Parameter: Handler will respond to all uses of a parameter not already handled by a Command handler.
+-- ParameterName: Special use handler to provide parameter names for non-PowerShell commands.
+-- CommandInfo: Special use handler to tell PowerTab about positional parameters and enumeration values.</maml:para>
         </maml:description>
         <command:parameterValue required="true">String</command:parameterValue>
         <dev:defaultValue>Command</dev:defaultValue>
@@ -1423,11 +1464,28 @@
         <maml:introduction>
           <maml:para>C:\PS&gt;</maml:para>
         </maml:introduction>
-        <dev:code>TODO Add Register-TabExpansion Example code</dev:code>
+        <dev:code>Register-TabExpansion "Get-Service" -Type Command {
+    param($Context, [ref]$TabExpansionHasOutput, [ref]$QuoteSpaces)
+
+    $Argument = $Context.Argument
+    switch -exact ($Context.Parameter) {
+        'DisplayName' {
+            $TabExpansionHasOutput.Value = $true 
+            Get-Service -DisplayName "*$Argument*" |
+                Select-Object -ExpandProperty DisplayName
+        }
+        'Name' {
+            $TabExpansionHasOutput.Value = $true
+            Get-Service -Name "$Argument*" |
+                Select-Object -ExpandProperty Name
+        }
+    }
+}</dev:code>
         <dev:remarks>
           <maml:para>Description</maml:para>
           <maml:para>-----------</maml:para>
-          <maml:para>TODO Add Register-TabExpansion Example Comment</maml:para>
+          <maml:para>This example is simplified from the Get-Service handler in PowerTab. Please read about_PowerTab_handlers for a more indepth explanation.</maml:para>
+          <maml:para/>
         </dev:remarks>
         <command:commandLines>
           <command:commandLine>
@@ -1438,6 +1496,7 @@
     </command:examples>
     <maml:relatedLinks>
       <maml:navigationLink>
+        <maml:linkText>about_PowerTab_handlers</maml:linkText>
         <maml:linkText>about_PowerTab</maml:linkText>
         <maml:uri />
       </maml:navigationLink>
@@ -1456,6 +1515,7 @@
     </command:details>
     <maml:description>
       <maml:para>This command will remove all computer name entries from the tab expansion database.</maml:para>
+      <maml:para/>
 	  <maml:para>Changes to the database need to be saved using Export-TabExpansionDatabase.</maml:para>
     </maml:description>
     <command:syntax>
@@ -1503,6 +1563,7 @@
           <maml:para>Description</maml:para>
           <maml:para>-----------</maml:para>
           <maml:para>This example will remove all computer name entries from the tab expansion database.</maml:para>
+          <maml:para/>
         </dev:remarks>
         <command:commandLines>
           <command:commandLine>
@@ -1531,6 +1592,7 @@
     </command:details>
     <maml:description>
       <maml:para>TODO Add Long description</maml:para>
+      <maml:para/>
 	  <maml:para>Changes to the database need to be saved using Export-TabExpansionDatabase.</maml:para>
     </maml:description>
     <command:syntax>
@@ -1592,6 +1654,7 @@
           <maml:para>Description</maml:para>
           <maml:para>-----------</maml:para>
           <maml:para>TODO Add Remove-TabExpansion Example Comment</maml:para>
+          <maml:para/>
         </dev:remarks>
         <command:commandLines>
           <command:commandLine>
@@ -1624,6 +1687,7 @@
     </command:details>
     <maml:description>
       <maml:para>This command will update all parts of the tab expansion database. The database stores source information that takes a long time to gather, such as a list of computer names on the network.</maml:para>
+      <maml:para/>
       <maml:para>Changes to the database need to be saved using Export-TabExpansionDatabase.</maml:para>
     </maml:description>
     <command:syntax>
@@ -1684,6 +1748,7 @@
           <maml:para>Description</maml:para>
           <maml:para>-----------</maml:para>
           <maml:para>This example will update the tab expansion database, but prompt for each step of the update.</maml:para>
+          <maml:para/>
         </dev:remarks>
         <command:commandLines>
           <command:commandLine>
@@ -1720,6 +1785,7 @@
     </command:details>
     <maml:description>
       <maml:para>This command will update the list of .NET types in the tab expansion database.</maml:para>
+      <maml:para/>
 	  <maml:para>Changes to the database need to be saved using Export-TabExpansionDatabase.</maml:para>
     </maml:description>
     <command:syntax>
@@ -1767,6 +1833,7 @@
           <maml:para>Description</maml:para>
           <maml:para>-----------</maml:para>
           <maml:para>Updates the list of .NET types.</maml:para>
+          <maml:para/>
         </dev:remarks>
         <command:commandLines>
           <command:commandLine>
@@ -1799,6 +1866,7 @@
     </command:details>
     <maml:description>
       <maml:para>This command will update the list of ProgIDs for COM objects in the tab expansion database.</maml:para>
+      <maml:para/>
 	  <maml:para>Changes to the database need to be saved using Export-TabExpansionDatabase.</maml:para>
     </maml:description>
     <command:syntax>
@@ -1846,6 +1914,7 @@
           <maml:para>Description</maml:para>
           <maml:para>-----------</maml:para>
           <maml:para>Updates the list of ProgIDs for COM objects.</maml:para>
+          <maml:para/>
         </dev:remarks>
         <command:commandLines>
           <command:commandLine>
@@ -1874,6 +1943,7 @@
     </command:details>
     <maml:description>
       <maml:para>This command will update the list of WMI classes in the tab expansion database.</maml:para>
+      <maml:para/>
 	  <maml:para>Changes to the database need to be saved using Export-TabExpansionDatabase.</maml:para>
     </maml:description>
     <command:syntax>
@@ -1921,6 +1991,7 @@
           <maml:para>Description</maml:para>
           <maml:para>-----------</maml:para>
           <maml:para>Updates the list of WMI classes.</maml:para>
+          <maml:para/>
         </dev:remarks>
         <command:commandLines>
           <command:commandLine>
