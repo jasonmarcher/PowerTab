@@ -788,20 +788,34 @@ Function Get-TabExpansion {
         }
 
         ## Run query
-        if ("COM","Types","WMI" -contains $Type){
+        if ("COM","Types","WMI" -contains $Type) {
             ## Construct query from multiple filters
             $Query = "Name LIKE '$($Filters[0])'"
             foreach ($Filter in $Filters[1..($Filters.Count - 1)]) {
                 $Query += " AND Name LIKE '$Filter'"
             }
-            $dsTabExpansionDatabase.Tables[$Type].Select($Query)
+            switch -exact ($Type) {
+                "COM" {
+                    $dsTabExpansionDatabase.Tables[$Type].Select($Query) |
+                        Select-Object Name,Description | RetypeObject "PowerTab.TabExpansion.COMItem"
+                }
+                "Types" {
+                    $dsTabExpansionDatabase.Tables[$Type].Select($Query) |
+                        Select-Object Name,DC,NS | RetypeObject "PowerTab.TabExpansion.TypeItem"
+                }
+                "WMI" {
+                    $dsTabExpansionDatabase.Tables[$Type].Select($Query) |
+                        Select-Object Name,Description | RetypeObject "PowerTab.TabExpansion.WMIItem"
+                }
+            }
         } else {
             ## Construct query from multiple filters
             $Query = "Filter LIKE '$($Filters[0])'"
             foreach ($Filter in $Filters[1..($Filters.Count - 1)]) {
                 $Query += " AND Filter LIKE '$Filter'"
             }
-            $dsTabExpansionDatabase.Tables["Custom"].Select("$Query AND Type LIKE '$Type'")
+            $dsTabExpansionDatabase.Tables["Custom"].Select("$Query AND Type LIKE '$Type'") |
+                Select-Object Filter,Text,Type | RetypeObject "PowerTab.TabExpansion.Item"
         }
 
         trap [System.Management.Automation.PipelineStoppedException] {

@@ -379,6 +379,25 @@ Function Resolve-TabExpansionParameterValue {
 
 ############
 
+
+Function RetypeObject {
+    [CmdletBinding()]
+    param(
+		[Parameter(Position = 0)]
+        [String]
+        $Type
+        ,
+		[Parameter(ValueFromPipeline = $true)]
+        [Object[]]
+        $InputObject
+    )
+
+    process {
+        $InputObject.PSObject.TypeNames.Insert(0, $Type)
+        $InputObject
+    }
+}
+
 ## Slightly modified from http://blog.sapien.com/index.php/2009/08/24/writing-form-centered-scripts-with-primalforms/
 Function Get-GuiDate {
     param(
