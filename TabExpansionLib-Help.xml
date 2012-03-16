@@ -160,7 +160,9 @@
       <dev:version />
     </command:details>
     <maml:description>
-      <maml:para>TODO Add Long description</maml:para>
+      <maml:para>This command is used to add items to the tab expansion database.</maml:para>
+      <maml:para/>
+	  <maml:para>Items for COM objects, .NET types, or WMI objects can not be added using this command. Please use the specific commands for those items.</maml:para>
       <maml:para/>
 	  <maml:para>Changes to the database need to be saved using Export-TabExpansionDatabase.</maml:para>
     </maml:description>
@@ -188,7 +190,7 @@
       <command:parameter required="true" globbing="false" pipelineInput="false" position="1">
         <maml:name>Filter</maml:name>
         <maml:description>
-          <maml:para>TODO Add Filter Description</maml:para>
+          <maml:para>The text to match against user input.</maml:para>
         </maml:description>
         <command:parameterValue required="true">String</command:parameterValue>
         <dev:defaultValue />
@@ -196,7 +198,7 @@
       <command:parameter required="true" globbing="false" pipelineInput="false" position="2">
         <maml:name>Text</maml:name>
         <maml:description>
-          <maml:para>TODO Add Text Description</maml:para>
+          <maml:para>The output text to present to the user. This value is often the same as Filter.</maml:para>
         </maml:description>
         <command:parameterValue required="true">String</command:parameterValue>
         <dev:defaultValue />
@@ -204,7 +206,14 @@
       <command:parameter required="true" globbing="false" pipelineInput="false" position="3">
         <maml:name>Type</maml:name>
         <maml:description>
-          <maml:para>TODO Add Type Description</maml:para>
+          <maml:para>The specific feature of PowerTab that the item is to be associated with.</maml:para>
+          <maml:para/>
+          <maml:para>-- Alias: The item defines an alias that does not exist for a PowerShell command or application.
+-- Custom: An item for the custom expansion character(^).
+-- Computer: The item represents a computer name.
+-- Invoke: An item for the invoke character (&amp;).</maml:para>
+          <maml:para/>
+	      <maml:para>Items for COM objects, .NET types, or WMI objects can not be added using this command.</maml:para>
         </maml:description>
         <command:parameterValue required="true">String</command:parameterValue>
         <dev:defaultValue>Custom</dev:defaultValue>
@@ -244,11 +253,13 @@
         <maml:introduction>
           <maml:para>C:\PS&gt;</maml:para>
         </maml:introduction>
-        <dev:code>TODO Add Add-TabExpansion Example code</dev:code>
+        <dev:code>Add-TabExpansion -Filter "test" -Text "Your first custom tab expansion was a success!" -Type Custom</dev:code>
         <dev:remarks>
           <maml:para>Description</maml:para>
           <maml:para>-----------</maml:para>
-          <maml:para>TODO Add Add-TabExpansion Example Comment</maml:para>
+          <maml:para>This example will add a custom pattern that will turn "test^" into the above sentence after pressing the tab key.</maml:para>
+          <maml:para/>
+          <maml:para>Changes to the database need to be saved using Export-TabExpansionDatabase.</maml:para>
           <maml:para/>
         </dev:remarks>
         <command:commandLines>
@@ -687,7 +698,7 @@
       <dev:version />
     </command:details>
     <maml:description>
-      <maml:para>TODO Add Long description</maml:para>
+      <maml:para>This command retrieves items from the currently loaded tab expansion database.</maml:para>
     </maml:description>
     <command:syntax>
       <command:syntaxItem>
@@ -708,7 +719,7 @@
       <command:parameter required="false" globbing="true" pipelineInput="false" position="1">
         <maml:name>Filter</maml:name>
         <maml:description>
-          <maml:para>TODO Add Filter Description</maml:para>
+          <maml:para>A pattern to match the filter property of items in the tab expansion database.</maml:para>
         </maml:description>
         <command:parameterValue required="true">String</command:parameterValue>
         <dev:defaultValue>*</dev:defaultValue>
@@ -716,7 +727,7 @@
       <command:parameter required="false" globbing="true" pipelineInput="false" position="2">
         <maml:name>Type</maml:name>
         <maml:description>
-          <maml:para>TODO Add Type Description</maml:para>
+          <maml:para>The collection or collections of items to search.</maml:para>
         </maml:description>
         <command:parameterValue required="true">String</command:parameterValue>
         <dev:defaultValue>*</dev:defaultValue>
@@ -735,12 +746,42 @@
     <command:returnValues>
       <command:returnValue>
         <dev:type>
-          <maml:name>TODO Add Get-TabExpansion returnType</maml:name>
+          <maml:name>PowerTab.TabExpansion.Item</maml:name>
           <maml:uri />
           <maml:description/>
         </dev:type>
         <maml:description>
-          <maml:para>TODO.</maml:para>
+          <maml:para></maml:para>
+        </maml:description>
+      </command:returnValue>
+      <command:returnValue>
+        <dev:type>
+          <maml:name>PowerTab.TabExpansion.COMItem</maml:name>
+          <maml:uri />
+          <maml:description/>
+        </dev:type>
+        <maml:description>
+          <maml:para></maml:para>
+        </maml:description>
+      </command:returnValue>
+      <command:returnValue>
+        <dev:type>
+          <maml:name>PowerTab.TabExpansion.TypeItem</maml:name>
+          <maml:uri />
+          <maml:description/>
+        </dev:type>
+        <maml:description>
+          <maml:para></maml:para>
+        </maml:description>
+      </command:returnValue>
+      <command:returnValue>
+        <dev:type>
+          <maml:name>PowerTab.TabExpansion.WMIItem</maml:name>
+          <maml:uri />
+          <maml:description/>
+        </dev:type>
+        <maml:description>
+          <maml:para></maml:para>
         </maml:description>
       </command:returnValue>
     </command:returnValues>
@@ -758,11 +799,11 @@
         <maml:introduction>
           <maml:para>C:\PS&gt;</maml:para>
         </maml:introduction>
-        <dev:code>TODO Add Get-TabExpansion Example code</dev:code>
+        <dev:code>Get-TabExpansion -Filter System.* -Type Types</dev:code>
         <dev:remarks>
           <maml:para>Description</maml:para>
           <maml:para>-----------</maml:para>
-          <maml:para>TODO Add Get-TabExpansion Example Comment</maml:para>
+          <maml:para>This example will return all .NET types under the System namespace from the tab expansion database.</maml:para>
           <maml:para/>
         </dev:remarks>
         <command:commandLines>
@@ -1591,7 +1632,7 @@
       <dev:version />
     </command:details>
     <maml:description>
-      <maml:para>TODO Add Long description</maml:para>
+      <maml:para>This command can remove items from the tab expansion database.</maml:para>
       <maml:para/>
 	  <maml:para>Changes to the database need to be saved using Export-TabExpansionDatabase.</maml:para>
     </maml:description>
@@ -1609,7 +1650,7 @@
       <command:parameter required="true" globbing="true" pipelineInput="false" position="1">
         <maml:name>Filter</maml:name>
         <maml:description>
-          <maml:para>TODO Add Filter Description</maml:para>
+          <maml:para>A pattern to match the Filter property of items from the tab expansion database to be removed.</maml:para>
         </maml:description>
         <command:parameterValue required="true">String</command:parameterValue>
         <dev:defaultValue />
@@ -1649,11 +1690,13 @@
         <maml:introduction>
           <maml:para>C:\PS&gt;</maml:para>
         </maml:introduction>
-        <dev:code>TODO Add Remove-TabExpansion Example code</dev:code>
+        <dev:code>Remove-TabExpansion -Filter h</dev:code>
         <dev:remarks>
           <maml:para>Description</maml:para>
           <maml:para>-----------</maml:para>
-          <maml:para>TODO Add Remove-TabExpansion Example Comment</maml:para>
+          <maml:para>This example will remove some of the custom filters that turn "h^" into calls to Get-Help</maml:para>
+          <maml:para/>
+          <maml:para>Changes to the database need to be saved using Export-TabExpansionDatabase.</maml:para>
           <maml:para/>
         </dev:remarks>
         <command:commandLines>
