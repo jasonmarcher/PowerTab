@@ -99,7 +99,7 @@ Function Out-ConsoleList {
                 }
                 $OldFilter = $Filter
             }
-            $Shift = $Key.ControlKeyState.ToString()
+            $ShiftPressed = Get-KeyState 0x10  ## Check for Shift Key
             $HasChild = $false
             switch ($Key.VirtualKeyCode) {
                 9 { ## Tab
@@ -110,7 +110,7 @@ Function Out-ConsoleList {
                         $Continue = $false
                         break
                     } else {
-                        if ($Shift -match 'ShiftPressed') {
+                        if ($ShiftPressed) {
                             Move-Selection -1  ## Up
                         } else {
                             Move-Selection 1  ## Down
@@ -119,7 +119,7 @@ Function Out-ConsoleList {
                     }
                 }
                 38 { ## Up Arrow
-                    if ($Shift -match 'ShiftPressed') {
+                    if ($ShiftPressed) {
                         ## Fast scroll selected
                         if ($PowerTabConfig.FastScrollItemCount -gt ($ListHandle.Items.Count - 1)) {
                             $Count = ($ListHandle.Items.Count - 1)
@@ -133,7 +133,7 @@ Function Out-ConsoleList {
                     break
                 }
                 40 { ## Down Arrow
-                    if ($Shift -match 'ShiftPressed') {
+                    if ($ShiftPressed) {
                         ## Fast scroll selected
                         if ($PowerTabConfig.FastScrollItemCount -gt ($ListHandle.Items.Count - 1)) {
                             $Count = ($ListHandle.Items.Count - 1)
