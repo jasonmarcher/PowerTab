@@ -29,7 +29,7 @@ showing up from Get-Command.
     Register-TabExpansion "Get-Alias" $AliasHandler -Type "Command"
 }
 
-## Get-Command (-Module mainly)
+## Get-Command
 Register-TabExpansion "Get-Command" -Type "Command" {
     param($Context, [ref]$TabExpansionHasOutput)
     $Argument = $Context.Argument
@@ -472,7 +472,7 @@ Register-TabExpansion "Remove-Module" -Type "Command" {
     switch -exact ($Context.Parameter) {
         'Name' {
             $TabExpansionHasOutput.Value = $true
-            Get-Module "$Argument*" | Select-Object -ExpandProperty Name | Sort-Object |
+            Get-Module "$Argument*" | Sort-Object Name |
                 New-TabItem -Value {$_.Name} -Text {$_.Name} -Type Module
         }
     }
