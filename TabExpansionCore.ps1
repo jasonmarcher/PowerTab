@@ -22,6 +22,9 @@ Function Invoke-TabExpansion {
     )
 
     try {
+    ## Indicate we are busy
+    Invoke-TabActivityIndicator
+
     ## Generate new GUID if this is a new (ie non nested) tab expand execution
     if (-not $NestedPowerTab) {
         $TraceId = [System.Guid]::NewGuid()
@@ -189,7 +192,8 @@ Function Invoke-TabExpansion {
         $LastToken = $Token
     }
     ## Special case, last word is "@", this causes a parsing error so we don't see the token
-    if ($LastWord -eq '@') {
+    ## but only in PS v2
+    if (($LastWord -eq '@') -and ($PSVersionTable.PSVersion -eq "2.0")) {
         if (-not $CurrentContext.Parameter) {
             $CurrentContext.PositionalParameter += 1
         }
@@ -242,9 +246,6 @@ Function Invoke-TabExpansion {
         $PowerTabLog.Debug.Insert(0, ($CurrentContext | Select-Object @{n="TraceId";e={$TraceId}},Line,LastWord,LastToken,Command,Parameter,Argument,
             PositionalParameter,PositionalParameters,OtherParameters,isCommandMode,isAssignment,isParameterValue,CommandInfo))
     }
-
-    ## Indicate we are busy
-    Invoke-TabActivityIndicator
 
     try {
         ## Detect DoubleTab if enabled
@@ -500,6 +501,9 @@ Function Invoke-TabExpansion {
     }
 
     } finally {
+        ## Remove busy indication on ready or error
+        Remove-TabActivityIndicator
+
         ## Save PowerTab errors and replace global errors
         $script:PowerTabLog.Error = $global:Error.Clone()
         $global:Error.Clear()
