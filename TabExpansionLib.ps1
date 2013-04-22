@@ -1362,7 +1362,7 @@ Function CreatePowerTabConfig {
             [Int]`$val = [Bool]`$args[0]
             `$dsTabExpansionConfig.Tables['Config'].Select(`"Name = 'Enabled'`")[0].Value = `$val
             if ([Bool]`$val) {
-                . `"`$PSScriptRoot\TabExpansion.ps1`"
+                . `"$PSScriptRoot\TabExpansion.ps1`"
             } else {
                 Set-Content Function:\TabExpansion -Value `$OldTabExpansion
             }") `
