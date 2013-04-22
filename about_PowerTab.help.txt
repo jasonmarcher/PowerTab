@@ -30,7 +30,7 @@ LONG DESCRIPTION
 
 
   LOAD POWERTAB WITH AN EXISTING CONFIG
-      To load an existing conifig file into PowerTab, pass in the full path to
+      To load an existing config file into PowerTab, pass in the full path to
       the config file as the first argument when importing the PowerTab module.
 
           $Path = "C:\Users\Bob\Documents\WindowsPowerShell\PowerTabConfig.xml"
