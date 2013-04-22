@@ -88,6 +88,8 @@ Function Invoke-TabItemSelector {
     begin {
         Write-Trace "Invoking Tab Item Selector."
 
+        if (-not $PSBoundParameters.ContainsKey("ReturnWord")) {$ReturnWord = $LastWord}
+
         [String[]]$Values = @()
         [Object[]]$Objects = @()
     }
