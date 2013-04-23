@@ -369,13 +369,14 @@ Function GetCommand {
     )
 
     end {
+        ## The closures prevent internal PowerTab methods from being shown.
         if ($PSVersionTable.PSVersion -eq "2.0") {
-            Get-Command $Name -Module $Module -CommandType $CommandType -ErrorAction SilentlyContinue
+            & {Get-Command $Name -Module $Module -CommandType $CommandType -ErrorAction SilentlyContinue}.GetNewClosure()
         } else {
             if ($Module) {
                 $Name = "$Module\$Name"
             }
-            $ExecutionContext.InvokeCommand.GetCommands($Name, $CommandType, $true) | Sort-Object Name
+            & {$ExecutionContext.InvokeCommand.GetCommands($Name, $CommandType, $true) | Sort-Object Name}.GetNewClosure()
         }
     }
 }
