@@ -18,14 +18,13 @@ if (Test-Path Function:TabExpansion) {
     $OldTabExpansion = Get-Content Function:TabExpansion
 } else {
     ## This is a temporary compatibility change for PowerShell v3.
-    ## TODO: Eventually TabExpansion() should get removed if it will have no contents
-    $OldTabExpansion = ""
+    $OldTabExpansion = $null
 }
 $Module = $MyInvocation.MyCommand.ScriptBlock.Module 
 $Module.OnRemove = {
     if ((Get-Command TabExpansion).Module.Name -eq "PowerTab") {
         ## Only reset TabExpansion() if PowerTab's override is currently in use
-        Set-Content Function:\TabExpansion -Value $OldTabExpansion
+        $Function:TabExpansion = $OldTabExpansion
     }
 }
 
