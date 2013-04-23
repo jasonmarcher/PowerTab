@@ -106,13 +106,13 @@ Function Resolve-Command {
             $Module = $Name.Substring(0, $Name.Indexof("\"))
             $CommandName = $Name.Substring($Name.Indexof("\") + 1, $Name.length - ($Name.Indexof("\") + 1))
             if ($Module = Get-Module $Module) {
-                $Command = @(Get-Command $CommandName -Module $Module -ErrorAction SilentlyContinue)[0]
+                $Command = @(GetCommand $CommandName -Module $Module)[0]
                 if (-not $Command) {
                     ## Try to look up command with prefix
                     $Prefix = Get-CommandPrefix $Module
                     $Verb = $CommandName.Substring(0, $CommandName.Indexof("-"))
                     $Noun = $CommandName.Substring($CommandName.Indexof("-") + 1, $CommandName.length - ($CommandName.Indexof("-") + 1))
-                    $Command = @(Get-Command "$Verb-$Prefix$Noun" -ErrorAction SilentlyContinue)[0]
+                    $Command = @(GetCommand "$Verb-$Prefix$Noun")[0]
                 }
                 if (-not $Command) {
                     ## Try looking in the module's exported command list
@@ -125,12 +125,12 @@ Function Resolve-Command {
                 ## This try is to provide a second chance to catch automatic aliases for Get-* commands
                 if ($Name.Contains("?")) {
                     ## The where clause prevents problems with "?" wildcard
-                    $Command = @(Get-Command $Name | Where-Object {$_.Name -eq $Name})[0]
+                    $Command = @(GetCommand $Name | Where-Object {$_.Name -eq $Name})[0]
                 } else {
-                    $Command = @(Get-Command $Name)[0]
+                    $Command = @(GetCommand $Name)[0]
                 }
             } catch {
-                if (-not ($Command = try {@(Get-Command "Get-$Name")[0]} catch {})) {
+                if (-not ($Command = try {@(GetCommand "Get-$Name")[0]} catch {})) {
                     throw $_
                 }
             }
@@ -322,9 +322,9 @@ Function Get-CommandPrefix {
     process {
         ## Get module info
 		if ($PSCmdlet.ParameterSetName -eq "Command") {
-            $ModuleInfo =  (Resolve-Command $Command -CommandInfo).Module
+            $ModuleInfo = (Resolve-Command $Command -CommandInfo).Module
         } elseif (($PSCmdlet.ParameterSetName -eq "CommandInfo") -and $CommandInfo.Module) {
-            $ModuleInfo =  Get-Module $CommandInfo.Module
+            $ModuleInfo = Get-Module $CommandInfo.Module
         }
 
         if ($ModuleInfo) {
@@ -353,6 +353,29 @@ Function Get-CommandPrefix {
         trap [System.Management.Automation.PipelineStoppedException] {
             ## Pipeline was stopped
             break
+        }
+    }
+}
+
+Function GetCommand {
+    [CmdletBinding()]
+    param(
+        [Parameter(Position = 0)]
+        [String]$Name
+        ,
+        [String]$Module
+        ,
+        [System.Management.Automation.CommandTypes]$CommandType = "All"
+    )
+
+    end {
+        if ($PSVersionTable.PSVersion -eq "2.0") {
+            Get-Command $Name -Module $Module -CommandType $CommandType -ErrorAction SilentlyContinue
+        } else {
+            if ($Module) {
+                $Name = "$Module\$Name"
+            }
+            $ExecutionContext.InvokeCommand.GetCommands($Name, $CommandType, $true) | Sort-Object Name
         }
     }
 }

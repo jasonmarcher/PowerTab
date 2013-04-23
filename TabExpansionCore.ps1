@@ -998,9 +998,13 @@ Function Invoke-PowerTab {
         "(.+)$([Regex]::Escape($PowerTabConfig.ShortcutChars.Alias))`$" {
             Write-Trace "Core Handler: Evaluating aliases only (special character)."
 
-            Get-Command -CommandType Alias -Name $Matches[1] | New-TabItem -Value {$_.Definition} -Text {$_.Definition} -Type Alias
+            if ($DoubleTab -or $PowerTabConfig.AliasQuickExpand) {
+                GetCommand -CommandType Alias -Name $Matches[1] | New-TabItem -Value {$_.Definition} -Text {$_.Definition} -Type Alias
+                $SelectorLastWord = $Matches[1]
+            } else {
+                $SelectorLastWord = $null
+            }
             Get-TabExpansion $Matches[1] Alias | New-TabItem -Value {$_.Text} -Text {$_.Text} -Type Alias
-            $SelectorLastWord = $Matches[1]
             break
         }
 
