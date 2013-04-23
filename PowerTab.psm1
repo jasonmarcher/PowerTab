@@ -47,6 +47,8 @@ $TabExpansionParameterNameRegistry = @{}
 
 $ConfigFileName = "PowerTabConfig.xml"
 
+$PSv3HasRun = if ($PSVersionTable.PSVersion -eq "3.0") {$false} else {$true}
+
 
 #########################
 ## Public properties

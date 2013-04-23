@@ -22,6 +22,14 @@ Function Invoke-TabExpansion {
     )
 
     try {
+    if (-not $PSv3HasRun) {
+        ## Hack to get around PS v3 submitting a tab expansion request on load
+        $script:PSv3HasRun = $true
+        if ($Line -eq "Set-Location" -and $LastWord -eq "Set-Location") {
+            return $LastWord
+        }
+    }
+
     ## Indicate we are busy
     Invoke-TabActivityIndicator
 
