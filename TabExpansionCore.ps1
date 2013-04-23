@@ -61,7 +61,7 @@ Function Invoke-TabExpansion {
         }
 
         if (($Token.Type -eq $_TokenTypes::Command) -and !($CurrentContext.Command)) {
-            $CurrentContext.CommandInfo = try {Resolve-Command $Token.Content -CommandInfo -ErrorAction "Stop"} catch {}
+            $CurrentContext.CommandInfo = try {Resolve-Command $Token.Content -CommandInfo -ErrorAction Stop} catch {}
             if ($CurrentContext.CommandInfo) {
                 $CurrentContext.Command = $CurrentContext.CommandInfo.Name
             } else {
@@ -535,14 +535,14 @@ Function Invoke-PowerTab {
         $LastWord,
         $Context,
         [Switch]$ForceList
-    ) 
+    )
 
     Write-Trace "Entering core handler."
 
     $TabExpansionHasOutput = $false
 
+    $OriginalConfirmPreference = $ConfirmPreference
     if ($PowerTabConfig.IgnoreConfirmPreference) {
-        $OriginalConfirmPreference = $ConfirmPreference
         $ConfirmPreference = 'High'
     }
 
@@ -1082,6 +1082,7 @@ Function Invoke-PowerTab {
     if ($PossibleValues -eq $null) {$PossibleValues = @()}
     ## If we have possible values, we certainly handled the user input
     if ($PossibleValues) {$TabExpansionHasOutput = $true}
+
     if ($TabExpansionHasOutput) {
         $PossibleValues | Invoke-TabItemSelector $LastWord -SelectionHandler $SelectionHandler
     }
