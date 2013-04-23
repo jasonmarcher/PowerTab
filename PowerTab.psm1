@@ -149,7 +149,7 @@ if ($ConfigurationPathParam) {
         $LocationChoices = [System.Management.Automation.Host.ChoiceDescription[]]($ProfileDir,$InstallDir,$AppDataDir,$IsoStorageDir,$OtherDir)
         $Answer = $Host.UI.PromptForChoice($Resources.setup_wizard_config_location_caption, $Resources.setup_wizard_config_location_message, $LocationChoices, 0)
         $SetupConfigurationPath = switch ($Answer) {
-            0 {Split-Path $Profile}
+            0 {$ExecutionContext.SessionState.Path.ParseParent($Profile, $null)}
             1 {$PSScriptRoot}
             2 {Join-Path ([System.Environment]::GetFolderPath([System.Environment+SpecialFolder]::ApplicationData)) "PowerTab"}
             3 {"IsolatedStorage"}
