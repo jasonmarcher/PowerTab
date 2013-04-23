@@ -87,6 +87,7 @@ Function Invoke-TabItemSelector {
 
     begin {
         Write-Trace "Invoking Tab Item Selector."
+        $SelectionReason = "it is the user's choice"
 
         if (-not $PSBoundParameters.ContainsKey("ReturnWord")) {$ReturnWord = $LastWord}
 
@@ -119,6 +120,7 @@ Function Invoke-TabItemSelector {
 
         ## If dynamic, select an appropriate handler based on the current host
         if ($SelectionHandler -eq "Dynamic") {
+            $SelectionReason = "it is the perferred handler for the current host"
             switch -exact ($Host.Name) {
                 'ConsoleHost' {  ## PowerShell.exe
                     $SelectionHandler = "ConsoleList"
@@ -172,7 +174,10 @@ Function Invoke-TabItemSelector {
                 break
             }
         }
-        if ($IncompatibleHandlers -contains $SelectionHandler) {$SelectionHandler = "Default"}
+        if ($IncompatibleHandlers -contains $SelectionHandler) {
+            $SelectionReason = "the chosen handler is not compatible with the current host"
+            $SelectionHandler = "Default"
+        }
 
         ## List of selection handlers that can handle objects
         $ObjectHandlers = @("ConsoleList","CommonPrefix","ObjectDefault")
@@ -183,7 +188,7 @@ Function Invoke-TabItemSelector {
             $Values = foreach ($Item in $Objects) {$Item.Value}
         }
 
-        Write-Trace "Decided to invoke $SelectionHandler."
+        Write-Trace "Decided to invoke $SelectionHandler, because $SelectionReason."
 
         switch -exact ($SelectionHandler) {
             'ConsoleList' {$Objects | Out-ConsoleList $LastWord $ReturnWord -ForceList:$ForceList}
