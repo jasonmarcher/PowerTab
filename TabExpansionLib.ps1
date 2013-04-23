@@ -1001,8 +1001,9 @@ Function Initialize-PowerTab {
     if ($ConfigurationPath -and ((Test-Path $ConfigurationPath) -or ($ConfigurationPath -eq "IsolatedStorage"))) {
         $Config = InternalImportTabExpansionConfig $ConfigurationPath
     } else {
-        ## TODO: Throw error or create new config?
-        #$Config = InternalNewTabExpansionConfig $ConfigurationPath
+        ## Configuration path does not exist
+        Write-Warning "Specified configuration path does not exist."  ## TODO: Localize
+        $Config = InternalNewTabExpansionConfig $ConfigurationPath
     }
 
     ## Load Version
@@ -1027,7 +1028,8 @@ Function Initialize-PowerTab {
         ## Upgrade config and database
         UpgradeTabExpansionDatabase ([Ref]$Config) ([Ref]$Database) $Version
     } elseif ($Version -gt $CurVersion) {
-        ## TODO: config is from a later version
+        ## Config is from a newer version
+        throw "The configuration was created with a newer version of PowerTab and is not compatible."
     }
 
     ## Config and database are good
@@ -1057,17 +1059,27 @@ Function UpgradeTabExpansionDatabase {
     in the database or config structure.  Or to add default values for new config settings.
     #>
 
+    $UpgradeOccurred = $false
+
     if ($Version -lt [System.Version]'0.99.3.0') {
         ## Upgrade versions from the first version of PowerTab
         Write-Host "Upgrading from version $Version"  ## TODO:  Localize
         UpgradePowerTab99 $Config $Database
         $Version = '0.99.3.0'
+        $UpgradeOccurred = $true
     }
     if ($Version -lt [System.Version]'0.99.5.0') {
         ## Upgrade versions from the first version of PowerTab
         Write-Host "Upgrading from version $Version"  ## TODO:  Localize
         UpgradePowerTab993 $Config $Database
         $Version = '0.99.5.0'
+        $UpgradeOccurred = $true
+    }
+
+    ## Export the newly upgraded config and database
+    if ($UpgradeOccurred) {
+        Export-TabExpansionConfig
+        Export-TabExpansionDatabase
     }
 }
 
