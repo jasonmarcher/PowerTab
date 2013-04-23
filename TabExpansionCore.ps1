@@ -68,10 +68,12 @@ Function Invoke-TabExpansion {
                 $CurrentContext.Command = $Token.Content
             }
             $CurrentContext.isCommandMode = $true
+            $CurrentContext.hasCommand = $true
         } elseif (($Token.Type -eq $_TokenTypes::Keyword) -and !($CurrentContext.Command) -and
                 (@("function") -contains $Token.Content)) {
             $CurrentContext.Command = $Token.Content
             $CurrentContext.isCommandMode = $true
+            $CurrentContext.hasCommand = $true
         } elseif ($Token.Type -eq $_TokenTypes::CommandParameter) {
             if ($CurrentContext.Parameter) {
                 $CurrentContext.OtherParameters[$CurrentContext.Parameter] = $CurrentContext.Argument
@@ -521,6 +523,7 @@ Function New-TabContext {
             "PositionalParameter" = -1
             "PositionalParameters" = @()
             "OtherParameters" = @{}
+            "hasCommand" = $false
             "isCommandMode" = $false
             "isAssignment" = $false
             "isParameterValue" = $false
@@ -1039,154 +1042,35 @@ Function Invoke-PowerTab {
             }
             break
         }
-
-        ## Partial functions or cmdlets
-        "(.*)$([Regex]::Escape($PowerTabConfig.ShortcutChars.Partial))`$" {
-            Write-Trace "Core Handler: Evaluating cmdlet and function names based on partial name."
-
-            ## TODO: Give different types?
-            Get-Command -CommandType Function,ExternalScript,Filter,Cmdlet -Name "$($Matches[1])*" |
-                New-TabItem -Value {$_.Name} -Text {$_.Name} -Type Command
-            $SelectorLastWord = $Matches[1]
-            break
-        }
-
-        ## Functions or cmdlets on dash
-        '(.+-.*)' {
-            Write-Trace "Core Handler: Evaluating cmdlet and function names."
-
-            ## TODO: Give different types?
-            Get-Command -CommandType Function,ExternalScript,Filter,Cmdlet -Name "$($Matches[1])*" |
-                New-TabItem -Value {$_.Name} -Text {$_.Name} -Type Command
-            $SelectorLastWord = $LastWord
-            break
-        }
-
-        ## Alternate alias
-        '(.+)$' {
-            Write-Trace "Core Handler: Evaluating aliases."
-
-            if ($DoubleTab -or $PowerTabConfig.AliasQuickExpand) {
-                Get-Command -CommandType Alias -Name $Matches[1] | New-TabItem -Value {$_.Definition} -Text {$_.Definition} -Type Alias
-                Get-TabExpansion $Matches[1] Alias | New-TabItem -Value {$_.Text} -Text {$_.Text} -Type Alias
-                $SelectorLastWord = $LastWord
-            } else {
-                Get-TabExpansion $Matches[1] Alias | New-TabItem -Value {$_.Text} -Text {$_.Text} -Type Alias
-                $SelectorLastWord = $null
-            }
-            break
-        }
     } ## End of switch -regex $LastWord
 
-    ## Make sure PossibleValues is not null
     if ($PossibleValues -eq $null) {$PossibleValues = @()}
-    ## If we have possible values, we certainly handled the user input
+
+    if ((-not $PossibleValues) -and 
+            (($Context.LastToken -eq [System.Management.Automation.PSTokenType]::Command -and $LastWord) -or
+            (-not $Context.hasCommand))) {
+        ## Try completing on commands and aliases
+        Write-Trace "Core Handler: Evaluating cmdlet and function names."
+        
+        $CommandTypes = "Function","ExternalScript","Filter","Cmdlet"
+        if ($PSVersionTable.PSVersion -ge "3.0") {
+            $CommandTypes += "Workflow"
+        }
+        $PossibleValues = @(GetCommand -CommandType $CommandTypes -Name "$LastWord*" |
+            New-TabItem -Value {$_.Name} -Text {$_.Name} -Type Command)
+        $SelectorLastWord = $LastWord
+    }
+
     if ($PossibleValues) {$TabExpansionHasOutput = $true}
 
     if ($TabExpansionHasOutput) {
         $PossibleValues | Invoke-TabItemSelector $LastWord -SelectionHandler $SelectionHandler
+    } elseif ((-not $TabExpansionHasOutput) -and $PowerTabConfig.FileSystemExpand) {
+        ## Filesystem Completion
+        Invoke-ProviderPathHandler $LastWord
     }
 
-    ## Filesystem Completion
-    if ((-not $TabExpansionHasOutput) -and $PowerTabConfig.FileSystemExpand) {
-        Write-Trace "Executing FileSystem completion."
-
-        $PowerTabFileSystemMode = $true
-        $LastWord = $LastWord -replace '`'
-
-        $PathSlices = [Regex]::Split($LastWord, '\\|/')
-        if ($PathSlices.Count -eq 1) {
-            if ($PathSlices[0] -like "*:") {
-                $LastWord = $PathSlices[0] + "\"
-                $PathSlices = $PathSlices,""
-            } else {
-                $PathSlices = ,"." + $PathSlices
-            }
-        }
-        if ($PathSlices[0] -eq "~") {
-            $PathSlices[0] = try {Resolve-Path "~"} catch {$PathSlices[0]}
-        }
-        $Container = [String]::Join('\', $PathSlices[0..($PathSlices.Count - 2)])
-        $LastPath = $Container + "\$([Regex]::Split($LastWord,'\\|/|:')[-1])"
-
-        if (("Push-Location","Set-Location") -contains $Context.Command) {
-            $ChildItems = @(Get-ChildItem "$LastWord*" | Where-Object {$_.PSIsContainer})
-        } else {
-            $ChildItems = @(Get-ChildItem "$LastWord*")
-        }
-        if (-not $ChildItems) {$LastWord; return}
-
-        #if ((@($childitems).count -eq 1) -and ($lastword.endswith('\')) ) {$childitems = $childitems,@{name='..'}}
-
-        ## Fixes paths for registry keys, certificates and other unusual paths
-        ## Improved fix for a problem identified by idvorkin (http://poshcode.org/1586)
-        $ChildItems = foreach ($Item in $ChildItems) {
-            $Child = switch ($Item.GetType().FullName) {
-                "System.Security.Cryptography.X509Certificates.X509Certificate2" {$Item.Thumbprint;break}
-                "Microsoft.Powershell.Commands.X509StoreLocation" {$Item.Location;break}
-                "Microsoft.Win32.RegistryKey" {$Item.Name.Split("\")[-1];break}
-                default {$Item.Name}
-            }
-            $Type = switch ($Item.GetType().FullName) {
-                "System.IO.DirectoryInfo" {"Directory";break}
-                "System.IO.FileInfo" {"File";break}
-                "System.Management.Automation.AliasInfo" {"Alias";break}
-                "System.Management.Automation.FilterInfo" {"Command";break}
-                "System.Management.Automation.FunctionInfo" {"Command";break}
-                "System.Security.Cryptography.X509Certificates.X509Certificate2" {"Certificate";break}
-                "Microsoft.Powershell.Commands.X509StoreLocation" {"CertificateStore";break}
-                "Microsoft.Win32.RegistryKey" {"RegistryKey";break}
-                default {$_}
-            }
-            New-TabItem "$Container\$Child" "$Container\$Child" -Type $Type
-        }
-        $ChildItems | Invoke-TabItemSelector $LastPath -SelectionHandler $SelectionHandler -Return $LastWord -ForceList:$ForceList | ForEach-Object {
-            ## If a path contains any of these characters it needs to be in quotes
-            $_charsRequiringQuotes = ('`&@''#{}()$,; ' + "`t").ToCharArray()
-        } {
-            $Quote = ''
-            $Invoke = ''
-
-            if (($LastBlock -notmatch ".*['`"]`$") -and (-not $NestedPowerTab)) {  ## Don't quote if it looks like the path is already quoted
-                if ($_ -is [String]) {
-                    ## Remove quotes from beginning and end of string
-                    $_ = $_ -replace '^"|"$'
-                    ## Escape certain characters
-                    $_ = $_ -replace '([\$"`])','`$1'
-
-                    if ($_.IndexOfAny($_charsRequiringQuotes) -ge 0) {
-                        ## Check for quotes in the last block of the input line,
-                        ## if they exist, PowerShell will add them to this output
-                        ## if not, then quotes can safely be added
-                        if (-not (@([Char[]]$LastBlock | Where-Object {$_ -match '"|'''}).Count % 2)) {$Quote = '"'}
-                        if (($LastBlock.Trim() -eq $LastWord)) {$Invoke = '& '}
-                    }
-                    "$Invoke$Quote$_$Quote"
-                } else {
-                    ## Remove quotes from beginning and end of string
-                    $_.Value = $_.Value -replace '^"|"$'
-                    ## Escape certain characters
-                    $_.Value = $_.Value -replace '([\$"`])','`$1'
-
-                    if ($_.Value.IndexOfAny($_charsRequiringQuotes) -ge 0) {
-                        ## Check for quotes in the last block of the input line,
-                        ## if they exist, PowerShell will add them to this output
-                        ## if not, then quotes can safely be added
-                        if (-not (@([Char[]]$LastBlock | Where-Object {$_ -match '"|'''}).Count % 2)) {$Quote = '"'}
-                        if (($LastBlock.Trim() -eq $LastWord)) {$Invoke = '& '}
-                    }
-                    $_.Value = "$Invoke$Quote$($_.Value)$Quote"
-                    $_
-                }
-            } else {
-                ## Need to return the value if we are not quoting
-                $_
-            }
-        }
-    }
-
-    if ($PowerTabConfig.IgnoreConfirmPreference) {
-        $ConfirmPreference = $OriginalConfirmPreference
-    }
+    ## Reset confirm preference even if we did not change it
+    $ConfirmPreference = $OriginalConfirmPreference
 
 }  # end-function
