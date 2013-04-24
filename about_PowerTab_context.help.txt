@@ -12,6 +12,9 @@ LONG DESCRIPTION
       The context object represents PowerTab's understanding of the current
       command line.
 
+      TraceId : <System.Guid>
+          The cross referencing ID to messages in the PowerTab trace log.
+
       Line : <String>
           The full command line.
 
@@ -35,10 +38,10 @@ LONG DESCRIPTION
           last word.
 
       PositionalParameter : <Int>
-          
+          The index of the last positional parameter.
 
       PositionalParameters : <String[]>
-          
+          The values of all positional parameters entered.
 
       OtherParameters : <Hashtable>
           A collection of the other identified parameters to the current
@@ -55,23 +58,29 @@ LONG DESCRIPTION
           Identifies the current context of the last word as being a value
           to a parameter.
 
+      CommandInfo : <System.Management.Automation.CmdletInfo>
+          Standard PowerShell info object for the identified command.
+
 
       Examples:
 
-          Line                 : Get-Process d* -ComputerName 
-          LastWord             : 
+          TraceId              : 96c69b40-7ea0-4d21-99d5-3ca6c9261595
+          Line                 : Get-Process d* -ComputerName
+          LastWord             :
           LastToken            : CommandParameter
           Command              : Get-Process
           Parameter            : ComputerName
-          Argument             : 
+          Argument             :
           PositionalParameter  : 0
           PositionalParameters : {d*}
           OtherParameters      : {}
           isCommandMode        : True
           isAssignment         : False
           isParameterValue     : True
+          CommandInfo          : Get-Process
 
 
+          TraceId              : 23e8943b-cc89-4043-905a-6e5c0b5ec200
           Line                 : Get-Process -Name d* -ErrorVariable e
           LastWord             : e
           LastToken            : CommandArgument
@@ -84,6 +93,7 @@ LONG DESCRIPTION
           isCommandMode        : True
           isAssignment         : False
           isParameterValue     : True
+          CommandInfo          : Get-Process
 
 
 SEE ALSO
