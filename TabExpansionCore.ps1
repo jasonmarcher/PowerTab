@@ -1059,8 +1059,8 @@ Function Invoke-PowerTab {
             (-not $Context.hasCommand))) {
         ## Try completing on commands and aliases
         Write-Trace "Core Handler: Evaluating cmdlet and function names."
-        
-        $CommandTypes = "Function","ExternalScript","Filter","Cmdlet"
+
+        $CommandTypes = "Function","ExternalScript","Filter","Cmdlet","Alias"
         if ($PSVersionTable.PSVersion -ge "3.0") {
             $CommandTypes += "Workflow"
         }

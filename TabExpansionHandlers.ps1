@@ -300,7 +300,7 @@ Register-TabExpansion "Get-FormatData" -Type "Command" {
                         $Commands
                     }
                 } else {
-                    $CommandTypes = "Function","ExternalScript","Filter","Cmdlet"
+                    $CommandTypes = "Function","ExternalScript","Filter","Cmdlet","Alias"
                     if ($PSVersionTable.PSVersion -ge "3.0") {
                         $CommandTypes += "Workflow"
                     }
