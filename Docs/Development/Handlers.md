@@ -1,0 +1,80 @@
+# Tab Expansion Handlers
+
+PowerTab provides a framework to enrich the tab expansion experience in PowerShell. It also provides extension points to add tab expansion support for additional cmdlets, functions and applications that are not already upported by PowerTab. This is done through tab expansion handlers that add logic to PowerTab.
+
+Tab expansion handlers are given first chance to decide what to do with the command line. Once a handler has signaled that it has decided on the appropriate output, processing halts and the output of that handler is ressented to the user according to their preferences or the limitations of the PowerShell host.
+
+Order of operation:
+1. Command Handler (for the current command, if it exists)
+1. Parameter Handler (for the current parameter, if it exists)
+1. Enum Handler (internal to PowerTab, handles parameters with enum values)
+1. Core Handler (general PowerTab logic)
+
+## Creating a Command Handler
+
+Command handlers are called when the last word (location of the cursor) will be the value to a parameter of the command that the command handler is registered to. The handler will be given first chance at the user input as well as information on the current context. Because of this, command handlers can override default PowerTab behavior for parameters of the command.
+
+Command handlers must follow this contract.
+
+NOTE: This applies to command and parameter handlers
+1. PowerTab **WILL** provide a context object that records what is known bout the current command line, and a couple of reference variables.
+1. If the handler will provide the tab expansion options for the given ontext, it **MUST** set the variable `$TabExpansionHasOutput.Value` to `$true`, even if no results will be produced. This will stop PowerTab from interpreting the context any further.
+1. The handler **MUST** output the options, as strings, to be displayed to the user, or no output at all.
+1. The handler **MAY** set the variable `$QuoteSpaces.Value` to `$false` to prevent PowerTab from quoting output values from the handler that contain spaces. The default is `$true`.
+
+**Example:**
+```
+Register-TabExpansion "Get-Service" -Type Command {
+    param($Context, [ref]$TabExpansionHasOutput, [ref]$QuoteSpaces)  # 1:
+ 
+    $Argument = $Context.Argument
+    switch -exact ($Context.Parameter) {
+        'DisplayName' {
+            $TabExpansionHasOutput.Value = $true  # 2:
+            Get-Service -DisplayName "*$Argument*" | Select-Object -ExpandProperty DisplayName  # 3:
+        }
+        'Name' {
+            $TabExpansionHasOutput.Value = $true  # 2:
+            Get-Service -Name "$Argument*" | Select-Object -ExpandProperty Name  # 3:
+        }
+    }
+}
+```
+
+## Creating a Parameter Handler
+
+Parameter handlers are called when the last word (location of the cursor) ill be the value to the parameter that the parameter handler is registered to. This handler will be called for any command, but only if he registered parameter is the current context.
+
+Parameter handlers must follow this contract.
+
+NOTE: This applies to command and parameter handlers
+1. PowerTab WILL provide a context object that records what is known about the current command line, and a couple of reference variables.
+1. If the handler **WILL** provide the tab expansion options for the given context, it **MUST** set the variable `$TabExpansionHasOutput.Value` to `$true`, even if no results will be produced. This will stop PowerTab from interpreting the context any further.
+1. The handler **MUST** output the options, as strings, to be displayed to the user, or no output at all.
+1. The handler **MAY** set the variable `$QuoteSpaces.Value` to `$false` to revent PowerTab from quoting output values from the handler that contain spaces. The default is `$true`.
+
+Example:
+```
+Register-TabExpansion "PSDrive" -Type Parameter {
+    param($Argument, [ref]$TabExpansionHasOutput, [ref]$QuoteSpaces)  # 1:
+
+    if ($Argument -notlike '^\$') {
+        $TabExpansionHasOutput.Value = $true  # 2:
+        Get-PSDrive "$Argument*" | Select-Object -ExpandProperty Name  # 3:
+    }
+}
+```
+
+## Registering a Handler
+
+Once the hander's script block is defined, it must be registered with PowerTab. Here is the syntax of the registration command.
+
+```
+Register-TabExpansion [-Name] <String> [-Handler] <ScriptBlock> [-Type <String>] [-Force]
+```
+
+The name of the command or parameter to handle must be entered. There can only be one handler for a command name or parameter name.
+
+A command name can either be simple like "Get-FooBar" or fully qualified like "MyModule\Get-Foobar". Using the simple name will trigger on any module using that command name.
+
+A parameter name should only be the real name of the parameter like "ComputerName". Parameter name aliases will be resolved by PowerTab like "cn" or "comp".
