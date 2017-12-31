@@ -2,7 +2,7 @@
 
 The tab expansion database stores items to improve the performance of PowerTab. Looking up some kinds of items can take too long to make it worth using tab expansion, so PowerTab stores those items for quick look ups. Any tab expansion context setup to use the database will only query the database in oder to prevent excessive wait times. The database needs to be persisted to a file for use in future PowerShell sessions, that path is stored in the **DatabasePath** setting of PowerTab.
 
-```
+```PowerShell
 $PowerTabConfig.Setup.DatabasePath
 ```
 
@@ -18,7 +18,7 @@ The tab expansion database will be created when PowerTab is started without a pa
 
 **Create a new Database after Starting PowerTab**
 
-```
+```PowerShell
 New-TabExpansionDatabase
 Update-TabExpansionDatabase  ## optional
 Export-TabExpansionDatabase "<full path>"
@@ -29,7 +29,7 @@ The first and last command will create a new database and save it to the specifi
 
 **Create a Copy of the Existing Database**
 
-```
+```PowerShell
 Export-TabExpansionDatabase "<full path>"
 ```
 
@@ -42,7 +42,7 @@ PowerTab has two startup modes, with a configuration and without. If no configur
 
 **When Starting PowerTab**
 
-```
+```PowerShell
 Import-Module PowerTab -ArgumentList C:\Users\JASON\PowerTabConfig.xml
 ```
 
@@ -51,7 +51,7 @@ Pass the full path to a configuration file while starting PowerTab. This will lo
 
 **While Running PowerTab**
 
-```
+```PowerShell
 Import-TabExpansionDatabase C:\Users\JASON\TabExpansion.xml
 ```
 

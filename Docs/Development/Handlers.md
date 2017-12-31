@@ -23,7 +23,7 @@ NOTE: This applies to command and parameter handlers
 1. The handler **MAY** set the variable `$QuoteSpaces.Value` to `$false` to prevent PowerTab from quoting output values from the handler that contain spaces. The default is `$true`.
 
 **Example:**
-```
+```PowerShell
 Register-TabExpansion "Get-Service" -Type Command {
     param($Context, [ref]$TabExpansionHasOutput, [ref]$QuoteSpaces)  # 1:
  
@@ -54,7 +54,7 @@ NOTE: This applies to command and parameter handlers
 1. The handler **MAY** set the variable `$QuoteSpaces.Value` to `$false` to revent PowerTab from quoting output values from the handler that contain spaces. The default is `$true`.
 
 Example:
-```
+```PowerShell
 Register-TabExpansion "PSDrive" -Type Parameter {
     param($Argument, [ref]$TabExpansionHasOutput, [ref]$QuoteSpaces)  # 1:
 
@@ -69,7 +69,7 @@ Register-TabExpansion "PSDrive" -Type Parameter {
 
 Once the hander's script block is defined, it must be registered with PowerTab. Here is the syntax of the registration command.
 
-```
+```PowerShell
 Register-TabExpansion [-Name] <String> [-Handler] <ScriptBlock> [-Type <String>] [-Force]
 ```
 

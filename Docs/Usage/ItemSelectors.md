@@ -5,14 +5,16 @@ PowerTab offers several options for shorting through the possible values present
 Additional tab item selectors are available in PowerTab that are designed to make it easier to choose from large lists of tab expansion options.
 
 **Available Selectors**
+
 There are currently three selectors available that are detailed in the sections below, **ConsoleList**, **Intellisense**, and **Default**. Also, there is the special setting **Dynamic** that will cause PowerTab to choose the best selector for your PowerShell host. This setting allows you to use PowerTab with multiple PowerShell hosts without needing multiple configurations.
 
 Please refer to the [Host Support](Usage/HostSupport.md) page for information on which selectors are supported on each host.
 
 **Setting the Selector to Use**
+
 To choose the tab item selector to use in PowerTab, set the **DefaultHandler** setting to an appropriate value. If that tab item selector will not work in the current PowerShell host, PowerTab will quietly use the "Default" tab item selector. The **AlternateHandler** setting will be used for Double Tab (if enabled), and certain other situations, instead of **DefaultHandler**.
 
-```
+```PowerShell
 $PowerTabConfig.DefaultHandler = "Dynamic"
 $PowerTabConfig.AlternateHandler = "Dynamic"
 ```
@@ -55,6 +57,7 @@ $PowerTabConfig.Colors.BorderBackColor | [ConsoleColor] |
 
 
 **Key Map for ConsoleList**
+
 Key | Function | Notes
 --- | -------- | -----
 Tab | Move Selection Down | Holding down SHIFT will cause TAB to move the selection up.

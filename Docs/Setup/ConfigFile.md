@@ -2,7 +2,7 @@
 
 The settings that control the behavior of PowerTab are persisted in a configuration file. That path to the configuration file is stored in the ConfigurationPath setting of PowerTab.
 
-```
+```PowerShell
 $PowerTabConfig.Setup.ConfigurationPath
 ```
 
@@ -26,7 +26,7 @@ The Setup Wizard will help you choose a location to save your configuration file
 
 **Create a new Configuration after Starting PowerTab**
 
-```
+```PowerShell
 New-TabExpansionConfig
 Export-TabExpansionConfig "<full path>"
 ```
@@ -36,7 +36,7 @@ Running these two commands will create a fresh collection of settings and export
 
 **Create a Copy of the Existing Configuration**
 
-```
+```PowerShell
 Export-TabExpansionConfig "<full path>"
 ```
 
@@ -49,7 +49,7 @@ PowerTab has two startup modes, with a configuration and without. If no configur
 
 **When Starting PowerTab**
 
-```
+```PowerShell
 Import-Module PowerTab -ArgumentList C:\Users\JASON\PowerTabConfig.xml
 ```
 
@@ -58,7 +58,7 @@ Pass the full path to a configuration file while starting PowerTab. This will lo
 
 **While Running PowerTab**
 
-```
+```PowerShell
 Import-TabExpansionConfig C:\Users\JASON\PowerTabConfig.xml
 ```
 

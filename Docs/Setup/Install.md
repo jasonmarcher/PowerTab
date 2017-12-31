@@ -14,11 +14,11 @@ There should now be a **PowerTab** folder in your modules folder. PowerTab is no
 
 To run PowerTab, open a PowerShell command prompt (or the shell of your favorite PowerShell editor) and run the following.
 
-```
+```PowerShell
 Import-Module PowerTab
 ```
 
-With no arguments, PowerTab will offer to run a setup wizard to configure PowerTab. The setup wizard will which will help define a location to save the [PowerTab config file](). The config file is required to persist configuration settings for PowerTab, and cached values for .NET type, WMI class and computer name expansion.
+With no arguments, PowerTab will offer to run a setup wizard to configure PowerTab. The setup wizard will which will help define a location to save the [PowerTab config file](ConfigFile.md). The config file is required to persist configuration settings for PowerTab, and cached values for .NET type, WMI class and computer name expansion.
 
 It is not necessary to run the setup wizard or do any additional configuration of PowerTab (though some features will not be available until configured).
 
@@ -29,19 +29,19 @@ Help for using PowerTab is provided from several sources.
 - The wiki pages on the PowerTab Website.
 - The main about topic available from the PowerShell console.
 
-```
+```PowerShell
 Get-Help about_PowerTab
 ```
 
 - Find all of the about topics for PowerTab.
 
-```
+```PowerShell
 Get-Help about_PowerTab*
 ```
 
 - Find all of the commands available from PowerTab and then view the help for each one.
 
-```
+```PowerShell
 Get-Command -Module PowerTab
 
 ## View the help for a specific PowerTab function
