@@ -469,15 +469,18 @@ Function Out-ConsoleList {
         $BufferBottom = $BufferTop = $Position
         $BufferBottom.X += ($Buffer.GetUpperBound(1))
         $BufferBottom.Y += ($Buffer.GetUpperBound(0))
-        $Rectangle = New-Object System.Management.Automation.Host.Rectangle $BufferTop, $BufferBottom
-        $OldBuffer = $Host.UI.RawUI.GetBufferContents($Rectangle)
+
+        $OldTop = New-Object System.Management.Automation.Host.Coordinates 0, $BufferTop.Y
+        $OldBottom = New-Object System.Management.Automation.Host.Coordinates ($Host.UI.RawUI.BufferSize.Width - 1), $BufferBottom.Y
+        $OldBuffer = $Host.UI.RawUI.GetBufferContents((New-Object System.Management.Automation.Host.Rectangle $OldTop, $OldBottom))
+
         $Host.UI.RawUI.SetBufferContents($BufferTop, $Buffer)
         $Handle = New-Object System.Management.Automation.PSObject -Property @{
             'Content' = $Buffer
             'OldContent' = $OldBuffer
             'Location' = $BufferTop
         }
-        Add-Member -InputObject $Handle -MemberType ScriptMethod -Name Clear -Value {$Host.UI.RawUI.SetBufferContents($This.Location, $This.OldContent)}
+        Add-Member -InputObject $Handle -MemberType ScriptMethod -Name Clear -Value {$Host.UI.RawUI.SetBufferContents($This.OldLocation, $This.OldContent)}
         Add-Member -InputObject $Handle -MemberType ScriptMethod -Name Show -Value {$Host.UI.RawUI.SetBufferContents($This.Location, $This.Content)}
         $Handle
     }
