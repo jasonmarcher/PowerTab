@@ -276,10 +276,14 @@ Function Invoke-TabExpansion {
         ## Resolve internal (no prefix) and fully qualified command names
         $FullCommandName = ""
         try {
-            $InternalCommand = Resolve-InternalCommandName $CurrentContext.CommandInfo
-            $InternalCommandName = $InternalCommand.InternalName
-            if ($InternalCommand.Module) {
-                $FullCommandName = $InternalCommand.Module.Name + "\" + $InternalCommand.InternalName
+            if ($CurrentContext.CommandInfo) {
+                $InternalCommand = Resolve-InternalCommandName $CurrentContext.CommandInfo
+                $InternalCommandName = $InternalCommand.InternalName
+                if ($InternalCommand.Module) {
+                    $FullCommandName = $InternalCommand.Module.Name + "\" + $InternalCommand.InternalName
+                }
+            } else {
+                $InternalCommandName = $CurrentContext.Command
             }
         } catch {
             $InternalCommandName = $CurrentContext.Command
