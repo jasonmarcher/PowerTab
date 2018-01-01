@@ -424,7 +424,7 @@ Function Invoke-ProviderPathHandler {
             if ($PathSlices[0] -like "*:") {
                 ## Add a trailing backslash if only a drive name
                 $Path = $PathSlices[0] + "\"
-                $PathSlices = $PathSlices,""
+                $PathSlices = $PathSlices[0],""
             } else {
                 ## Convert single words to a more exact path
                 $PathSlices = ,"." + $PathSlices
