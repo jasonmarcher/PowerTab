@@ -294,6 +294,7 @@ Register-TabExpansion "Get-FormatData" -Type "Command" {
         switch -exact ($Context.Parameter) {
             'Name' {
                 if ($Argument -like "about_*") {
+                    $ProgressPreference = "SilentlyContinue" ## Progress bars break in PowerTab
                     $Commands = Get-Help "$Argument*" | Select-Object -ExpandProperty Name
                     if ($Commands) {
                         $TabExpansionHasOutput.Value = $true
