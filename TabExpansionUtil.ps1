@@ -641,9 +641,17 @@ Function Get-KeyState {
         [UInt16]$KeyCode
     )
 
-    $Signature = '[DllImport("user32.dll")]public static extern short GetKeyState(int nVirtKey);'
-    $Type = Add-Type -MemberDefinition $Signature -Name User32PowerTab -Namespace GetKeyState -PassThru
-    return [Bool]($Type::GetKeyState($KeyCode) -band 0x80)
+    ## This function is needed because we are testing for a key state without requesting a new key press from the user
+
+    if (($PSVersionTable.Platform -eq "Win32NT") -or ($env:OS -like "Windows*")) {
+        $Signature = '[DllImport("user32.dll")]public static extern short GetKeyState(int nVirtKey);'
+        $Type = Add-Type -MemberDefinition $Signature -Name User32PowerTab -Namespace GetKeyState -PassThru
+        $result = [Bool]($Type::GetKeyState($KeyCode) -band 0x80)
+    } else {
+        ## TODO: Find out if we can detect key states (like Shift) on other OSes
+        $result = $false
+    }
+    return $result
 }
 
 Function Write-Trace {
