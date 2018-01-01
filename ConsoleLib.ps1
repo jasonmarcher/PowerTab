@@ -479,6 +479,7 @@ Function Out-ConsoleList {
             'Content' = $Buffer
             'OldContent' = $OldBuffer
             'Location' = $BufferTop
+            'OldLocation' = $OldTop
         }
         Add-Member -InputObject $Handle -MemberType ScriptMethod -Name Clear -Value {$Host.UI.RawUI.SetBufferContents($This.OldLocation, $This.OldContent)}
         Add-Member -InputObject $Handle -MemberType ScriptMethod -Name Show -Value {$Host.UI.RawUI.SetBufferContents($This.Location, $This.Content)}
