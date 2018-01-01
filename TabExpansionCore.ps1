@@ -592,6 +592,14 @@ Function Invoke-PowerTab {
             } else {
                 $Members = Get-Member -InputObject $Target
             }
+
+            if ($PSVersionTable.PSVersion.Major -ge 3) {
+                $Members += @(
+                    New-Object PSObject -Property @{Name = "ForEach"; MemberType = "Method"}
+                    New-Object PSObject -Property @{Name = "Where"; MemberType = "Method"}
+                )
+            }
+
             $Members | Where-Object {
                 $n = $_.Name
                 if (-not $PowerTabConfig.ShowAccessorMethods) {
