@@ -2,6 +2,11 @@
 #
 # 
 
+## Reason: Intentional because we need to evaluate variables
+[Diagnostics.CodeAnalysis.SuppressMessageAttribute("PSAvoidUsingInvokeExpression", "")]
+## Reason: Script analyzer doesn't catch all variable usages
+[Diagnostics.CodeAnalysis.SuppressMessageAttribute("PSUseDeclaredVarsMoreThanAssignments", "")]
+param()
 
 #########################
 ## Private functions
@@ -39,7 +44,7 @@ Function Out-DataGridView {
                     $col.ColumnName = $_.Name.ToString()
                     $dt.Columns.Add($col)
                 }
-                if ($_.Value -eq $null) {
+                if ($null -eq $_.Value) {
                     $dr.Item($_.Name) = "[empty]"
                 } elseif ($_.IsArray) {
                     $dr.Item($_.Name) =[String]::Join($_.Value ,";")
@@ -130,7 +135,7 @@ Function Resolve-Command {
                     $Command = @(GetCommand $Name)[0]
                 }
             } catch {
-                if (-not ($Command = try {@(GetCommand "Get-$Name")[0]} catch {})) {
+                if (-not ($Command = try {@(GetCommand "Get-$Name")[0]} catch {$null = ""})) {
                     throw $_
                 }
             }
@@ -188,7 +193,7 @@ Function Resolve-Parameter {
 		if ($PSCmdlet.ParameterSetName -eq "Command") {
             $CommandInfo = Resolve-Command $Command -CommandInfo
         } elseif ($PSCmdlet.ParameterSetName -eq "CommandInfo") {
-            if ($CommandInfo -eq $null) {return}
+            if ($null -eq $CommandInfo) {return}
         }
 
         ## Check if this is a real parameter name and not an alias
@@ -666,7 +671,7 @@ Function Write-Trace {
             Location = @(Get-PSCallStack)[1]
             Message = $Message
         }
-        $TraceEntry.PSObject.TypeNames.Insert(0, ”PowerTab.TraceEntry”)
+        $TraceEntry.PSObject.TypeNames.Insert(0, "PowerTab.TraceEntry")
 
         $PowerTabLog.Trace.Insert(0, $TraceEntry)
     }
@@ -782,6 +787,7 @@ Function Open-IsolatedStorageFile {
 
 Function New-IsolatedStorageDirectory {
     [CmdletBinding()]
+    [Diagnostics.CodeAnalysis.SuppressMessageAttribute("PSUseShouldProcessForStateChangingFunctions", "")]  ## TODO: Suport for readl
     param(
         [Alias("Path")]
         [Parameter(Mandatory = $true, Position = 0)]
@@ -805,6 +811,7 @@ Function Get-IsolatedStorage {
 ##########
 
 Function Parse-Manifest {
+    ## TODO: Replace
     $Manifest = Get-Content "$PSScriptRoot\PowerTab.psd1" | Where-Object {$_ -notmatch '^\s*#'}
     $ModuleManifest = "Data {`n" + ($Manifest -join "`r`n") + "`n}"
     $ExecutionContext.SessionState.InvokeCommand.NewScriptBlock($ModuleManifest).Invoke()[0]

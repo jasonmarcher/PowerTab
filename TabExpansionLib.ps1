@@ -2,6 +2,9 @@
 #
 # 
 
+## Reason: Script analyzer doesn't catch all variable usages
+[Diagnostics.CodeAnalysis.SuppressMessageAttribute("PSUseDeclaredVarsMoreThanAssignments", "")]
+param()
 
 #########################
 ## Public functions
@@ -41,6 +44,7 @@ Function Invoke-TabActivityIndicator {
 
 Function Remove-TabActivityIndicator {
     [CmdletBinding()]
+    [Diagnostics.CodeAnalysis.SuppressMessageAttribute("PSUseShouldProcessForStateChangingFunctions", "")]
     param()
 
     end {
@@ -203,6 +207,7 @@ Function Invoke-TabItemSelector {
 
 Function New-TabItem {
     [CmdletBinding()]
+    [Diagnostics.CodeAnalysis.SuppressMessageAttribute("PSUseShouldProcessForStateChangingFunctions", "")]
     param(
         [Parameter(Position = 0, Mandatory = $true, ValueFromPipeline = $true)]
         [ValidateNotNullOrEmpty()]
@@ -229,6 +234,7 @@ Function New-TabItem {
 # .ExternalHelp TabExpansionLib-Help.xml
 Function New-TabExpansionDatabase {
     [CmdletBinding()]
+    [Diagnostics.CodeAnalysis.SuppressMessageAttribute("PSUseShouldProcessForStateChangingFunctions", "")]
     param()
 
     end {
@@ -268,6 +274,7 @@ Function New-TabExpansionDatabase {
 # .ExternalHelp TabExpansionLib-Help.xml
 Function New-TabExpansionConfig {
     [CmdletBinding()]
+    [Diagnostics.CodeAnalysis.SuppressMessageAttribute("PSUseShouldProcessForStateChangingFunctions", "")]
     param(
         [Alias("FullName","Path")]
         [Parameter(Position = 0, ValueFromPipeline = $true, ValueFromPipelineByPropertyName = $true)]
@@ -500,6 +507,7 @@ Function Export-TabExpansionTheme {
 Function Update-TabExpansionDataBase {
     [CmdletBinding(SupportsShouldProcess = $true, SupportsTransactions = $false,
         ConfirmImpact = "Low", DefaultParameterSetName = "")]
+    [Diagnostics.CodeAnalysis.SuppressMessageAttribute("PSUseShouldProcessForStateChangingFunctions", "")]
     param(
         [Switch]
         $Force
@@ -531,6 +539,7 @@ Set-Alias udte Update-TabExpansionDataBase
 # .ExternalHelp TabExpansionLib-Help.xml
 Function Update-TabExpansionType {
     [CmdletBinding()]
+    [Diagnostics.CodeAnalysis.SuppressMessageAttribute("PSUseShouldProcessForStateChangingFunctions", "")]
     param()
 
     end {
@@ -656,6 +665,7 @@ Function Find-TabExpansionType {
 # .ExternalHelp TabExpansionLib-Help.xml
 Function Update-TabExpansionWmi {
     [CmdletBinding()]
+    [Diagnostics.CodeAnalysis.SuppressMessageAttribute("PSUseShouldProcessForStateChangingFunctions", "")]
     param()
 
     end {
@@ -680,13 +690,14 @@ Function Update-TabExpansionWmi {
 # .ExternalHelp TabExpansionLib-Help.xml
 Function Update-TabExpansionCom {
     [CmdletBinding()]
+    [Diagnostics.CodeAnalysis.SuppressMessageAttribute("PSUseShouldProcessForStateChangingFunctions", "")]
     param()
 
     end {
         $dsTabExpansionDatabase.Tables['COM'].Clear()
 
         $i = 0 ; Write-Progress $Resources.update_tabexpansiondatabase_com_activity $i
-        foreach ($Class in (Get-WmiObject Win32_ClassicCOMClassSetting -Filter "VersionIndependentProgId LIKE '%'" |
+        foreach ($Class in (Get-CimInstance -ClassName "Win32_ClassicCOMClassSetting" -Filter "VersionIndependentProgId LIKE '%'" |
                 Sort-Object VersionIndependentProgId)) {
             $i++ ; if ($i % 10 -eq 0) {Write-Progress $Resources.update_tabexpansiondatabase_com_activity $i}
             [Void]$dsTabExpansionDatabase.Tables['COM'].Rows.Add($Class.VersionIndependentProgId, $Class.Description)
@@ -753,6 +764,7 @@ Function Add-TabExpansionComputer {
 # .ExternalHelp TabExpansionLib-Help.xml
 Function Remove-TabExpansionComputer {
     [CmdletBinding()]
+    [Diagnostics.CodeAnalysis.SuppressMessageAttribute("PSUseShouldProcessForStateChangingFunctions", "")]
     param()
 
     end {
@@ -879,6 +891,7 @@ Set-Alias ate Add-TabExpansion
 # .ExternalHelp TabExpansionLib-Help.xml
 Function Remove-TabExpansion {
     [CmdletBinding()]
+    [Diagnostics.CodeAnalysis.SuppressMessageAttribute("PSUseShouldProcessForStateChangingFunctions", "")]
     param(
         [Parameter(Position = 0, Mandatory = $true)]
         [ValidateNotNullOrEmpty()]
@@ -1046,6 +1059,7 @@ Function Initialize-PowerTab {
 
 Function UpgradeTabExpansionDatabase {
     [CmdletBinding()]
+    [Diagnostics.CodeAnalysis.SuppressMessageAttribute("PSAvoidUsingWriteHost", "")]
     param(
         [Ref]$Config
         ,
@@ -1352,7 +1366,7 @@ Function InternalImportTabExpansionConfig {
     }
 
     $Version = $Config.Tables['Config'].Select("Name = 'Version'")[0].Value -as [System.Version]
-    if ($Version -eq $null) {$Config.Tables['Config'].Select("Name = 'Version'")[0].Value = '0.99.0.0'}
+    if ($null -eq $Version) {$Config.Tables['Config'].Select("Name = 'Version'")[0].Value = '0.99.0.0'}
 
     $Config
 }

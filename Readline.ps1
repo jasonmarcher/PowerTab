@@ -46,6 +46,7 @@ Function Show-CommonPrefix {
 
 Function Search-CommonPrefix {
     [CmdletBinding()]
+    [OutputType([String])]
     param(
         [Parameter()]
         [ValidateNotNull()]

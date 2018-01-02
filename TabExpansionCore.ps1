@@ -2,10 +2,18 @@
 #
 # 
 
+## Reason: Intentional because we really need to suppress errors due to the nature of this module
+[Diagnostics.CodeAnalysis.SuppressMessageAttribute("PSAvoidUsingEmptyCatchBlock", "")]
+## Reason: Intentional because we need to evaluate variables
+[Diagnostics.CodeAnalysis.SuppressMessageAttribute("PSAvoidUsingInvokeExpression", "")]
+## Reason: Script analyzer doesn't catch all variable usages
+[Diagnostics.CodeAnalysis.SuppressMessageAttribute("PSUseDeclaredVarsMoreThanAssignments", "")]
+param()
 
 # .ExternalHelp TabExpansionCore-Help.xml
 Function Invoke-TabExpansion {
 	[CmdletBinding()]
+    [OutputType([String])]
     param(
         [Parameter(Position = 0, Mandatory = $true)]
         [AllowEmptyString()]
@@ -46,7 +54,7 @@ Function Invoke-TabExpansion {
     $global:Error.Clear()
     $global:Error.AddRange($PowerTabLog.Error)
 
-    if ($PowerTabConfig -eq $null) {
+    if ($null -eq $PowerTabConfig) {
         ## Something happened to the PowerTabConfig object, recreate it
         CreatePowerTabConfig
     }
@@ -363,7 +371,7 @@ Function Invoke-TabExpansion {
             }
 
             ## Ensure that variables get handled
-            if ($PossibleValues -eq $null) {$PossibleValues = @()}
+            if ($null -eq $PossibleValues) {$PossibleValues = @()}
             if ($TabExpansionHasOutput -and ($PossibleValues.Count -eq 0) -and ($LastWord -match '^[@\$]')) {
                 $TabExpansionHasOutput = $false
             }
@@ -467,9 +475,9 @@ Function Invoke-TabExpansion {
             }
         }
 
-        if ($PossibleValues -eq $null) {$PossibleValues = @()}
+        if ($null -eq $PossibleValues) {$PossibleValues = @()}
 
-        if ($PowerTabConfig -eq $null) {
+        if ($null -eq $PowerTabConfig) {
             ## Something happened to the PowerTabConfig object, recreate it
             CreatePowerTabConfig
         }
@@ -526,6 +534,9 @@ Function Invoke-TabExpansion {
 }
 
 Function New-TabContext {
+    [Diagnostics.CodeAnalysis.SuppressMessageAttribute("PSUseShouldProcessForStateChangingFunctions", "")]
+    param()
+    
     $Properties = @{
             "Command" = ""
             "CommandInfo" = $null
@@ -766,7 +777,7 @@ Function Invoke-PowerTab {
                 if ($Pattern -match '^[0-9]+$') {
                     @(Get-History -Id $Pattern -ErrorAction SilentlyContinue)[0].CommandLine
                 } else {
-					Get-History -Count 32767 | Where-Object {$_.CommandLine -like "*$Pattern*"} | Sort Id -Descending |
+					Get-History -Count 32767 | Where-Object {$_.CommandLine -like "*$Pattern*"} | Sort-Object Id -Descending |
                         Select-Object -ExpandProperty CommandLine -Unique | New-TabItem -Value {$_} -Text {$_} -Type History
                     $SelectorLastWord = $Pattern
                 }
@@ -1064,7 +1075,7 @@ Function Invoke-PowerTab {
         }
     } ## End of switch -regex $LastWord
 
-    if ($PossibleValues -eq $null) {$PossibleValues = @()}
+    if ($null -eq $PossibleValues) {$PossibleValues = @()}
 
     if ((-not $PossibleValues) -and 
             (($Context.LastToken -eq [System.Management.Automation.PSTokenType]::Command -and $LastWord) -or

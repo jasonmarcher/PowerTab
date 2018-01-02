@@ -1,3 +1,8 @@
+
+## Reason: Using Write-Host is intentional
+[Diagnostics.CodeAnalysis.SuppressMessageAttribute("PSAvoidUsingWriteHost", "")]
+## Reason: ConsoleList uses variables that are intended to be used in recursive calls
+[Diagnostics.CodeAnalysis.SuppressMessageAttribute("PSUseDeclaredVarsMoreThanAssignments", "")]
 param()
 
 ## Load forms library when not loaded 

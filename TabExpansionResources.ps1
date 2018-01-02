@@ -1,4 +1,7 @@
 
+[Diagnostics.CodeAnalysis.SuppressMessageAttribute("PSUseDeclaredVarsMoreThanAssignments", "")]
+param()
+
 Data Resources {
 @{
     ## Default resources
@@ -52,6 +55,8 @@ $ResourceFiles = @(
 
 Function Update-Resource {
     [CmdletBinding()]
+    [Diagnostics.CodeAnalysis.SuppressMessageAttribute("PSAvoidUsingWriteHost", "")]
+    [Diagnostics.CodeAnalysis.SuppressMessageAttribute("PSUseShouldProcessForStateChangingFunctions", "")]
     param(
         [Parameter(Position = 0, Mandatory = $true, ValueFromPipelineByPropertyName = $true)]
         [String]
@@ -68,14 +73,14 @@ Function Update-Resource {
 
     process {
         [System.Globalization.CultureInfo]$ControlCulture = "en"
-        $ResourceCollection = @{}
+        # $ResourceCollection = @{}
         $BaseResources = (Get-Variable $Variable).Value
         $BaseKeys = $BaseResources.Keys.GetEnumerator() | Sort-Object
 
         ## Update control resources
         [String[]]$ModifiedKeys = @()
         [Bool]$Modified = $false
-        $ControlResources = Import-Resources $ControlCulture -FileName $FileName
+        $ControlResources = Import-Resource $ControlCulture -FileName $FileName
         $ControlKeys = $ControlResources.Keys.GetEnumerator() | Sort-Object
         Compare-Object $BaseKeys $ControlKeys -IncludeEqual | ForEach-Object {
             $Key = $_.InputObject
@@ -105,13 +110,13 @@ Function Update-Resource {
             }
         }
         if ($Modified) {
-            Export-Resources $ControlCulture $ControlResources -FileName $FileName
+            Export-Resource $ControlCulture $ControlResources -FileName $FileName
         }
 
         ## Update localized languages
         foreach ($Culture in $Cultures) {
             $Modified = $false
-            $CultureResources = Import-Resources $Culture -FileName $FileName
+            $CultureResources = Import-Resource $Culture -FileName $FileName
             $CultureKeys = $CultureResources.Keys.GetEnumerator() | Sort-Object
             Compare-Object $BaseKeys $CultureKeys -IncludeEqual | ForEach-Object {
                 $Key = $_.InputObject
@@ -145,15 +150,16 @@ Function Update-Resource {
 
             ## Update culture resources
             if ($Modified) {
-                Export-Resources $Culture $CultureResources -FileName $FileName
+                Export-Resource $Culture $CultureResources -FileName $FileName
             }
         }
     }
 }
 
 
-Function Import-Resources {
+Function Import-Resource {
     [CmdletBinding()]
+    [OutputType([System.Collections.Hashtable])]
     param(
         [Parameter(Position = 0, Mandatory = $true, ValueFromPipeline = $true)]
         [ValidateNotNull()]
@@ -181,7 +187,7 @@ Function Import-Resources {
 }
 
 
-Function Export-Resources {
+Function Export-Resource {
     [CmdletBinding()]
     param(
         [Parameter(Position = 0, Mandatory = $true, ValueFromPipeline = $true)]
@@ -217,7 +223,7 @@ Function Export-Resources {
 
 <#
 $mod = (get-module -All PowerTab)[0]
-& $mod Update-Resources -verbose
+& $mod Update-Resource -verbose
 #>
 
 

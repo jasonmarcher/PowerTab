@@ -1,4 +1,8 @@
 
+## Reason: Intentional because we need to evaluate variables
+[Diagnostics.CodeAnalysis.SuppressMessageAttribute("PSAvoidUsingInvokeExpression", "")]
+param()
+
 <########################
 ## Notes
 
@@ -98,7 +102,7 @@ Register-TabExpansion "Reset-ComputerMachinePassword" -Type "Command" {
     
     $ComputerRestorePointHandler = {
         param($Context, [ref]$TabExpansionHasOutput, [ref]$QuoteSpaces)
-        $Argument = $Context.Argument
+        # $Argument = $Context.Argument
         switch -exact ($Context.Parameter) {
             'RestorePoint' {
                 $TabExpansionHasOutput.Value = $true
@@ -319,7 +323,7 @@ Register-TabExpansion "Get-FormatData" -Type "Command" {
                 } else {
                     $Command = Resolve-TabExpansionParameterValue $Context.PositionalParameters[0]
                 }
-                $CommandInfo = try {& (Get-Module PowerTab) Resolve-Command $Command -CommandInfo -ErrorAction "Stop"} catch {}
+                $CommandInfo = try {& (Get-Module PowerTab) Resolve-Command $Command -CommandInfo -ErrorAction "Stop"} catch {$null = ""}
                 if ($CommandInfo) {
                     foreach ($Parameter in $CommandInfo.Parameters.Values) {
                         if ($Parameter.Name -like "$Argument*") {
@@ -598,7 +602,7 @@ Register-TabExpansion "Out-Printer" -Type "Command" {
     switch -exact ($Context.Parameter) {
         'Name' {
             $TabExpansionHasOutput.Value = $true
-            Get-WMIObject Win32_Printer -Filter "Name LIKE '$Argument%'" | New-TabItem -Value {$_.Name} -Text {$_.Name} -Type Printer
+            Get-CimInstance -ClassName "Win32_Printer" -Filter "Name LIKE '$Argument%'" | New-TabItem -Value {$_.Name} -Text {$_.Name} -Type Printer
         }
     }
 }.GetNewClosure()
@@ -780,7 +784,7 @@ Register-TabExpansion "Out-Printer" -Type "Command" {
     }.GetNewClosure()
     $NewPSDriveHandler = {
         param($Context, [ref]$TabExpansionHasOutput)
-        $Argument = $Context.Argument
+        # $Argument = $Context.Argument
         switch -exact ($Context.Parameter) {
             'Scope' {
                 $TabExpansionHasOutput.Value = $true
@@ -1159,6 +1163,10 @@ Register-TabExpansion "Get-WinEvent" -Type "Command" {
     Register-TabExpansion "Register-WmiEvent" $WmiObjectHandler -Type "Command"
     Register-TabExpansion "Remove-WmiObject" $WmiObjectHandler -Type "Command"
     Register-TabExpansion "Set-WmiInstance" $WmiObjectHandler -Type "Command"
+}
+
+## CIM
+& {
 }
 
 ## WSMan & WSManInstance & WSManAction

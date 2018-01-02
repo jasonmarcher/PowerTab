@@ -52,8 +52,8 @@
 & {
     Register-TabExpansion reg.exe -Type Command {
         param($Context, [ref]$TabExpansionHasOutput)
-        $Argument = $Context.Argument
         <#
+        $Argument = $Context.Argument
         switch -exact ($Context.Parameter) {
             'r' {
                 $TabExpansionHasOutput.Value = $true

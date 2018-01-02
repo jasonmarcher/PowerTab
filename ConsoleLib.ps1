@@ -2,6 +2,9 @@
 #
 # 
 
+## Reason: ConsoleList uses variables that are intended to be used in recursive calls
+[Diagnostics.CodeAnalysis.SuppressMessageAttribute("PSUseDeclaredVarsMoreThanAssignments", "")]
+param()
 
 Function Out-ConsoleList {
     #[CmdletBinding()]
@@ -343,6 +346,7 @@ Function Out-ConsoleList {
 
 
     Function New-Box {
+        [Diagnostics.CodeAnalysis.SuppressMessageAttribute("PSUseShouldProcessForStateChangingFunctions", "")]
         param(
             [System.Drawing.Size]
             $Size
@@ -444,6 +448,7 @@ Function Out-ConsoleList {
 
 
     Function New-Position {
+        [Diagnostics.CodeAnalysis.SuppressMessageAttribute("PSUseShouldProcessForStateChangingFunctions", "")]
         param(
             [Int]$X
             ,
@@ -458,6 +463,7 @@ Function Out-ConsoleList {
 
 
     Function New-Buffer {
+        [Diagnostics.CodeAnalysis.SuppressMessageAttribute("PSUseShouldProcessForStateChangingFunctions", "")]
         param(
             [System.Management.Automation.Host.Coordinates]
             $Position
@@ -504,6 +510,7 @@ Function Out-ConsoleList {
 
 
     Function Parse-List {
+        [Diagnostics.CodeAnalysis.SuppressMessageAttribute("PSUseApprovedVerbs", "")]
         param(
             [System.Drawing.Size]$Size
         )
@@ -563,6 +570,7 @@ Function Out-ConsoleList {
 
 
     Function New-ConsoleList {
+        [Diagnostics.CodeAnalysis.SuppressMessageAttribute("PSUseShouldProcessForStateChangingFunctions", "")]
         param(
             [Object[]]
             $Content
@@ -668,6 +676,7 @@ Function Out-ConsoleList {
 
 
     Function Set-Selection {
+        [Diagnostics.CodeAnalysis.SuppressMessageAttribute("PSUseShouldProcessForStateChangingFunctions", "")]
         param(
             [Int]$X
             ,
