@@ -648,7 +648,7 @@ Function Get-KeyState {
 
     ## This function is needed because we are testing for a key state without requesting a new key press from the user
 
-    if (($PSVersionTable.Platform -eq "Win32NT") -or ($env:OS -like "Windows*")) {
+    if (isWindows) {
         $Signature = '[DllImport("user32.dll")]public static extern short GetKeyState(int nVirtKey);'
         $Type = Add-Type -MemberDefinition $Signature -Name User32PowerTab -Namespace GetKeyState -PassThru
         $result = [Bool]($Type::GetKeyState($KeyCode) -band 0x80)
@@ -846,4 +846,12 @@ Function Find-Module {
 # | Sort-Object {switch ($_.Extension) {".psd1"{1} ".psm1"{2}}})
 Function Get-ModulePath {
     $Env:PSModulePath -split ";" | ForEach-Object {"{0}\" -f $_.TrimEnd('\','/')} | Select-Object -Unique | Where-Object {Test-Path $_}
+}
+
+function isWindows {
+    if (($PSVersionTable.Platform -eq "Win32NT") -or ($env:OS -like "Windows*")) {
+        $true
+    } else {
+        $false
+    }
 }

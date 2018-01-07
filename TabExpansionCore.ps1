@@ -721,12 +721,14 @@ Function Invoke-PowerTab {
         '^(\\\\|//)(?<Computer>[^\\/]+)[\\/](?<Share>[^\\/]*)$' {
             Write-Trace "Core Handler: Evaluating file shares."
 
-            #gwmi win32_share -computer $ComputerName -filter "name like '$($ShareName)%'" | Foreach-Object {"\\$($ComputerName)\$($_.name)"}
-            #([adsi]"WinNT://$($ComputerName)/LanmanServer,FileService" ).psbase.children |? {$_.name -like "$($ShareName)*"}  |% {$_.name}
             $ComputerName = $Matches.Computer
             $ShareName = $Matches.Share
-            [Trinet.Networking.ShareCollection]::GetShares($ComputerName) | Where-Object {$_.NetName -like "$ShareName*"} |
-                Sort-Object NetName | New-TabItem -Value {"\\$ComputerName\" + $_.NetName} -Text {"\\$ComputerName\" + $_.NetName} -Type Share
+            if (isWindows) {
+                # Get-WmiObject -Class Win32_Share -ComputerName $ComputerName -Filter "name like '$($ShareName)%'" |
+                #     Sort-Object Name | New-TabItem -Value {"\\$ComputerName\" + $_.Name} -Text {"\\$ComputerName\" + $_.Name} -Type Share
+                [Trinet.Networking.ShareCollection]::GetShares($ComputerName) | Where-Object {$_.NetName -like "$ShareName*"} |
+                    Sort-Object NetName | New-TabItem -Value {"\\$ComputerName\" + $_.NetName} -Text {"\\$ComputerName\" + $_.NetName} -Type Share
+            }
             $SelectorLastWord = $LastWord
             break
         }
