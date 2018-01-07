@@ -1498,7 +1498,7 @@ Register-TabExpansion "PSProvider" -Type Parameter {
         switch -exact ($Context.Parameter) {
             'Name' {
                 $TabExpansionHasOutput.Value = $true
-                Get-ChildItem (Join-Path $PSScriptRoot "ColorThemes\Theme${Argument}*") -Include *.csv |
+                Get-ChildItem (Join-Path $PSScriptRoot "ColorThemes/Theme${Argument}*") -Include *.csv |
                     ForEach-Object {$_.Name -replace '^Theme([^\.]+)\.csv$','$1'}
             }
         }

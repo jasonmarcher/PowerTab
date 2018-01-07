@@ -328,7 +328,7 @@ Function Export-TabExpansionDatabase {
 
             if ($LiteralPath -eq "IsolatedStorage") {
                 New-IsolatedStorageDirectory "PowerTab"
-                $IsoFile = Open-IsolatedStorageFile "PowerTab\TabExpansion.xml" -Writable
+                $IsoFile = Open-IsolatedStorageFile "PowerTab/TabExpansion.xml" -Writable
                 $dsTabExpansionDatabase.WriteXml($IsoFile)
             } else {
                 if (-not (Test-Path (Split-Path $LiteralPath))) {
@@ -415,7 +415,7 @@ Function Export-TabExpansionConfig {
 
             if ($LiteralPath -eq "IsolatedStorage") {
                 New-IsolatedStorageDirectory "PowerTab"
-                $IsoFile = Open-IsolatedStorageFile "PowerTab\PowerTabConfig.xml" -Writable
+                $IsoFile = Open-IsolatedStorageFile "PowerTab/PowerTabConfig.xml" -Writable
                 $dsTabExpansionConfig.Tables['Config'].WriteXml($IsoFile)
             } else {
                 if (-not (Test-Path (Split-Path $LiteralPath))) {
@@ -460,7 +460,7 @@ Function Import-TabExpansionTheme {
 
     end {
         if ($PSCmdlet.ParameterSetName -eq "Name") {
-            Import-Csv (Join-Path $PSScriptRoot "ColorThemes\Theme${Name}.csv") | ForEach-Object {$PowerTabConfig.Colors."$($_.Name)" = $_.Color}
+            Import-Csv (Join-Path $PSScriptRoot "ColorThemes/Theme${Name}.csv") | ForEach-Object {$PowerTabConfig.Colors."$($_.Name)" = $_.Color}
         } else {
             Import-Csv $LiteralPath | ForEach-Object {$PowerTabConfig.Colors."$($_.Name)" = $_.Color}
         }
@@ -486,7 +486,7 @@ Function Export-TabExpansionTheme {
 
     process {
         if ($PSCmdlet.ParameterSetName -eq "Name") {
-            $ExportPath = Join-Path $PSScriptRoot "ColorThemes\Theme${Name}.csv"
+            $ExportPath = Join-Path $PSScriptRoot "ColorThemes/Theme${Name}.csv"
         } else {
             $ExportPath = $LiteralPath
         }
@@ -1297,9 +1297,9 @@ Function InternalImportTabExpansionDataBase {
     )
 
     $Database = New-Object System.Data.DataSet
-    if (($LiteralPath -eq "IsolatedStorage") -and (Test-IsolatedStoragePath "PowerTab\TabExpansion.xml")) {
+    if (($LiteralPath -eq "IsolatedStorage") -and (Test-IsolatedStoragePath "PowerTab/TabExpansion.xml")) {
         $UserIsoStorage = [System.IO.IsolatedStorage.IsolatedStorageFile]::GetUserStoreForAssembly()
-        $IsoFile = New-Object System.IO.IsolatedStorage.IsolatedStorageFileStream("PowerTab\TabExpansion.xml",
+        $IsoFile = New-Object System.IO.IsolatedStorage.IsolatedStorageFileStream("PowerTab/TabExpansion.xml",
             [System.IO.FileMode]::Open, $UserIsoStorage)
         [Void]$Database.ReadXml($IsoFile)
     } elseif (Test-Path $LiteralPath) {
@@ -1353,7 +1353,7 @@ Function InternalImportTabExpansionConfig {
     $Config = New-Object System.Data.DataSet
     if ($LiteralPath -eq "IsolatedStorage") {
         $UserIsoStorage = [System.IO.IsolatedStorage.IsolatedStorageFile]::GetUserStoreForAssembly()
-        $IsoFile = New-Object System.IO.IsolatedStorage.IsolatedStorageFileStream("PowerTab\PowerTabConfig.xml",
+        $IsoFile = New-Object System.IO.IsolatedStorage.IsolatedStorageFileStream("PowerTab/PowerTabConfig.xml",
             [System.IO.FileMode]::Open, $UserIsoStorage)
         [Void]$Config.ReadXml($IsoFile, 'InferSchema')
     } elseif (Test-Path $LiteralPath) {
@@ -1395,7 +1395,7 @@ Function CreatePowerTabConfig {
             [Int]`$val = [Bool]`$args[0]
             `$dsTabExpansionConfig.Tables['Config'].Select(`"Name = 'Enabled'`")[0].Value = `$val
             if ([Bool]`$val) {
-                . `"$PSScriptRoot\TabExpansion.ps1`"
+                . `"$PSScriptRoot/TabExpansion.ps1`"
             } else {
                 Set-Content Function:\TabExpansion -Value `$OldTabExpansion
             }") `

@@ -423,7 +423,7 @@ Function Invoke-ProviderPathHandler {
         $PowerTabFileSystemMode = $true
         $Path = $Path -replace '`'
 
-        ## 
+        ## TODO: PowerShell Core
         $PathSlices = [Regex]::Split($Path, '\\|/')
         if ($PathSlices.Count -eq 1) {
             if ($PathSlices[0] -like "*:") {
@@ -439,7 +439,7 @@ Function Invoke-ProviderPathHandler {
             ## Resolve reference to HOME folder for use outside PS
             $PathSlices[0] = try {Resolve-Path "~"} catch {$PathSlices[0]}
         }
-        $Container = [String]::Join('\', $PathSlices[0..($PathSlices.Count - 2)])
+        $Container = [String]::Join('\', $PathSlices[0..($PathSlices.Count - 2)]) ## TODO: PowerShell Core
         $LastPath = $Container + "\$([Regex]::Split($Path,'\\|/|:')[-1])"
 
         ## TODO: replace with calls to new function
@@ -453,7 +453,7 @@ Function Invoke-ProviderPathHandler {
         if (-not $ChildItems) {$Path; return}
 
         ## Add entry for parent ("..")
-        #if ((@($childitems).count -eq 1) -and ($Path.endswith('\')) ) {$childitems = $childitems,@{name='..'}}
+        #if ((@($childitems).count -eq 1) -and ($Path.endswith('\')) ) {$childitems = $childitems,@{name='..'}} ## TODO: PowerShell Core
 
         ## Fixes paths for registry keys, certificates and other unusual paths
         ## Improved fix for a problem identified by idvorkin (http://poshcode.org/1586)
@@ -475,7 +475,7 @@ Function Invoke-ProviderPathHandler {
                 "Microsoft.Win32.RegistryKey" {"RegistryKey";break}
                 default {$_}
             }
-            New-TabItem "$Container\$Child" "$Container\$Child" -Type $Type
+            New-TabItem "$Container\$Child" "$Container\$Child" -Type $Type  ## TODO: PowerShell Core
         }
         $ChildItems | Invoke-TabItemSelector $LastPath -SelectionHandler $SelectionHandler -Return $Path -ForceList:$ForceList | ForEach-Object {
             ## If a path contains any of these characters it needs to be in quotes
@@ -812,7 +812,7 @@ Function Get-IsolatedStorage {
 
 Function Parse-Manifest {
     ## TODO: Replace
-    $Manifest = Get-Content "$PSScriptRoot\PowerTab.psd1" | Where-Object {$_ -notmatch '^\s*#'}
+    $Manifest = Get-Content "$PSScriptRoot/PowerTab.psd1" | Where-Object {$_ -notmatch '^\s*#'}
     $ModuleManifest = "Data {`n" + ($Manifest -join "`r`n") + "`n}"
     $ExecutionContext.SessionState.InvokeCommand.NewScriptBlock($ModuleManifest).Invoke()[0]
 }
@@ -840,12 +840,14 @@ Function Find-Module {
                 $parent = [System.IO.Path]::GetFileName( $_.PSParentPath )
                 return $all -or ($parent -eq $_.BaseName) -or ($folder -and ($parent -eq ([System.IO.Path]::GetFileName($folder))) -and ($n -eq $_.BaseName))
             } | Group-Object PSParentPath | ForEach-Object {@($_.Group)[0]}
+
+        ## Possibly useful in the future
+        # | Sort-Object {switch ($_.Extension) {".psd1"{1} ".psm1"{2}}})
     }
 }
 
-# | Sort-Object {switch ($_.Extension) {".psd1"{1} ".psm1"{2}}})
 Function Get-ModulePath {
-    $Env:PSModulePath -split ";" | ForEach-Object {"{0}\" -f $_.TrimEnd('\','/')} | Select-Object -Unique | Where-Object {Test-Path $_}
+    $Env:PSModulePath -split ";" | Select-Object -Unique | Where-Object {Test-Path $_}
 }
 
 function isWindows {
