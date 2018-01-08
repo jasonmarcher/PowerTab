@@ -19,6 +19,8 @@
 - Added #71 - PS v3, support finding workflow names
 - Added #73 - Tab support for "Get-Help -Parameter"
 - Added #74 - Support for calculated properties with ConvertTo-HTML
+- Fixed #76 - Remove Intellisense item selector
+- Fixed #77 - Remove Shares.dll
 - Added #78 - Add CMD based color theme
 - Fixed #6 - In Core handler, avoid call with null CommandInfo
 - Fixed #7 - Progress bar possibly hanging
