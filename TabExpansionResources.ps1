@@ -172,7 +172,7 @@ Function Import-Resource {
     )
 
     process {
-        if (Test-Path "$PSScriptRoot\$($Culture.Name)\$FileName.psd1") {
+        if (Test-Path "$PSScriptRoot/$($Culture.Name)/$FileName.psd1") {
             Import-LocalizedData -BindingVariable "TempResources" -FileName $FileName -UICulture $Culture -ErrorAction SilentlyContinue
             $TempResources
         } else {
@@ -212,7 +212,7 @@ Function Export-Resource {
         }
         $Contents += "}"
         
-        Set-Content -Path "$PSScriptRoot\$($Culture.Name)\$FileName.psd1" -Value $Contents
+        Set-Content -Path "$PSScriptRoot/$($Culture.Name)/$FileName.psd1" -Value $Contents
 
         trap [System.Management.Automation.PipelineStoppedException] {
             ## Pipeline was stopped

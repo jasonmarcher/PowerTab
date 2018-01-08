@@ -87,10 +87,10 @@ Import-LocalizedData -BindingVariable Resources -FileName Resources -ErrorAction
 . (Join-Path $PSScriptRoot "TabExpansionHandlers.ps1")
 . (Join-Path $PSScriptRoot "ConsoleLib.ps1")
 . (Join-Path $PSScriptRoot "Readline.ps1")
-. (Join-Path $PSScriptRoot "Handlers\PowerShellGet.ps1")
-. (Join-Path $PSScriptRoot "Handlers\PSClientManager.ps1")
-. (Join-Path $PSScriptRoot "Handlers\Robocopy.ps1")
-. (Join-Path $PSScriptRoot "Handlers\Utilities.ps1")
+. (Join-Path $PSScriptRoot "Handlers/PowerShellGet.ps1")
+. (Join-Path $PSScriptRoot "Handlers/PSClientManager.ps1")
+. (Join-Path $PSScriptRoot "Handlers/Robocopy.ps1")
+. (Join-Path $PSScriptRoot "Handlers/Utilities.ps1")
 
 
 #########################
@@ -123,7 +123,7 @@ $ConfigurationPathParam = ""
 
 if ($ConfigurationPathParam) {
     if ((Test-Path $ConfigurationPathParam) -or (
-            ($ConfigurationPathParam -eq "IsolatedStorage") -and (Test-IsolatedStoragePath "PowerTab\$ConfigFileName"))) {
+            ($ConfigurationPathParam -eq "IsolatedStorage") -and (Test-IsolatedStoragePath "PowerTab/$ConfigFileName"))) {
         Initialize-PowerTab $ConfigurationPathParam
     } else {
         ## Config specified, but does not exist
@@ -213,7 +213,7 @@ Import-Module "PowerTab" -ArgumentList "$(Join-Path $SetupConfigurationPath $Con
         ## Create new database or load existing database
         if ($SetupConfigurationPath -eq "IsolatedStorage") {
             $SetupDatabasePath = $SetupConfigurationPath
-            if (Test-IsolatedStoragePath "PowerTab\TabExpansion.xml") {
+            if (Test-IsolatedStoragePath "PowerTab/TabExpansion.xml") {
                 $Answer = $Host.UI.PromptForChoice($Resources.setup_wizard_upgrade_existing_database_caption, $Resources.setup_wizard_upgrade_existing_database_message, $YesNoChoices, 1)
             } else {
                 $Answer = 0
@@ -247,7 +247,7 @@ Import-Module "PowerTab" -ArgumentList "$(Join-Path $SetupConfigurationPath $Con
 }
 
 if ($PowerTabConfig.Enabled) {
-    . "$PSScriptRoot\TabExpansion.ps1"
+    . "$PSScriptRoot/TabExpansion.ps1"
 }
 
 if ($PowerTabConfig.ShowBanner) {
