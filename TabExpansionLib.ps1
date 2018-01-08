@@ -70,7 +70,7 @@ Function Invoke-TabItemSelector {
         [String]
         $LastWord
         ,
-        [ValidateSet("ConsoleList","Intellisense","CommonPrefix","Dynamic","Default","ObjectDefault")]
+        [ValidateSet("ConsoleList","CommonPrefix","Dynamic","Default","ObjectDefault")]
         [String]
         $SelectionHandler = "Default"
         ,
@@ -150,31 +150,29 @@ Function Invoke-TabItemSelector {
         }
 
         ## Block certain handlers in hosts that don't support them
-        ## Example, ConsoleList and Intellisense won't work in PowerShell ISE
+        ## Example, ConsoleList won't work in PowerShell ISE
         [String[]]$IncompatibleHandlers = @()
         switch -exact ($Host.Name) {
             'ConsoleHost' {  ## PowerShell.exe
-                $IncompatibleHandlers = @()
                 break
             }
             'PoshConsole' {
-                $IncompatibleHandlers = "ConsoleList","Intellisense"
+                $IncompatibleHandlers += "ConsoleList"
                 break
             }
             'PowerGUIHost' {
-                $IncompatibleHandlers = "ConsoleList","Intellisense"
+                $IncompatibleHandlers += "ConsoleList"
                 break
             }
             'PowerGUIScriptEditorHost' {
-                $IncompatibleHandlers = "ConsoleList","Intellisense"
+                $IncompatibleHandlers += "ConsoleList"
                 break
             }
             'PowerShellPlus Host' {
-                $IncompatibleHandlers = @()
                 break
             }
             'Windows PowerShell ISE Host' {
-                $IncompatibleHandlers = "ConsoleList","Intellisense"
+                $IncompatibleHandlers += "ConsoleList"
                 break
             }
         }
@@ -196,7 +194,6 @@ Function Invoke-TabItemSelector {
 
         switch -exact ($SelectionHandler) {
             'ConsoleList' {$Objects | Out-ConsoleList $LastWord $ReturnWord -ForceList:$ForceList}
-            'Intellisense' {$Values | Invoke-Intellisense $LastWord}
             'CommonPrefix' {$Objects | Show-CommonPrefix $LastWord}
             'ObjectDefault' {$Objects}
             'Default' {$Values}
@@ -367,9 +364,10 @@ Function Import-TabExpansionConfig {
         $Version = $Config.Tables['Config'].Select("Name = 'Version'")[0].Value -as [System.Version]
 
         ## Upgrade if needed
+        $UpgradeOccurred = $false
         if ($Version -lt $CurVersion) {
-            ## Upgrade config and database
-            UpgradeTabExpansionDatabase ([Ref]$Config) ([Ref](New-Object System.Data.DataSet)) $Version
+            ## Upgrade config
+            $UpgradeOccurred = UpgradeTabExpansionDatabase ([Ref]$Config) ([Ref](New-Object System.Data.DataSet)) $Version
         } elseif ($Version -gt $CurVersion) {
             ## TODO: config is from a later version
         }
@@ -378,6 +376,11 @@ Function Import-TabExpansionConfig {
 
         ## Set version
         $PowerTabConfig.Version = $CurVersion
+
+        ## Export the newly upgraded config
+        if ($UpgradeOccurred) {
+            Export-TabExpansionConfig
+        }
 
         Write-Verbose ($Resources.import_tabexpansionconfig_ver_success -f $LiteralPath)
     }
@@ -1037,9 +1040,10 @@ Function Initialize-PowerTab {
     $Database = InternalImportTabExpansionDataBase $DatabasePath
 
     ## Upgrade if needed
+    $UpgradeOccurred = $false
     if ($Version -lt $CurVersion) {
         ## Upgrade config and database
-        UpgradeTabExpansionDatabase ([Ref]$Config) ([Ref]$Database) $Version
+        $UpgradeOccurred = UpgradeTabExpansionDatabase ([Ref]$Config) ([Ref]$Database) $Version
     } elseif ($Version -gt $CurVersion) {
         ## Config is from a newer version
         throw "The configuration was created with a newer version of PowerTab and is not compatible."
@@ -1054,6 +1058,12 @@ Function Initialize-PowerTab {
 
     ## Set version
     $PowerTabConfig.Version = $CurVersion
+
+    ## Export the newly upgraded config and database
+    if ($UpgradeOccurred) {
+        Export-TabExpansionConfig
+        Export-TabExpansionDatabase
+    }
 }
 
 
@@ -1089,12 +1099,15 @@ Function UpgradeTabExpansionDatabase {
         $Version = '0.99.5.0'
         $UpgradeOccurred = $true
     }
-
-    ## Export the newly upgraded config and database
-    if ($UpgradeOccurred) {
-        Export-TabExpansionConfig
-        Export-TabExpansionDatabase
+    if ($Version -lt [System.Version]'1.0.0.0') {
+        ## Upgrade versions from the first version of PowerTab
+        Write-Host "Upgrading from version $Version"  ## TODO:  Localize
+        UpgradePowerTab100 $Config $Database
+        $Version = '1.0.0.0'
+        $UpgradeOccurred = $true
     }
+
+    return $UpgradeOccurred
 }
 
 
@@ -1140,6 +1153,25 @@ Function UpgradePowerTab993 {
     $row.Category = 'Global'
     $row.Value = [Int]($False)
     $Config.Value.Tables['Config'].Rows.Add($row)
+}
+
+
+Function UpgradePowerTab100 {
+    [CmdletBinding()]
+    param(
+        [Ref]$Config
+        ,
+        [Ref]$Database
+    )
+
+    $DefaultHandler = $Config.Value.Tables['Config'].Select("Name = 'DefaultHandler'")[0]
+    $AlternateHandler = $Config.Value.Tables['Config'].Select("Name = 'AlternateHandler'")[0]
+    if ($DefaultHandler.Value -eq "Intellisense") {
+        $DefaultHandler.Value = "Dynamic"
+    }
+    if ($AlternateHandler.Value -eq "Intellisense") {
+        $AlternateHandler.Value = "Dynamic"
+    }
 }
 
 

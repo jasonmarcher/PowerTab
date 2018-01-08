@@ -78,7 +78,6 @@ New-Variable PowerTabLog -Value (
 ## Functions
 #########################
 
-Import-Module (Join-Path $PSScriptRoot "Lerch.PowerShell.dll")
 . (Join-Path $PSScriptRoot "TabExpansionResources.ps1")
 Import-LocalizedData -BindingVariable Resources -FileName Resources -ErrorAction SilentlyContinue
 . (Join-Path $PSScriptRoot "TabExpansionCore.ps1")

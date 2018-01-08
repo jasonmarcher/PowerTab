@@ -61,9 +61,6 @@ LONG DESCRIPTION
 
       Igor Dvorkin
 
-      Aaron Lerch / Invoke-Intellisense / Lerch.PowerShell.dll
-      http://www.aaronlerch.com/
-
       Richard Deeming / Shares.dll
       http://www.codeproject.com/KB/IP/networkshares.aspx
 

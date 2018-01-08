@@ -6,7 +6,7 @@ Additional tab item selectors are available in PowerTab that are designed to mak
 
 **Available Selectors**
 
-There are currently three selectors available that are detailed in the sections below, **ConsoleList**, **Intellisense**, and **Default**. Also, there is the special setting **Dynamic** that will cause PowerTab to choose the best selector for your PowerShell host. This setting allows you to use PowerTab with multiple PowerShell hosts without needing multiple configurations.
+There are currently three selectors available that are detailed in the sections below, **ConsoleList** and **Default**. Also, there is the special setting **Dynamic** that will cause PowerTab to choose the best selector for your PowerShell host. This setting allows you to use PowerTab with multiple PowerShell hosts without needing multiple configurations.
 
 Please refer to the [Host Support](Usage/HostSupport.md) page for information on which selectors are supported on each host.
 
@@ -72,27 +72,6 @@ Period |  | See $PowerTabConfig.DotComplete above.
 Space |  | 
 Enter | Accept Current Selection | The selection is used to replace the last word on the command line.
 Letters or Numbers | Adds to Filter | The filter updates the list of available choices in real time.
-
-## Intellisense
-
-![Intellisense](PowerTabIntellisense.png)
-
-The Intellisense selector presents a list outside of the console that is more compact than the ConsoleList selector. However, shifting focus away from the list will cause it to close and add the currently selected item to the command line.
-
-
-**Key Map for Intellisense**
-
-Key | Function | Notes
---- | -------- | -----
-Tab | Accept Current Selection | The selection is used to replace the last word on the command line
-Up Arrow | Move Selection Up | 
-Down Arrow | Move Selection Down | 
-Right Arrow | Move Selection Down | 
-Left Arrow | Move Selection Up | 
-Page Up | Move Up One Page | 
-Page Down | Move Down One Page | 
-Enter | Accept Current Selection | The selection is used to replace the last word on the command line
-Letters or Numbers |  | 
 
 ## Default
 
