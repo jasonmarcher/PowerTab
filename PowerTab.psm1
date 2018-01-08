@@ -10,12 +10,6 @@ if (-not ([AppDomain]::CurrentDomain.GetAssemblies() | Where-Object {$_.Manifest
     [Void][System.Reflection.Assembly]::LoadWithPartialName("System.Windows.Forms")
 }
 
-## Load shares library
-if (($PSVersionTable.Platform -eq "Win32NT") -or ($env:OS -like "Windows*")) {
-    if (-not ([AppDomain]::CurrentDomain.GetAssemblies() | Where-Object {$_.ManifestModule -like "Shares.*"})) {
-        [Void][System.Reflection.Assembly]::LoadFile((Join-Path $PSScriptRoot "Shares.dll"))
-    }
-}
 
 #########################
 ## Cleanup

@@ -12,7 +12,7 @@ param()
 
 # .ExternalHelp TabExpansionCore-Help.xml
 Function Invoke-TabExpansion {
-	[CmdletBinding()]
+    [CmdletBinding()]
     [OutputType([String])]
     param(
         [Parameter(Position = 0, Mandatory = $true)]
@@ -724,17 +724,15 @@ Function Invoke-PowerTab {
             $ComputerName = $Matches.Computer
             $ShareName = $Matches.Share
             if (isWindows) {
-                # Get-WmiObject -Class Win32_Share -ComputerName $ComputerName -Filter "name like '$($ShareName)%'" |
-                #     Sort-Object Name | New-TabItem -Value {"\\$ComputerName\" + $_.Name} -Text {"\\$ComputerName\" + $_.Name} -Type Share
-                [Trinet.Networking.ShareCollection]::GetShares($ComputerName) | Where-Object {$_.NetName -like "$ShareName*"} |
-                    Sort-Object NetName | New-TabItem -Value {"\\$ComputerName\" + $_.NetName} -Text {"\\$ComputerName\" + $_.NetName} -Type Share
+                Get-WmiObject -Class Win32_Share -ComputerName $ComputerName -Filter "name like '$($ShareName)%'" |
+                    Sort-Object Name | New-TabItem -Value {"\\$ComputerName\" + $_.Name} -Text {"\\$ComputerName\" + $_.Name + " - " + $_.Description} -Type Share
             }
             $SelectorLastWord = $LastWord
             break
         }
 
         ## Completion on computers in database            
-			'^(\\\\|//)(?<Computer>[^\\/]*)$' {
+        '^(\\\\|//)(?<Computer>[^\\/]*)$' {
             Write-Trace "Core Handler: Evaluating computer names from database."
 
             foreach ($Computer in Get-TabExpansion "$($Matches.Computer)*" Computer) {
@@ -779,7 +777,7 @@ Function Invoke-PowerTab {
                 if ($Pattern -match '^[0-9]+$') {
                     @(Get-History -Id $Pattern -ErrorAction SilentlyContinue)[0].CommandLine
                 } else {
-					Get-History -Count 32767 | Where-Object {$_.CommandLine -like "*$Pattern*"} | Sort-Object Id -Descending |
+                    Get-History -Count 32767 | Where-Object {$_.CommandLine -like "*$Pattern*"} | Sort-Object Id -Descending |
                         Select-Object -ExpandProperty CommandLine -Unique | New-TabItem -Value {$_} -Text {$_} -Type History
                     $SelectorLastWord = $Pattern
                 }
