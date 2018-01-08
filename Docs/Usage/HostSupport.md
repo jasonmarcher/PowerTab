@@ -15,11 +15,11 @@ All Other Hosts | Not Tested | If a PowerShell host invokes the built-in tab exp
 
 ## Item Selector Support
 
-Host Name | ConsoleList | Intellisense | Default
---------- | ----------- | ------------ | -------
-PowerShell.exe | Yes | Yes | Yes
-PowerShell ISE |  |  | Yes
-PoshConsole |  |  | Yes
-PowerShell Plus | Yes | Yes | Yes
-PowerGUI (embedded) |  |  | ???
-All Other Hosts |  |  | Yes
+Host Name | ConsoleList | Default
+--------- | ----------- | -------
+PowerShell.exe | Yes | Yes
+PowerShell ISE |  | Yes
+PoshConsole |  | Yes
+PowerShell Plus | Yes | Yes
+PowerGUI (embedded) |  | ???
+All Other Hosts |  | Yes
