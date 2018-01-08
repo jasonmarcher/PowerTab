@@ -217,6 +217,7 @@ Register-TabExpansion "Reset-ComputerMachinePassword" -Type "Command" {
     Register-TabExpansion "Register-ObjectEvent" $EventHandler -Type "Command"
     Register-TabExpansion "Register-EngineEvent" $EventHandler -Type "Command"
     Register-TabExpansion "Register-WmiEvent" $EventHandler -Type "Command"
+    Register-TabExpansion "Register-CimIndicationEvent" $EventHandler -Type "Command"
     Register-TabExpansion "Remove-Event" $EventHandler -Type "Command"
     Register-TabExpansion "Unregister-Event" $EventHandler -Type "Command"
     Register-TabExpansion "Wait-Event" $EventHandler -Type "Command"

@@ -724,7 +724,7 @@ Function Invoke-PowerTab {
             $ComputerName = $Matches.Computer
             $ShareName = $Matches.Share
             if (isWindows) {
-                Get-WmiObject -Class Win32_Share -ComputerName $ComputerName -Filter "name like '$($ShareName)%'" |
+                Get-CimInstance -Class Win32_Share -ComputerName $ComputerName -Filter "name like '$($ShareName)%'" |
                     Sort-Object Name | New-TabItem -Value {"\\$ComputerName\" + $_.Name} -Text {"\\$ComputerName\" + $_.Name + " - " + $_.Description} -Type Share
             }
             $SelectorLastWord = $LastWord
