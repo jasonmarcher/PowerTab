@@ -53,6 +53,8 @@ LONG DESCRIPTION
       https://mvp.support.microsoft.com/profile/van%20Orsouw
       http://thepowershellguy.com/
 
+      Jason Archer
+
       Xaegr
       http://xaegr.livejournal.com/
 
@@ -60,11 +62,6 @@ LONG DESCRIPTION
       http://janel.spaces.live.com/blog/
 
       Igor Dvorkin
-
-      Richard Deeming / Shares.dll
-      http://www.codeproject.com/KB/IP/networkshares.aspx
-
-      Jason Archer
 
 
 SEE ALSO
