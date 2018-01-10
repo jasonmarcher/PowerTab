@@ -259,11 +259,10 @@ Function Invoke-TabExpansion {
     Add-Member -InputObject $CurrentContext -Name Line -Value $Line -MemberType NoteProperty
     Add-Member -InputObject $CurrentContext -Name LastWord -Value $LastWord -MemberType NoteProperty
     Add-Member -InputObject $CurrentContext -Name LastToken -Value $LastToken.Type -MemberType NoteProperty
-    ##  Special debug logging
-    if ($PowerTabLog.DebugEnabled) {
-        $PowerTabLog.Debug.Insert(0, ($CurrentContext | Select-Object @{n="TraceId";e={$TraceId}},Line,LastWord,LastToken,Command,Parameter,Argument,
-            PositionalParameter,PositionalParameters,OtherParameters,isCommandMode,isAssignment,isParameterValue,CommandInfo))
-    }
+
+    ## Save to history
+    $PowerTabLog.History.Insert(0, ($CurrentContext | Select-Object @{n="TraceId";e={$TraceId}},Line,LastWord,LastToken,Command,Parameter,Argument,
+        PositionalParameter,PositionalParameters,OtherParameters,isCommandMode,isAssignment,isParameterValue,CommandInfo))
 
     try {
         ## Detect DoubleTab if enabled

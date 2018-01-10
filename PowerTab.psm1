@@ -60,10 +60,9 @@ $PowerTabConfig = New-Object System.Management.Automation.PSObject
 New-Variable PowerTabLog -Value (
     New-Object PSObject -Property @{
         Error = New-Object System.Collections.ArrayList
-        Debug = New-Object System.Collections.ArrayList
-        DebugEnabled = $false
+        History = New-Object System.Collections.ArrayList
         Trace = New-Object System.Collections.ArrayList
-        TraceEnabled = $false
+        TraceEnabled = $true
     }
 )
 
