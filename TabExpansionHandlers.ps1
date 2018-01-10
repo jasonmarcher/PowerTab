@@ -54,7 +54,7 @@ Register-TabExpansion "Get-Command" -Type "Command" {
             if ($Context.OtherParameters["CommandType"]) {
                 $Parameters["CommandType"] = Resolve-TabExpansionParameterValue $Context.OtherParameters["CommandType"]
             } else {
-                $Parameters["CommandType"] = "Alias","Function","Filter","Cmdlet"
+                $Parameters["CommandType"] = "Alias","Function","ExternalScript","Filter","Cmdlet"
                 if ($PSVersionTable.PSVersion -ge "3.0") {
                     $Parameters["CommandType"] += "Workflow"
                 }
