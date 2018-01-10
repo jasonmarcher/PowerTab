@@ -777,8 +777,16 @@ Function Invoke-PowerTab {
                 if ($Pattern -match '^[0-9]+$') {
                     @(Get-History -Id $Pattern -ErrorAction SilentlyContinue)[0].CommandLine
                 } else {
-                    Get-History -Count 32767 | Where-Object {$_.CommandLine -like "*$Pattern*"} | Sort-Object Id -Descending |
-                        Select-Object -ExpandProperty CommandLine -Unique | New-TabItem -Value {$_} -Text {$_} -Type History
+                    if ((Get-Module PSReadline) -and (Test-Path (Get-PSReadlineOption).HistorySavePath)) {
+                        ## TODO: Find a way to support multi-line commands
+                        $history = Get-Content (Get-PSReadlineOption).HistorySavePath | Where-Object {$_ -notmatch '`' <# exclude multi-line #>} |
+                            Where-Object {$_ -like "*$Pattern*"} | Select-Object -Unique
+                        [Array]::Reverse($history)
+                        $history | New-TabItem -Value {$_} -Text {$_} -Type History
+                    } else {
+                        Get-History -Count 32767 | Where-Object {$_.CommandLine -like "*$Pattern*"} | Sort-Object Id -Descending |
+                            Select-Object -ExpandProperty CommandLine -Unique | New-TabItem -Value {$_} -Text {$_} -Type History
+                    }
                     $SelectorLastWord = $Pattern
                 }
                 break
