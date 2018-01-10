@@ -8,7 +8,7 @@ Additional tab item selectors are available in PowerTab that are designed to mak
 
 There are currently three selectors available that are detailed in the sections below, **ConsoleList** and **Default**. Also, there is the special setting **Dynamic** that will cause PowerTab to choose the best selector for your PowerShell host. This setting allows you to use PowerTab with multiple PowerShell hosts without needing multiple configurations.
 
-Please refer to the [Host Support](Usage/HostSupport.md) page for information on which selectors are supported on each host.
+Please refer to the [Host Support](HostSupport.md) page for information on which selectors are supported on each host.
 
 **Setting the Selector to Use**
 
