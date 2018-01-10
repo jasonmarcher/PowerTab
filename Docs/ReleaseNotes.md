@@ -3,6 +3,7 @@
 ## PowerTab 1.0.0
 
 - Added #5 - Support array functions for PS 3.0+
+- Added #20 - Add PowerTab History $PowerTabStatus.History
 - Added #33 - Create basic help
 - Added #37 - Add constructor syntax for New-Object
 - Added #39 - Add a trace log
@@ -19,11 +20,13 @@
 - Added #71 - PS v3, support finding workflow names
 - Added #73 - Tab support for "Get-Help -Parameter"
 - Added #74 - Support for calculated properties with ConvertTo-HTML
-- Fixed #76 - Remove Intellisense item selector
-- Fixed #77 - Remove Shares.dll
+- Added #76 - Remove Intellisense item selector
+- Added #77 - Remove Shares.dll
 - Added #78 - Add CMD based color theme
+- Added #83 - If PSReadline history is available, use that instead
 - Fixed #6 - In Core handler, avoid call with null CommandInfo
 - Fixed #7 - Progress bar possibly hanging
+- Fixed #19 - Get-Command <TAB> doesn't show scripts that are in $Env:Path
 - Fixed #24 - Detecting key state only works on Windows
 - Fixed #25 - On closing the menu vertical lines may stay visible in the console
 - Fixed #27 - Error with "Get-Content Function:TabExpansion" in PS V4
