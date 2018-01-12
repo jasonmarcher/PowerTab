@@ -778,10 +778,10 @@ Function Invoke-PowerTab {
                 } else {
                     if ((Get-Module PSReadline) -and (Test-Path (Get-PSReadlineOption).HistorySavePath)) {
                         ## TODO: Find a way to support multi-line commands
-                        $history = Get-Content (Get-PSReadlineOption).HistorySavePath | Where-Object {$_ -notmatch '`' <# exclude multi-line #>} |
-                            Where-Object {$_ -like "*$Pattern*"} | Select-Object -Unique
+                        $history = Get-Content (Get-PSReadlineOption).HistorySavePath | Where-Object {$_ -like "*$Pattern*"} |
+                            Where-Object {$_ -notmatch '`' <# exclude multi-line #>}
                         [Array]::Reverse($history)
-                        $history | New-TabItem -Value {$_} -Text {$_} -Type History
+                        $history | Select-Object -Unique | New-TabItem -Value {$_} -Text {$_} -Type History
                     } else {
                         Get-History -Count 32767 | Where-Object {$_.CommandLine -like "*$Pattern*"} | Sort-Object Id -Descending |
                             Select-Object -ExpandProperty CommandLine -Unique | New-TabItem -Value {$_} -Text {$_} -Type History
