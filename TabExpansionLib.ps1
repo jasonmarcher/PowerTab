@@ -463,9 +463,9 @@ Function Import-TabExpansionTheme {
 
     end {
         if ($PSCmdlet.ParameterSetName -eq "Name") {
-            Import-Csv (Join-Path $PSScriptRoot "ColorThemes/Theme${Name}.csv") | ForEach-Object {$PowerTabConfig.Colors."$($_.Name)" = $_.Color}
+            Import-Csv (Join-Path $PSScriptRoot "ColorThemes/Theme${Name}.csv") | ForEach-Object {$PowerTabConfig.ConsoleList.Colors."$($_.Name)" = $_.Color}
         } else {
-            Import-Csv $LiteralPath | ForEach-Object {$PowerTabConfig.Colors."$($_.Name)" = $_.Color}
+            Import-Csv $LiteralPath | ForEach-Object {$PowerTabConfig.ConsoleList.Colors."$($_.Name)" = $_.Color}
         }
     }
 }
@@ -493,8 +493,8 @@ Function Export-TabExpansionTheme {
         } else {
             $ExportPath = $LiteralPath
         }
-        $Colors = $PowerTabConfig.Colors | Get-Member -MemberType ScriptProperty |
-            Select-Object @{Name='Name';Expression={$_.Name}},@{Name='Color';Expression={$PowerTabConfig.Colors."$($_.Name)"}} |
+        $Colors = $PowerTabConfig.ConsoleList.Colors | Get-Member -MemberType ScriptProperty |
+            Select-Object @{Name='Name';Expression={$_.Name}},@{Name='Color';Expression={$PowerTabConfig.ConsoleList.Colors."$($_.Name)"}} |
             Export-Csv $ExportPath -NoType
 
         trap [System.Management.Automation.PipelineStoppedException] {
@@ -1172,6 +1172,32 @@ Function UpgradePowerTab100 {
     if ($AlternateHandler.Value -eq "Intellisense") {
         $AlternateHandler.Value = "Dynamic"
     }
+    $DefaultHandler.Category = "Core"
+    $AlternateHandler.Category = "Core"
+
+    ## Convert Core settings
+    $Config.Value.Tables['Config'].Select("Name = 'DoubleTabEnabled'")[0].Category = "Core"
+    $Config.Value.Tables['Config'].Select("Name = 'DoubleTabLock'")[0].Category = "Core"
+    $Config.Value.Tables['Config'].Select("Name = 'AliasQuickExpand'")[0].Category = "Core"
+    $Config.Value.Tables['Config'].Select("Name = 'CustomFunctionEnabled'")[0].Category = "Core"
+    $Config.Value.Tables['Config'].Select("Name = 'CustomUserFunction'")[0].Category = "Core"
+    $Config.Value.Tables['Config'].Select("Name = 'FileSystemExpand'")[0].Category = "Core"
+    $Config.Value.Tables['Config'].Select("Name = 'ShowAccessorMethods'")[0].Category = "Core"
+    $Config.Value.Tables['Config'].Select("Name = 'IgnoreConfirmPreference'")[0].Category = "Core"
+
+    ## Convert ConsoleList settings
+    $Config.Value.Tables['Config'].Select("Name = 'MinimumListItems'")[0].Category = "ConsoleList"
+    $Config.Value.Tables['Config'].Select("Name = 'FastScrollItemcount'")[0].Category = "ConsoleList"
+    $Config.Value.Tables['Config'].Select("Name = 'CloseListOnEmptyFilter'")[0].Category = "ConsoleList"
+    $Config.Value.Tables['Config'].Select("Name = 'VisualStudioTabBehavior'")[0].Category = "ConsoleList"
+    $Config.Value.Tables['Config'].Select("Name = 'DotComplete'")[0].Category = "ConsoleList"
+    $Config.Value.Tables['Config'].Select("Name = 'AutoExpandOnDot'")[0].Category = "ConsoleList"
+    $Config.Value.Tables['Config'].Select("Name = 'BackSlashComplete'")[0].Category = "ConsoleList"
+    $Config.Value.Tables['Config'].Select("Name = 'AutoExpandOnBackSlash'")[0].Category = "ConsoleList"
+    $Config.Value.Tables['Config'].Select("Name = 'SpaceComplete'")[0].Category = "ConsoleList"
+    $Config.Value.Tables['Config'].Select("Name = 'CustomComplete'")[0].Category = "ConsoleList"
+    $Config.Value.Tables['Config'].Select("Name = 'CustomCompletionChars'")[0].Category = "ConsoleList"
+    $Config.Value.Tables['Config'].Select("Name = 'DoubleBorder'")[0].Category = "ConsoleList"
 }
 
 
@@ -1199,13 +1225,9 @@ Function InternalNewTabExpansionConfig {
     $dtConfig.TableName = 'Config'
 
     ## Add global configuration
-    @{
-        Version = (Parse-Manifest).ModuleVersion
-        DefaultHandler = 'Dynamic'
-        AlternateHandler = 'Dynamic'
-        CustomUserFunction = 'Write-Warning'
-        CustomCompletionChars = ']:)'
-    }.GetEnumerator() | Foreach-Object {
+    ([Ordered]@{
+            Version = (Parse-Manifest).ModuleVersion
+        }).GetEnumerator() | Foreach-Object {
             $row = $dtConfig.NewRow()
             $row.Name = $_.Name
             $row.Type = 'String'
@@ -1214,88 +1236,11 @@ Function InternalNewTabExpansionConfig {
             $dtConfig.Rows.Add($row)
         }
     @($dtConfig.Select("Name = 'Version'"))[0].Category = 'Version'
-
-    ## Add color configuration
-    $Items = `
-        'BorderColor',
-        'BorderBackColor',
-        'BackColor',
-        'TextColor',
-        'SelectedBackColor',
-        'SelectedTextColor',
-        'BorderTextColor',
-        'FilterColor'
-    $DefaultColors = `
-        'Blue',
-        'DarkBlue',
-        'DarkGray',
-        'Yellow',
-        'DarkRed',
-        'Red',
-        'Yellow',
-        'DarkGray'
-    0..($Items.GetUpperBound(0)) | Foreach-Object {
-            $row = $dtConfig.NewRow()
-            $row.Name = $items[$_]
-            $row.Category = 'Colors'
-            $row.Type = 'ConsoleColor'
-            $row.Value = [ConsoleColor]($DefaultColors[$_])
-            $dtConfig.Rows.Add($row)
-        }
-
-    ## Add shortcut configuration
-    @{
-        Alias   = '@'
-        Partial = '%'
-        Native  = '!'
-        Invoke  = '&'
-        Custom  = '^'
-        CustomFunction  = '#'
-    }.GetEnumerator() | Foreach-Object {
-            $row = $dtConfig.NewRow()
-            $row.Name = $_.Name
-            $row.Type = 'String'
-            $row.Category = 'ShortcutChars'
-            $row.Value = $_.Value
-            $dtConfig.Rows.Add($row)
-        }
-
-    ## Add setup configuration
-    @{
-        ConfigurationPath = $ConfigurationPath
-        DatabasePath = $DatabasePath
-    }.GetEnumerator() | Foreach-Object {
-            $row = $dtConfig.NewRow()
-            $row.Name = $_.Name
-            $row.Type = 'String'
-            $row.Category = 'Setup'
-            $row.Value = $_.Value
-            $dtConfig.Rows.Add($row)
-        }
-
-    $Options = @{
+    ([Ordered]@{
             Enabled = $True
-            ShowBanner = $True
             TabActivityIndicator = $True
-            DoubleTabEnabled = $False
-            DoubleTabLock = $False
-            AliasQuickExpand = $False
-            FileSystemExpand = $True
-            ShowAccessorMethods = $True
-            DoubleBorder = $True
-            CustomFunctionEnabled = $False
-            IgnoreConfirmPreference = $False
-            ## ConsoleList
-            CloseListOnEmptyFilter = $True
-            DotComplete = $True
-            AutoExpandOnDot = $True
-            BackSlashComplete = $True
-            AutoExpandOnBackSlash = $True
-            CustomComplete = $True
-            SpaceComplete = $True
-            VisualStudioTabBehavior = $False
-        }
-    $Options.GetEnumerator() | Foreach-Object {
+            ShowBanner = $True
+        }).GetEnumerator() | Foreach-Object {
             $row = $dtConfig.NewRow()
             $row.Name = $_.Name
             $row.Type = 'Bool'
@@ -1304,16 +1249,119 @@ Function InternalNewTabExpansionConfig {
             $dtConfig.Rows.Add($row)
         }
 
-    @{
-        ## ConsoleList
-        MinimumListItems   = '2'
-        FastScrollItemcount = '10'
-    }.GetEnumerator() | ForEach-Object {
+    ## Add setup configuration
+    ([Ordered]@{
+            ConfigurationPath = $ConfigurationPath
+            DatabasePath = $DatabasePath
+        }).GetEnumerator() | Foreach-Object {
+            $row = $dtConfig.NewRow()
+            $row.Name = $_.Name
+            $row.Type = 'String'
+            $row.Category = 'Setup'
+            $row.Value = $_.Value
+            $dtConfig.Rows.Add($row)
+        }
+
+    ## Add Core configuration
+    ([Ordered]@{
+            DefaultHandler = 'Dynamic'
+            AlternateHandler = 'Dynamic'
+            CustomUserFunction = 'Write-Warning'
+        }).GetEnumerator() | Foreach-Object {
+            $row = $dtConfig.NewRow()
+            $row.Name = $_.Name
+            $row.Type = 'String'
+            $row.Category = 'Core'
+            $row.Value = $_.Value
+            $dtConfig.Rows.Add($row)
+        }
+    ([Ordered]@{
+            CustomFunctionEnabled = $False
+            DoubleTabEnabled = $False
+            DoubleTabLock = $False
+            AliasQuickExpand = $False
+            FileSystemExpand = $True
+            ShowAccessorMethods = $True
+            IgnoreConfirmPreference = $False
+        }).GetEnumerator() | Foreach-Object {
+            $row = $dtConfig.NewRow()
+            $row.Name = $_.Name
+            $row.Type = 'Bool'
+            $row.Category = 'Core'
+            $row.Value = [Int]($_.Value)
+            $dtConfig.Rows.Add($row)
+        }
+    ([Ordered]@{
+            Alias   = '@'
+            Partial = '%'
+            Native  = '!'
+            Invoke  = '&'
+            Custom  = '^'
+            CustomFunction  = '#'
+        }).GetEnumerator() | Foreach-Object {
+            $row = $dtConfig.NewRow()
+            $row.Name = $_.Name
+            $row.Type = 'String'
+            $row.Category = 'ShortcutChars'
+            $row.Value = $_.Value
+            $dtConfig.Rows.Add($row)
+        }
+
+    ## Add ConsoleList configuration
+    ([Ordered]@{
+            MinimumListItems   = '2'
+            FastScrollItemcount = '10'
+        }).GetEnumerator() | Foreach-Object {
             $row = $dtConfig.NewRow()
             $row.Name = $_.Name
             $row.Type = 'Int'
-            $row.Category = 'Global'
+            $row.Category = 'ConsoleList'
             $row.Value = $_.Value
+            $dtConfig.Rows.Add($row)
+        }
+    ([Ordered]@{
+            CloseListOnEmptyFilter = $True
+            VisualStudioTabBehavior = $False
+            DotComplete = $True
+            AutoExpandOnDot = $True
+            BackSlashComplete = $True
+            AutoExpandOnBackSlash = $True
+            SpaceComplete = $True
+            DoubleBorder = $True
+            CustomComplete = $True
+        }).GetEnumerator() | Foreach-Object {
+            $row = $dtConfig.NewRow()
+            $row.Name = $_.Name
+            $row.Type = 'Bool'
+            $row.Category = 'ConsoleList'
+            $row.Value = [Int]($_.Value)
+            $dtConfig.Rows.Add($row)
+        }
+    ([Ordered]@{
+            CustomCompletionChars = ']:)'
+        }).GetEnumerator() | Foreach-Object {
+            $row = $dtConfig.NewRow()
+            $row.Name = $_.Name
+            $row.Type = 'String'
+            $row.Category = 'ConsoleList'
+            $row.Value = $_.Value
+            $dtConfig.Rows.Add($row)
+        }
+    ([Ordered]@{
+            TextColor = "Yellow"
+            BackColor = "DarkGray"
+            BorderColor = "Blue"
+            BorderBackColor = "DarkBlue"
+            SelectedTextColor = "Red"
+            SelectedBackColor = "DarkRed"
+            BorderTextColor = "Yellow"
+            FilterColor = "DarkGray"
+        }).GetEnumerator() | Foreach-Object {
+            $row = $dtConfig.NewRow()
+            $row.Name = $_.Name
+            $row.Category = 'Colors'
+            $row.Type = 'ConsoleColor'
+            $row.Value = [ConsoleColor]($_.Value)
             $dtConfig.Rows.Add($row)
         }
 
@@ -1410,14 +1458,13 @@ Function CreatePowerTabConfig {
     
     $script:PowerTabConfig = New-Object PSObject
 
+    ## Make global properties on config object
     Add-Member -InputObject $PowerTabConfig -MemberType ScriptProperty -Name Version `
         -Value $ExecutionContext.InvokeCommand.NewScriptBlock(
             "`$dsTabExpansionConfig.Tables['Config'].Select(`"Name = 'Version'`")[0].Value") `
         -SecondValue $ExecutionContext.InvokeCommand.NewScriptBlock(
             "trap {Write-Warning `$_; continue}
             `$dsTabExpansionConfig.Tables['Config'].Select(`"Name = 'Version'`")[0].Value = [String]`$args[0]")
-
-    ## Add Enable ScriptProperty
     Add-Member -InputObject $PowerTabConfig -MemberType ScriptProperty -Name Enabled `
         -Value $ExecutionContext.InvokeCommand.NewScriptBlock(
             "`$v = `$dsTabExpansionConfig.Tables['Config'].Select(`"Name = 'Enabled'`")[0]
@@ -1432,17 +1479,6 @@ Function CreatePowerTabConfig {
                 Set-Content Function:\TabExpansion -Value `$OldTabExpansion
             }") `
         -Force
-
-    Add-Member -InputObject $PowerTabConfig -MemberType NoteProperty -Name Colors -Value (New-Object PSObject)
-    Add-Member -InputObject $PowerTabConfig.Colors -MemberType ScriptMethod -Name ToString -Value {"{PowerTab Color Configuration}"} -Force
-
-    Add-Member -InputObject $PowerTabConfig -MemberType NoteProperty -Name ShortcutChars -Value (New-Object PSObject)
-    Add-Member -InputObject $PowerTabConfig.ShortcutChars -MemberType ScriptMethod -Name ToString -Value {"{PowerTab Shortcut Characters}"} -Force
-
-    Add-Member -InputObject $PowerTabConfig -MemberType NoteProperty -Name Setup -Value (New-Object PSObject)
-    Add-Member -InputObject $PowerTabConfig.Setup -MemberType ScriptMethod -Name ToString -Value {"{PowerTab Setup Data}"} -Force
-
-    ## Make global properties on config object
     $dsTabExpansionConfig.Tables['Config'].Select("Category = 'Global'") | Where-Object {$_.Name -ne "Enabled"} | ForEach-Object {
             Add-Member -InputObject $PowerTabConfig -MemberType ScriptProperty -Name $_.Name `
                 -Value $ExecutionContext.InvokeCommand.NewScriptBlock(
@@ -1455,36 +1491,36 @@ Function CreatePowerTabConfig {
                 -SecondValue $ExecutionContext.InvokeCommand.NewScriptBlock(
                     "trap {Write-Warning `$_; continue}
                     `$val = [$($_.Type)]`$args[0]
-                     if ('$($_.Type)' -eq 'bool') {`$val = [Int]`$val}
+                        if ('$($_.Type)' -eq 'bool') {`$val = [Int]`$val}
                     `$dsTabExpansionConfig.Tables['Config'].Select(`"Name = '$($_.Name)'`")[0].Value = `$val") `
                 -Force
         }
 
-    ## Make color properties on config object
-    $dsTabExpansionConfig.Tables['Config'].Select("Category = 'Colors'") | Foreach-Object {
-            Add-Member -InputObject $PowerTabConfig.Colors -MemberType ScriptProperty -Name $_.Name `
-                -Value $ExecutionContext.InvokeCommand.NewScriptBlock(
-                 "`$dsTabExpansionConfig.Tables['Config'].Select(`"Name = '$($_.Name)'`")[0].Value") `
-                -SecondValue $ExecutionContext.InvokeCommand.NewScriptBlock(
-                    "trap {Write-Warning `$_; continue}
-                    `$dsTabExpansionConfig.Tables['Config'].Select(`"Name = '$($_.Name)'`")[0].Value = [ConsoleColor]`$args[0]") `
-                -Force
-        }
-
-    ## Make shortcut properties on config object
-    $dsTabExpansionConfig.Tables['Config'].Select("Category = 'ShortcutChars'") | Foreach-Object {
-            Add-Member -InputObject $PowerTabConfig.ShortcutChars -MemberType ScriptProperty -Name $_.Name `
-                -Value $ExecutionContext.InvokeCommand.NewScriptBlock(
-                    "`$dsTabExpansionConfig.Tables['Config'].Select(`"Name = '$($_.Name)'`")[0].Value") `
-                -SecondValue $ExecutionContext.InvokeCommand.NewScriptBlock(
-                    "trap {Write-Warning `$_; continue}
-                    `$dsTabExpansionConfig.Tables['Config'].Select(`"Name = '$($_.Name)'`")[0].Value = `$args[0]") `
-                -Force
-        }
-
-    ## Make Setup properties on Config Object
+    ## Make Setup properties on config object
+    Add-Member -InputObject $PowerTabConfig -MemberType NoteProperty -Name Setup -Value (New-Object PSObject)
+    Add-Member -InputObject $PowerTabConfig.Setup -MemberType ScriptMethod -Name ToString -Value {"{PowerTab Setup Data}"} -Force
     $dsTabExpansionConfig.Tables['Config'].Select("Category = 'Setup'") | Foreach-Object {
-            Add-Member -InputObject $PowerTabConfig.Setup -MemberType ScriptProperty -Name $_.Name `
+        Add-Member -InputObject $PowerTabConfig.Setup -MemberType ScriptProperty -Name $_.Name `
+            -Value $ExecutionContext.InvokeCommand.NewScriptBlock(
+                "`$v = `$dsTabExpansionConfig.Tables['Config'].Select(`"Name = '$($_.Name)'`")[0]
+                if (`$v.Type -eq 'Bool') {
+                    [Bool][Int]`$v.Value
+                } else {
+                    [$($_.Type)](`$v.Value)
+                }") `
+            -SecondValue $ExecutionContext.InvokeCommand.NewScriptBlock(
+                "trap {Write-Warning `$_; continue}
+                `$val = [$($_.Type)]`$args[0]
+                 if ('$($_.Type)' -eq 'bool') {`$val = [Int]`$val}
+                `$dsTabExpansionConfig.Tables['Config'].Select(`"Name = '$($_.Name)'`")[0].Value = `$val") `
+            -Force
+    }
+    
+    ## Make properties for Core features
+    Add-Member -InputObject $PowerTabConfig -MemberType NoteProperty -Name Core -Value (New-Object PSObject)
+    Add-Member -InputObject $PowerTabConfig.Core -MemberType ScriptMethod -Name ToString -Value {"{PowerTab Core Behavior}"} -Force
+    $dsTabExpansionConfig.Tables['Config'].Select("Category = 'Core'") | ForEach-Object {
+            Add-Member -InputObject $PowerTabConfig.Core -MemberType ScriptProperty -Name $_.Name `
                 -Value $ExecutionContext.InvokeCommand.NewScriptBlock(
                     "`$v = `$dsTabExpansionConfig.Tables['Config'].Select(`"Name = '$($_.Name)'`")[0]
                     if (`$v.Type -eq 'Bool') {
@@ -1497,6 +1533,48 @@ Function CreatePowerTabConfig {
                     `$val = [$($_.Type)]`$args[0]
                      if ('$($_.Type)' -eq 'bool') {`$val = [Int]`$val}
                     `$dsTabExpansionConfig.Tables['Config'].Select(`"Name = '$($_.Name)'`")[0].Value = `$val") `
+                -Force
+        }
+    Add-Member -InputObject $PowerTabConfig.Core -MemberType NoteProperty -Name ShortcutChars -Value (New-Object PSObject)
+    Add-Member -InputObject $PowerTabConfig.Core.ShortcutChars -MemberType ScriptMethod -Name ToString -Value {"{PowerTab Shortcut Characters}"} -Force
+    $dsTabExpansionConfig.Tables['Config'].Select("Category = 'ShortcutChars'") | Foreach-Object {
+            Add-Member -InputObject $PowerTabConfig.Core.ShortcutChars -MemberType ScriptProperty -Name $_.Name `
+                -Value $ExecutionContext.InvokeCommand.NewScriptBlock(
+                    "`$dsTabExpansionConfig.Tables['Config'].Select(`"Name = '$($_.Name)'`")[0].Value") `
+                -SecondValue $ExecutionContext.InvokeCommand.NewScriptBlock(
+                    "trap {Write-Warning `$_; continue}
+                    `$dsTabExpansionConfig.Tables['Config'].Select(`"Name = '$($_.Name)'`")[0].Value = `$args[0]") `
+                -Force
+        }
+
+    ## Make properties for Console List
+    Add-Member -InputObject $PowerTabConfig -MemberType NoteProperty -Name ConsoleList -Value (New-Object PSObject)
+    Add-Member -InputObject $PowerTabConfig.ConsoleList -MemberType ScriptMethod -Name ToString -Value {"{ConsoleList Configuration}"} -Force
+    $dsTabExpansionConfig.Tables['Config'].Select("Category = 'ConsoleList'") | ForEach-Object {
+        Add-Member -InputObject $PowerTabConfig.ConsoleList -MemberType ScriptProperty -Name $_.Name `
+            -Value $ExecutionContext.InvokeCommand.NewScriptBlock(
+                "`$v = `$dsTabExpansionConfig.Tables['Config'].Select(`"Name = '$($_.Name)'`")[0]
+                if (`$v.Type -eq 'Bool') {
+                    [Bool][Int]`$v.Value
+                } else {
+                    [$($_.Type)](`$v.Value)
+                }") `
+            -SecondValue $ExecutionContext.InvokeCommand.NewScriptBlock(
+                "trap {Write-Warning `$_; continue}
+                `$val = [$($_.Type)]`$args[0]
+                 if ('$($_.Type)' -eq 'bool') {`$val = [Int]`$val}
+                `$dsTabExpansionConfig.Tables['Config'].Select(`"Name = '$($_.Name)'`")[0].Value = `$val") `
+            -Force
+    }
+    Add-Member -InputObject $PowerTabConfig.ConsoleList -MemberType NoteProperty -Name Colors -Value (New-Object PSObject)
+    Add-Member -InputObject $PowerTabConfig.ConsoleList.Colors -MemberType ScriptMethod -Name ToString -Value {"{ConsoleList Color Configuration}"} -Force
+    $dsTabExpansionConfig.Tables['Config'].Select("Category = 'Colors'") | Foreach-Object {
+            Add-Member -InputObject $PowerTabConfig.ConsoleList.Colors -MemberType ScriptProperty -Name $_.Name `
+                -Value $ExecutionContext.InvokeCommand.NewScriptBlock(
+                 "`$dsTabExpansionConfig.Tables['Config'].Select(`"Name = '$($_.Name)'`")[0].Value") `
+                -SecondValue $ExecutionContext.InvokeCommand.NewScriptBlock(
+                    "trap {Write-Warning `$_; continue}
+                    `$dsTabExpansionConfig.Tables['Config'].Select(`"Name = '$($_.Name)'`")[0].Value = [ConsoleColor]`$args[0]") `
                 -Force
         }
 }

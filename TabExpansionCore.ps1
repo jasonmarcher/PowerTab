@@ -266,18 +266,18 @@ Function Invoke-TabExpansion {
 
     try {
         ## Detect DoubleTab if enabled
-        if ($PowerTabConfig.DoubleTabEnabled) {
+        if ($PowerTabConfig.Core.DoubleTabEnabled) {
             Start-Sleep -m 400
             $DoubleTab = ($Host.UI.RawUI.KeyAvailable)
         } else {
-            $DoubleTab = $PowerTabConfig.DoubleTabLock  
+            $DoubleTab = $PowerTabConfig.Core.DoubleTabLock  
         }
 
         ## Check DoubleTab and set selection handler
         if ($DoubleTab) {
-            $SelectionHandler = $PowerTabConfig.AlternateHandler
+            $SelectionHandler = $PowerTabConfig.Core.AlternateHandler
         } else {
-            $SelectionHandler = $PowerTabConfig.DefaultHandler
+            $SelectionHandler = $PowerTabConfig.Core.DefaultHandler
         }
 
         ## Resolve internal (no prefix) and fully qualified command names
@@ -567,7 +567,7 @@ Function Invoke-PowerTab {
     $TabExpansionHasOutput = $false
 
     $OriginalConfirmPreference = $ConfirmPreference
-    if ($PowerTabConfig.IgnoreConfirmPreference) {
+    if ($PowerTabConfig.Core.IgnoreConfirmPreference) {
         $ConfirmPreference = 'High'
     }
 
@@ -612,7 +612,7 @@ Function Invoke-PowerTab {
 
             $Members | Where-Object {
                 $n = $_.Name
-                if (-not $PowerTabConfig.ShowAccessorMethods) {
+                if (-not $PowerTabConfig.Core.ShowAccessorMethods) {
                     $n -like $Pattern -and $n -notmatch '^[gs]et_'
                 } else {
                     $n -like $Pattern
@@ -696,7 +696,7 @@ Function Invoke-PowerTab {
             $Member = $Matches[2]
             {} | Get-Member | Where-Object {
                 $n = $_.Name
-                if (-not $PowerTabConfig.ShowAccessorMethods) {
+                if (-not $PowerTabConfig.Core.ShowAccessorMethods) {
                     $n -like "$Member*" -and $n -notmatch '^[gs]et_'
                 } else {
                     $n -like "$Member*"
@@ -1023,7 +1023,7 @@ Function Invoke-PowerTab {
         ## Completion on cmdlets, function, aliases and native commands with defined shortcuts and custom additions from database
 
         ## Native commands / scripts in path
-        "(.*)$([Regex]::Escape($PowerTabConfig.ShortcutChars.Native))`$" { 
+        "(.*)$([Regex]::Escape($PowerTabConfig.Core.ShortcutChars.Native))`$" { 
             Write-Trace "Core Handler: Evaluating native commands and scripts only (special character)."
 
             Get-Command -CommandType ExternalScript -Name "$($Matches[1])*" |
@@ -1036,10 +1036,10 @@ Function Invoke-PowerTab {
         }
 
         ## Aliases
-        "(.+)$([Regex]::Escape($PowerTabConfig.ShortcutChars.Alias))`$" {
+        "(.+)$([Regex]::Escape($PowerTabConfig.Core.ShortcutChars.Alias))`$" {
             Write-Trace "Core Handler: Evaluating aliases only (special character)."
 
-            if ($DoubleTab -or $PowerTabConfig.AliasQuickExpand) {
+            if ($DoubleTab -or $PowerTabConfig.Core.AliasQuickExpand) {
                 GetCommand -CommandType Alias -Name $Matches[1] | New-TabItem -Value {$_.Definition} -Text {$_.Definition} -Type Alias
                 $SelectorLastWord = $Matches[1]
             } else {
@@ -1050,7 +1050,7 @@ Function Invoke-PowerTab {
         }
 
         ## Custom
-        "(.*)$([Regex]::Escape($PowerTabConfig.ShortcutChars.Custom))`$" {
+        "(.*)$([Regex]::Escape($PowerTabConfig.Core.ShortcutChars.Custom))`$" {
             Write-Trace "Core Handler: Evaluating custon results from database only (special character)."
 
             Get-TabExpansion "$($Matches[1])*" Custom | New-TabItem -Value {$_.Text} -Text {$_.Text}
@@ -1059,7 +1059,7 @@ Function Invoke-PowerTab {
         }
 
         ## Invoke
-        "(.+)$([Regex]::Escape($PowerTabConfig.ShortcutChars.Invoke))`$" {
+        "(.+)$([Regex]::Escape($PowerTabConfig.Core.ShortcutChars.Invoke))`$" {
             Write-Trace "Core Handler: Evaluating invoke results from database only (special character)."
 
             Get-TabExpansion "$($Matches[1])*" Invoke | ForEach-Object {
@@ -1070,11 +1070,11 @@ Function Invoke-PowerTab {
         }
 
         ## Call function
-        "(.*)$([Regex]::Escape($PowerTabConfig.ShortcutChars.CustomFunction))`$" {
+        "(.*)$([Regex]::Escape($PowerTabConfig.Core.ShortcutChars.CustomFunction))`$" {
             Write-Trace "Core Handler: Calling custom user function."
 
-            if ($PowerTabConfig.CustomFunctionEnabled) {
-                & $PowerTabConfig.CustomUserFunction $Context | 
+            if ($PowerTabConfig.Core.CustomFunctionEnabled) {
+                & $PowerTabConfig.Core.CustomUserFunction $Context | 
                     New-TabItem -Value {$_} -Text {$_}
                 $SelectorLastWord = $Matches[1]
             }
@@ -1103,7 +1103,7 @@ Function Invoke-PowerTab {
 
     if ($TabExpansionHasOutput) {
         $PossibleValues | Invoke-TabItemSelector $LastWord -SelectionHandler $SelectionHandler
-    } elseif ((-not $TabExpansionHasOutput) -and $PowerTabConfig.FileSystemExpand) {
+    } elseif ((-not $TabExpansionHasOutput) -and $PowerTabConfig.Core.FileSystemExpand) {
         ## Filesystem Completion
         Invoke-ProviderPathHandler $LastWord
     }

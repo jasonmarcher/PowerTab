@@ -30,7 +30,7 @@ LONG DESCRIPTION
       commands. Adding a "%" character to the end of the search string will
       force PowerTab to search for any type of command (cmdlet, function,
       script, or application).  That character is configurable with
-      $PowerTabConfig.ShortcutChars.Partial.
+      $PowerTabConfig.Core.ShortcutChars.Partial.
 
           Get-
           di
@@ -87,7 +87,7 @@ LONG DESCRIPTION
       To tab expand the names of native commands and executables, add the "!"
       character to the end of the search string (that character will be removed
       from the results). That character is configurable with
-      $PowerTabConfig.ShortcutChars.Native.
+      $PowerTabConfig.Core.ShortcutChars.Native.
 
           !
           net!
@@ -97,7 +97,7 @@ LONG DESCRIPTION
       PowerTab supports expanding command history in the same way as the
       default tab expansion in PowerShell, using the "#" character to lead off
       the search string. That character is configurable with
-      $PowerTabConfig.ShortcutChars.Native. Additionally, PowerTab supports
+      $PowerTabConfig.Core.ShortcutChars.Native. Additionally, PowerTab supports
       wildcards in the search string.
 
           #
