@@ -167,7 +167,7 @@ Function Out-ConsoleList {
                 }
                 39 { ## Right Arrow
                     ## Add a new character (the one right after the current filter string) from currently selected item
-                    $Char = $ListHandle.Items[$ListHandle.SelectedItem].Text[($LastWord.Length + $Filter.Length + 1)]
+                    $Char = $ListHandle.Items[$ListHandle.SelectedItem].DisplayText[($LastWord.Length + $Filter.Length + 1)]
                     $Filter += $Char
                     
                     $Old = $Items.Length
@@ -201,7 +201,7 @@ Function Out-ConsoleList {
                         Write-Line ($Host.UI.RawUI.CursorPosition.X) ($Host.UI.RawUI.CursorPosition.Y - $Host.UI.RawUI.WindowPosition.Y) " " $PowerTabConfig.ConsoleList.Colors.FilterColor $Host.UI.RawUI.BackgroundColor
 
                         $Old = $Items.Length
-                        $Items = @($Content | Where-Object {$_.Text -match ([Regex]::Escape("$LastWord$Filter") + '.*')})
+                        $Items = @($Content | Where-Object {$_.DisplayText -match ([Regex]::Escape("$LastWord$Filter") + '.*')})
                         $New = $Items.Length
                         if ($Old -ne $New) {
                             ## If the item list changed, update the contents of the console list
@@ -297,7 +297,7 @@ Function Out-ConsoleList {
                     $Filter += $Key.Character
 
                     $Old = $Items.Length
-                    $Items = @($Content | Where-Object {$_.Text -match ('^' + [Regex]::Escape("$LastWord$Filter") + '.*')})
+                    $Items = @($Content | Where-Object {$_.DisplayText -match ('^' + [Regex]::Escape("$LastWord$Filter") + '.*')})
                     $New = $Items.Length
                     if ($Items.Length -lt 1) {
                         ## New filter results in no items
@@ -590,11 +590,23 @@ Function Out-ConsoleList {
 
         $Size = Get-ContentSize $Content
         $MinWidth = ([String]$Content.Count).Length * 4 + 7
-        if ($Size.Width -lt $MinWidth) {$Size.Width = $MinWidth}
+        $MaxWidth = $Host.UI.RawUI.WindowSize.Width - 2
+        $Size.Width = [Math]::Max($Size.Width, $MinWidth)
+        $Size.Width = [Math]::Min($Size.Width, $MaxWidth)
+
         $Content = foreach ($Item in $Content) {
-            $Item.DisplayText = "$($Item.Text) ".PadRight($Size.Width + 2)
+            if ($Size.Width -eq $MaxWidth) {
+                if ($Item.Text.Length -ge $Size.Width) {
+                    $Item.DisplayText = $Item.Text.Substring(0, $Size.Width - 3) + "..."
+                } else {
+                    $Item.DisplayText = "$($Item.Text)".PadRight($Size.Width)
+                }
+            } else {
+                $Item.DisplayText = "$($Item.Text)".PadRight($Size.Width + 2)
+            }
             $Item
         }
+
         $ListConfig = Parse-List $Size
         $BoxSize = New-Object System.Drawing.Size $ListConfig.ListWidth, $ListConfig.ListHeight
         $Box = New-Box $BoxSize $BorderForegroundColor $BorderBackgroundColor
@@ -742,10 +754,10 @@ Function Out-ConsoleList {
             $LinePosition.X += 1
             if ($One -eq 1) {
                 $LinePosition.Y += $Line - ($Count - $One)
-                $LineBuffer = ConvertTo-BufferCellArray ($ListHandle.Items[($SelectedItem - ($Count - $One)) .. $SelectedItem] | Select-Object -ExpandProperty Text) $PowerTabConfig.ConsoleList.Colors.TextColor $PowerTabConfig.ConsoleList.Colors.BackColor
+                $LineBuffer = ConvertTo-BufferCellArray ($ListHandle.Items[($SelectedItem - ($Count - $One)) .. $SelectedItem] | Select-Object -ExpandProperty DisplayText) $PowerTabConfig.ConsoleList.Colors.TextColor $PowerTabConfig.ConsoleList.Colors.BackColor
             } else {
                 $LinePosition.Y += 1
-                $LineBuffer = ConvertTo-BufferCellArray ($ListHandle.Items[($SelectedItem..($SelectedItem - ($Count - $One)))] | Select-Object -ExpandProperty Text) $PowerTabConfig.ConsoleList.Colors.TextColor $PowerTabConfig.ConsoleList.Colors.BackColor
+                $LineBuffer = ConvertTo-BufferCellArray ($ListHandle.Items[($SelectedItem..($SelectedItem - ($Count - $One)))] | Select-Object -ExpandProperty DisplayText) $PowerTabConfig.ConsoleList.Colors.TextColor $PowerTabConfig.ConsoleList.Colors.BackColor
             }
             $LineHandle = New-Buffer $LinePosition $LineBuffer
             Set-Selection 1 $Line ($ListHandle.ListConfig.ListWidth - 3) $PowerTabConfig.ConsoleList.Colors.SelectedTextColor $PowerTabConfig.ConsoleList.Colors.SelectedBackColor
@@ -764,4 +776,3 @@ Function Out-ConsoleList {
             $PowerTabConfig.ConsoleList.Colors.BorderTextColor $PowerTabConfig.ConsoleList.Colors.BorderBackColor
         $StatusHandle = New-Buffer $StatusHandle.Location $StatusBuffer
     }
-
