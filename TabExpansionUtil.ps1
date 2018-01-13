@@ -465,17 +465,17 @@ Function Invoke-ProviderPathHandler {
                 default {$Item.Name}
             }
             $Type = switch ($Item.GetType().FullName) {
-                "System.IO.DirectoryInfo" {"Directory";break}
-                "System.IO.FileInfo" {"File";break}
-                "System.Management.Automation.AliasInfo" {"Alias";break}
+                "System.IO.DirectoryInfo" {"ProviderContainer";break}
+                "System.IO.FileInfo" {"ProviderItem";break}
+                "System.Management.Automation.AliasInfo" {"Command";break}
                 "System.Management.Automation.FilterInfo" {"Command";break}
                 "System.Management.Automation.FunctionInfo" {"Command";break}
-                "System.Security.Cryptography.X509Certificates.X509Certificate2" {"Certificate";break}
-                "Microsoft.Powershell.Commands.X509StoreLocation" {"CertificateStore";break}
-                "Microsoft.Win32.RegistryKey" {"RegistryKey";break}
-                default {$_}
+                "System.Security.Cryptography.X509Certificates.X509Certificate2" {"ProviderItem";break}
+                "Microsoft.Powershell.Commands.X509StoreLocation" {"ProviderContainer";break}
+                "Microsoft.Win32.RegistryKey" {"ProviderItem";break}
+                default {"ProviderItem"}
             }
-            New-TabItem "$Container\$Child" "$Container\$Child" -Type $Type  ## TODO: PowerShell Core
+            New-TabItem "$Container\$Child" "$Container\$Child" -ResultType $Type  ## TODO: PowerShell Core
         }
         $ChildItems | Invoke-TabItemSelector $LastPath -SelectionHandler $SelectionHandler -Return $Path -ForceList:$ForceList | ForEach-Object {
             ## If a path contains any of these characters it needs to be in quotes

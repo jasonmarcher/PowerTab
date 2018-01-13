@@ -7,7 +7,7 @@
         switch -exact ($Context.Parameter) {
             'r' {
                 $TabExpansionHasOutput.Value = $true
-                Get-TabExpansion "$Argument*" Computer | New-TabItem -Value {$_.Text} -Text {$_.Text} -Type Computer
+                Get-TabExpansion "$Argument*" Computer | New-TabItem -Value {$_.Text} -Text {$_.Text} -ResultType ParameterValue
             }
         }
     }.GetNewClosure()
@@ -44,7 +44,7 @@
     Register-TabExpansion netsh.exe -Type ParameterName {
         param($Context, $Parameter)
         $Parameters = "-a","-c","-r","-u","-p","-f"
-        $Parameters | Where-Object {$_ -like "$Parameter*"}
+        $Parameters | Where-Object {$_ -like "$Parameter*"} | New-TabItem -Value {$_} -Text {$_} -ResultType ParameterName
     }.GetNewClosure()
 }
 
@@ -57,7 +57,7 @@
         switch -exact ($Context.Parameter) {
             'r' {
                 $TabExpansionHasOutput.Value = $true
-                Get-TabExpansion "$Argument*" Computer | New-TabItem {$_.Text} {$_.Text} -Type Computer
+                Get-TabExpansion "$Argument*" Computer | New-TabItem {$_.Text} {$_.Text} -ResultType ParameterValue
             }
         }
         #>

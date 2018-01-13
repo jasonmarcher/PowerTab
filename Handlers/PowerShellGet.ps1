@@ -8,7 +8,7 @@ Register-TabExpansion "Get-InstalledModule" -Type "Command" {
             $Modules = @(Get-InstalledModule "$Argument*" @Parameters | Sort-Object Name)
             if ($Modules.Count -gt 0) {
                 $TabExpansionHasOutput.Value = $true
-                $Modules | New-TabItem -Value {$_.Name} -Text {$_.Name} -Type Module
+                $Modules | New-TabItem -Value {$_.Name} -Text {$_.Name} -ResultType ParameterValue
             }
         }
     }
@@ -23,7 +23,7 @@ Register-TabExpansion "Uninstall-Module" -Type "Command" {
             $Modules = @(Get-InstalledModule "$Argument*" @Parameters | Sort-Object Name)
             if ($Modules.Count -gt 0) {
                 $TabExpansionHasOutput.Value = $true
-                $Modules | New-TabItem -Value {$_.Name} -Text {$_.Name} -Type Module
+                $Modules | New-TabItem -Value {$_.Name} -Text {$_.Name} -ResultType ParameterValue
             }
         }
     }
@@ -38,7 +38,7 @@ Register-TabExpansion "Update-Module" -Type "Command" {
             $Modules = @(Get-InstalledModule "$Argument*" @Parameters | Sort-Object Name)
             if ($Modules.Count -gt 0) {
                 $TabExpansionHasOutput.Value = $true
-                $Modules | New-TabItem -Value {$_.Name} -Text {$_.Name} -Type Module
+                $Modules | New-TabItem -Value {$_.Name} -Text {$_.Name} -ResultType ParameterValue
             }
         }
     }
@@ -54,7 +54,7 @@ Register-TabExpansion "Get-PSRepository" -Type "Command" {
             $PSRepositories = @(Get-PSRepository "$Argument*" @Parameters | Sort-Object Name)
             if ($Modules.Count -gt 0) {
                 $TabExpansionHasOutput.Value = $true
-                $PSRepositories | New-TabItem -Value {$_.Name} -Text {$_.Name} -Type Repository
+                $PSRepositories | New-TabItem -Value {$_.Name} -Text {$_.Name} -ResultType ParameterValue
             }
         }
     }
@@ -69,7 +69,7 @@ Register-TabExpansion "Set-PSRepository" -Type "Command" {
             $PSRepositories = @(Get-PSRepository "$Argument*" @Parameters | Sort-Object Name)
             if ($Modules.Count -gt 0) {
                 $TabExpansionHasOutput.Value = $true
-                $PSRepositories | New-TabItem -Value {$_.Name} -Text {$_.Name} -Type Repository
+                $PSRepositories | New-TabItem -Value {$_.Name} -Text {$_.Name} -ResultType ParameterValue
             }
         }
     }
@@ -84,7 +84,7 @@ Register-TabExpansion "Unregister-PSRepository" -Type "Command" {
             $PSRepositories = @(Get-PSRepository "$Argument*" @Parameters | Sort-Object Name)
             if ($Modules.Count -gt 0) {
                 $TabExpansionHasOutput.Value = $true
-                $PSRepositories | New-TabItem -Value {$_.Name} -Text {$_.Name} -Type Repository
+                $PSRepositories | New-TabItem -Value {$_.Name} -Text {$_.Name} -ResultType ParameterValue
             }
         }
     }

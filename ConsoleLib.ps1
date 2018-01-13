@@ -42,13 +42,13 @@ Function Out-ConsoleList {
 
         ## If contents contains less than minimum options, then forward contents without displaying console list
         if (($Content.Length -lt $PowerTabConfig.ConsoleList.MinimumListItems) -and (-not $ForceList)) {
-            $Content | Select-Object -ExpandProperty Value
+            $Content | Select-Object -ExpandProperty CompletionText
             return
         }
 
         ## If the shift key is pressed, then output the first result without displaying console list
         if (Get-KeyState 0x10) {
-            $Content[0].Value
+            $Content[0].CompletionText
             return
         }
 
@@ -109,7 +109,7 @@ Function Out-ConsoleList {
                     ## In Visual Studio, Tab acts like Enter
                     if ($PowerTabConfig.ConsoleList.VisualStudioTabBehavior) {
                         ## Expand with currently selected item
-                        $ListHandle.Items[$ListHandle.SelectedItem].Value
+                        $ListHandle.Items[$ListHandle.SelectedItem].CompletionText
                         $Continue = $false
                         break
                     } else {
@@ -228,7 +228,7 @@ Function Out-ConsoleList {
                     if ($PowerTabConfig.ConsoleList.DotComplete -and -not $PowerTabFileSystemMode) {
                         if ($PowerTabConfig.ConsoleList.AutoExpandOnDot) {
                             ## Expand with currently selected item
-                            $Host.UI.Write($Host.UI.RawUI.ForegroundColor, $Host.UI.RawUI.BackgroundColor, ($ListHandle.Items[$ListHandle.SelectedItem].Value.SubString($LastWord.Length + $Filter.Length) + '.'))
+                            $Host.UI.Write($Host.UI.RawUI.ForegroundColor, $Host.UI.RawUI.BackgroundColor, ($ListHandle.Items[$ListHandle.SelectedItem].CompletionText.SubString($LastWord.Length + $Filter.Length) + '.'))
                             $ListHandle.Clear()
                             $LinePart = $Line.SubString(0, $Line.Length - $LastWord.Length)
 
@@ -236,10 +236,10 @@ Function Out-ConsoleList {
                             Remove-TabActivityIndicator
 
                             ## Recursive tab expansion
-                            . TabExpansion ($LinePart + $ListHandle.Items[$ListHandle.SelectedItem].Value + '.') ($ListHandle.Items[$ListHandle.SelectedItem].Value + '.') -ForceList
+                            . TabExpansion ($LinePart + $ListHandle.Items[$ListHandle.SelectedItem].CompletionText + '.') ($ListHandle.Items[$ListHandle.SelectedItem].CompletionText + '.') -ForceList
                             $HasChild = $true
                         } else {
-                            $ListHandle.Items[$ListHandle.SelectedItem].Value
+                            $ListHandle.Items[$ListHandle.SelectedItem].CompletionText
                         }
                         $Continue = $false
                         break
@@ -249,7 +249,7 @@ Function Out-ConsoleList {
                     if ($PowerTabConfig.ConsoleList.BackSlashComplete) {
                         if ($PowerTabConfig.ConsoleList.AutoExpandOnBackSlash) {
                             ## Expand with currently selected item
-                            $Host.UI.Write($Host.UI.RawUI.ForegroundColor, $Host.UI.RawUI.BackgroundColor, ($ListHandle.Items[$ListHandle.SelectedItem].Value.SubString($LastWord.Length + $Filter.Length) + $Key.Character))
+                            $Host.UI.Write($Host.UI.RawUI.ForegroundColor, $Host.UI.RawUI.BackgroundColor, ($ListHandle.Items[$ListHandle.SelectedItem].CompletionText.SubString($LastWord.Length + $Filter.Length) + $Key.Character))
                             $ListHandle.Clear()
                             if ($Line.Length -ge $LastWord.Length) {
                                 $LinePart = $Line.SubString(0, $Line.Length - $LastWord.Length)
@@ -259,10 +259,10 @@ Function Out-ConsoleList {
                             Remove-TabActivityIndicator
 
                             ## Recursive tab expansion
-                            . Invoke-TabExpansion ($LinePart + $ListHandle.Items[$ListHandle.SelectedItem].Value + $Key.Character) ($ListHandle.Items[$ListHandle.SelectedItem].Value + $Key.Character) -ForceList
+                            . Invoke-TabExpansion ($LinePart + $ListHandle.Items[$ListHandle.SelectedItem].CompletionText + $Key.Character) ($ListHandle.Items[$ListHandle.SelectedItem].CompletionText + $Key.Character) -ForceList
                             $HasChild = $true
                         } else {
-                            $ListHandle.Items[$ListHandle.SelectedItem].Value
+                            $ListHandle.Items[$ListHandle.SelectedItem].CompletionText
                         }
                         $Continue = $false
                         break
@@ -272,7 +272,7 @@ Function Out-ConsoleList {
                     ## True if "Space" and SpaceComplete is true, or "Ctrl+Space" and SpaceComplete is false
                     if (($PowerTabConfig.ConsoleList.SpaceComplete -and -not ($Key.ControlKeyState -match 'CtrlPressed')) -or (-not $PowerTabConfig.ConsoleList.SpaceComplete -and ($Key.ControlKeyState -match 'CtrlPressed'))) {
                         ## Expand with currently selected item
-                        $Item = $ListHandle.Items[$ListHandle.SelectedItem].Value
+                        $Item = $ListHandle.Items[$ListHandle.SelectedItem].CompletionText
                         if ((-not $Item.Contains(' ')) -and ($PowerTabFileSystemMode -ne $true)) {$Item += ' '}
                         $Item
                         $Continue = $false
@@ -280,7 +280,7 @@ Function Out-ConsoleList {
                     }
                 }
                 {($PowerTabConfig.ConsoleList.CustomCompletionChars.ToCharArray() -contains $Key.Character) -and $PowerTabConfig.ConsoleList.CustomComplete} { ## Extra completions
-                    $Item = $ListHandle.Items[$ListHandle.SelectedItem].Value
+                    $Item = $ListHandle.Items[$ListHandle.SelectedItem].CompletionText
                     $Item = ($Item + $Key.Character) -replace "\$($Key.Character){2}$",$Key.Character
                     $Item
                     $Continue = $false
@@ -288,7 +288,7 @@ Function Out-ConsoleList {
                 }
                 13 { ## Enter
                     ## Expand with currently selected item
-                    $ListHandle.Items[$ListHandle.SelectedItem].Value
+                    $ListHandle.Items[$ListHandle.SelectedItem].CompletionText
                     $Continue = $false
                     break
                 }
@@ -442,7 +442,7 @@ Function Out-ConsoleList {
             [Object[]]$Content
         )
 
-        $MaxWidth = @($Content | Select-Object -ExpandProperty Text | Sort-Object Length -Descending)[0].Length
+        $MaxWidth = @($Content | Select-Object -ExpandProperty ListItemText | Sort-Object Length -Descending)[0].Length
         New-Object System.Drawing.Size $MaxWidth, $Content.Length
     }
 
@@ -595,14 +595,15 @@ Function Out-ConsoleList {
         $Size.Width = [Math]::Min($Size.Width, $MaxWidth)
 
         $Content = foreach ($Item in $Content) {
+            Add-Member -InputObject $Item -MemberType NoteProperty -Name DisplayText -Value "Show us de way"
             if ($Size.Width -eq $MaxWidth) {
-                if ($Item.Text.Length -ge $Size.Width) {
-                    $Item.DisplayText = $Item.Text.Substring(0, $Size.Width - 3) + "..."
+                if ($Item.ListItemText.Length -ge $Size.Width) {
+                    $Item.DisplayText = $Item.ListItemText.Substring(0, $Size.Width - 3) + "..."
                 } else {
-                    $Item.DisplayText = "$($Item.Text)".PadRight($Size.Width)
+                    $Item.DisplayText = "$($Item.ListItemText)".PadRight($Size.Width)
                 }
             } else {
-                $Item.DisplayText = "$($Item.Text)".PadRight($Size.Width + 2)
+                $Item.DisplayText = "$($Item.ListItemText)".PadRight($Size.Width + 2)
             }
             $Item
         }

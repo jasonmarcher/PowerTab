@@ -24,7 +24,7 @@ showing up from Get-Command.
         switch -exact ($Context.Parameter) {
             'Name' {
                 $TabExpansionHasOutput.Value = $true
-                Get-Alias -Name "$Argument*" | Select-Object -ExpandProperty Name
+                Get-Alias -Name "$Argument*" | New-TabItem -Value {$_.Name} -Text {$_.Name} -ResultType Command
             }
         }
     }.GetNewClosure()
@@ -43,7 +43,7 @@ Register-TabExpansion "Get-Command" -Type "Command" {
     switch -exact ($Context.Parameter) {
         'Module' {
             $TabExpansionHasOutput.Value = $true
-            Get-Module "$Argument*" | Select-Object -ExpandProperty Name | Sort-Object
+            Get-Module "$Argument*" | New-TabItem -Value {$_.Name} -Text {$_.Name} -ResultType ParameterValue
         }
         'Name' {
             $TabExpansionHasOutput.Value = $true
@@ -59,16 +59,16 @@ Register-TabExpansion "Get-Command" -Type "Command" {
                     $Parameters["CommandType"] += "Workflow"
                 }
             }
-            Get-Command "$Argument*" @Parameters | Select-Object -ExpandProperty Name
+            Get-Command "$Argument*" @Parameters | New-TabItem -Value {$_.Name} -Text {$_.Name} -ResultType Command
         }
         'Noun' {
             $TabExpansionHasOutput.Value = $true
             Get-Command -CommandType Cmdlet,Filter,Function | Where-Object {$_.Name -match "^[^-]+-(?<Noun>$Argument.*)"} |
-                ForEach-Object {$Matches.Noun} | Sort-Object -Unique
+                ForEach-Object {$Matches.Noun} | Sort-Object -Unique | New-TabItem -Value {$_} -Text {$_} -ResultType ParameterValue
         }
         'Verb' {
             $TabExpansionHasOutput.Value = $true
-            Get-Verb "$Argument*" | Select-Object -ExpandProperty Verb | Sort-Object
+            Get-Verb "$Argument*" | Sort-Object Verb | New-TabItem -Value {$_.Verb} -Text {$_.Verb} -ResultType ParameterValue
         }
     }
 }.GetNewClosure()
@@ -81,7 +81,7 @@ Register-TabExpansion "Reset-ComputerMachinePassword" -Type "Command" {
         'Server' {
             if ($Argument -notmatch '^\$') {
                 $TabExpansionHasOutput.Value = $true
-                Get-TabExpansion "$Argument*" Computer | Select-Object -ExpandProperty "Text"
+                Get-TabExpansion "$Argument*" Computer | New-TabItem -Value {$_.Text} -Text {$_.Text} -ResultType ParameterValue
             }
         }
     }
@@ -95,7 +95,7 @@ Register-TabExpansion "Reset-ComputerMachinePassword" -Type "Command" {
         switch -exact ($Context.Parameter) {
             'Drive' {
                 $TabExpansionHasOutput.Value = $true
-                Get-PSDrive -PSProvider FileSystem "$Argument*" | New-TabItem -Value {$_.Root} -Text {$_.Root} -Type Drive
+                Get-PSDrive -PSProvider FileSystem "$Argument*" | New-TabItem -Value {$_.Root} -Text {$_.Root} -ResultType ProviderContainer
             }
         }
     }.GetNewClosure()
@@ -114,7 +114,7 @@ Register-TabExpansion "Reset-ComputerMachinePassword" -Type "Command" {
                         $Description = $Point.Description
                     }
                     $Text = "{0}: {1} ({2})" -f $Point.SequenceNumber,[DateTime]::ParseExact($Point.CreationTime, "yyyyMMddHHmmss.ffffff-000", $null),$Description
-                    New-TabItem -Value $Point.SequenceNumber -Text $Text -Type ComputerRestorePoint
+                    New-TabItem -Value $Point.SequenceNumber -Text $Text -ResultType ParameterValue
                 }
             }
         }
@@ -138,8 +138,8 @@ Register-TabExpansion "Reset-ComputerMachinePassword" -Type "Command" {
                 if ($Context.OtherParameters["ComputerName"]) {
                     $Parameters["ComputerName"] = Resolve-TabExpansionParameterValue $Context.OtherParameters["ComputerName"]
                 }
-                Get-Counter -ListSet * @Parameters | Select-Object -ExpandProperty PathsWithInstances | 
-                    Where-Object {$_ -like "*$Argument*"} | Sort-Object
+                Get-Counter -ListSet * @Parameters | Where-Object {$_.PathsWithInstances -like "*$Argument*"} |
+                    Sort-Object PathsWithInstances | New-TabItem -Value {$_.PathsWithInstances} -Text {$_.PathsWithInstances} -ResultType ParameterValue
             }
             'ListSet' {
                 $TabExpansionHasOutput.Value = $true
@@ -147,7 +147,7 @@ Register-TabExpansion "Reset-ComputerMachinePassword" -Type "Command" {
                 if ($Context.OtherParameters["ComputerName"]) {
                     $Parameters["ComputerName"] = Resolve-TabExpansionParameterValue $Context.OtherParameters["ComputerName"]
                 }
-                Get-Counter -ListSet "$Argument*" @Parameters | Select-Object -ExpandProperty CounterSetName
+                Get-Counter -ListSet "$Argument*" @Parameters | New-TabItem -Value {$_.CounterSetName} -Text {$_.CounterSetName} -ResultType ParameterValue
             }
         }
     }.GetNewClosure()
@@ -164,11 +164,11 @@ Register-TabExpansion "Reset-ComputerMachinePassword" -Type "Command" {
         switch -exact ($Context.Parameter) {
             'SourceIdentifier' {
                 $TabExpansionHasOutput.Value = $true
-                Get-Event "$Argument*" | Select-Object -ExpandProperty SourceIdentifier | Sort-Object
+                Get-Event "$Argument*" | Sort-Object SourceIdentifier | New-TabItem -Value {$_.SourceIdentifier} -Text {$_.SourceIdentifier} -ResultType ParameterValue
             }
             'EventIdentifier' {
                 $TabExpansionHasOutput.Value = $true
-                Get-Event | Select-Object -ExpandProperty EventIdentifier
+                Get-Event | New-TabItem -Value {$_.EventIdentifier} -Text {$_.EventIdentifier} -ResultType ParameterValue
             }
         }
     }.GetNewClosure()
@@ -185,7 +185,7 @@ Register-TabExpansion "Reset-ComputerMachinePassword" -Type "Command" {
                 if ($Context.OtherParameters["InputObject"]) {
                     $TabExpansionHasOutput.Value = $true
                     Invoke-Expression $Context.OtherParameters["InputObject"] | Get-Member | 
-                        Where-Object {$_.MemberType -eq "Event" -and $_.Name -like "$Argument*"} | Select-Object -ExpandProperty Name
+                        Where-Object {$_.MemberType -eq "Event" -and $_.Name -like "$Argument*"} | New-TabItem -Value {$_.Name} -Text {$_.Name} -ResultType ParameterValue
                 }
             }
             'Namespace' {
@@ -202,11 +202,11 @@ Register-TabExpansion "Reset-ComputerMachinePassword" -Type "Command" {
                 $ParentNamespace = $Argument -replace '\\[^\\]*$'
                 $Namespaces = New-Object System.Management.ManagementClass "\\$ComputerName\${ParentNamespace}:__NAMESPACE"
                 $Namespaces = foreach ($Namespace in $Namespaces.PSBase.GetInstances()) {"{0}\{1}" -f $Namespace.__NameSpace,$Namespace.Name}
-                $Namespaces | Where-Object {$_ -like "$Argument*"} | Sort-Object
+                $Namespaces | Where-Object {$_ -like "$Argument*"} | Sort-Object | New-TabItem -Value {$_} -Text {$_} -ResultType Namespace
             }
             'SourceIdentifier' {
                 $TabExpansionHasOutput.Value = $true
-                Get-Event "$Argument*" | Select-Object -ExpandProperty SourceIdentifier | Sort-Object
+                Get-Event "$Argument*" | Sort-Object SourceIdentifier | New-TabItem -Value {$_.SourceIdentifier} -Text {$_.SourceIdentifier} -ResultType ParameterValue
             }
         }
     }.GetNewClosure()
@@ -243,7 +243,7 @@ Register-TabExpansion "Reset-ComputerMachinePassword" -Type "Command" {
                     @{'Id'='7';'Name'='Network'}
                 )
                 $Categories | Where-Object {$_.Name -like "$Argument*"} |
-                    New-TabItem -Value {$_.Id} -Text {$_.Name} -Type EventLogCategory
+                    New-TabItem -Value {$_.Id} -Text {$_.Name} -ResultType ParameterValue
             }
             'LogName' {
                 $TabExpansionHasOutput.Value = $true
@@ -252,7 +252,7 @@ Register-TabExpansion "Reset-ComputerMachinePassword" -Type "Command" {
                     $Parameters["ComputerName"] = Resolve-TabExpansionParameterValue $Context.OtherParameters["ComputerName"]
                 }
                 Get-EventLog -List -AsString @Parameters | Where-Object {$_ -like "$Argument*"} |
-                    New-TabItem -Value {$_} -Text {$_} -Type EventLog
+                    New-TabItem -Value {$_} -Text {$_} -ResultType ParameterValue
             }
         }
     }.GetNewClosure()
@@ -271,21 +271,8 @@ Register-TabExpansion "Get-FormatData" -Type "Command" {
     switch -exact ($Context.Parameter) {
         'TypeName' {
             if ($Argument -notmatch '^\.') {
-                ## TODO: Find way to differentiate namespaces from types
                 $TabExpansionHasOutput.Value = $true
-                $Dots = $Argument.Split(".").Count - 1
-                $res = @()
-                $res += $dsTabExpansionDatabase.Tables['Types'].Select("NS like '$Argument*' and DC = $($Dots + 1)") |
-                    Select-Object -Unique -ExpandProperty NS | New-TabItem -Value {$_} -Text {"$_."} -Type Namespace
-                $res += $dsTabExpansionDatabase.Tables['Types'].Select("NS like 'System.$Argument*' and DC = $($Dots + 2)") |
-                    Select-Object -Unique -ExpandProperty NS | New-TabItem -Value {$_} -Text {"$_."} -Type Namespace
-                if ($Dots -gt 0) {
-                    $res += $dsTabExpansionDatabase.Tables['Types'].Select("Name like '$Argument*' and DC = $Dots") |
-                        Select-Object -ExpandProperty Name | New-TabItem -Value {$_} -Text {$_} -Type Type
-                    $res += $dsTabExpansionDatabase.Tables['Types'].Select("Name like 'System.$Argument*' and DC = $($Dots + 1)") |
-                        Select-Object -ExpandProperty Name | New-TabItem -Value {$_} -Text {$_} -Type Type
-                }
-                $res | Where-Object {$_}
+                Find-TabExpansionType $Argument
             }
         }
     }
@@ -300,7 +287,7 @@ Register-TabExpansion "Get-FormatData" -Type "Command" {
             'Name' {
                 if ($Argument -like "about_*") {
                     $ProgressPreference = "SilentlyContinue" ## Progress bars break in PowerTab
-                    $Commands = Get-Help "$Argument*" | Select-Object -ExpandProperty Name
+                    $Commands = Get-Help "$Argument*" | New-TabItem -Value {$_.Name} -Text {$_.Name} -ResultType ParameterValue
                     if ($Commands) {
                         $TabExpansionHasOutput.Value = $true
                         $Commands
@@ -310,7 +297,7 @@ Register-TabExpansion "Get-FormatData" -Type "Command" {
                     if ($PSVersionTable.PSVersion -ge "3.0") {
                         $CommandTypes += "Workflow"
                     }
-                    $Commands = Get-Command "$Argument*" -CommandType $CommandTypes | Select-Object -ExpandProperty Name
+                    $Commands = Get-Command "$Argument*" -CommandType $CommandTypes | New-TabItem -Value {$_.Name} -Text {$_.Name} -ResultType Command
                     if ($Commands) {
                         $TabExpansionHasOutput.Value = $true
                         $Commands
@@ -328,7 +315,7 @@ Register-TabExpansion "Get-FormatData" -Type "Command" {
                 if ($CommandInfo) {
                     foreach ($Parameter in $CommandInfo.Parameters.Values) {
                         if ($Parameter.Name -like "$Argument*") {
-                            New-TabItem -Value $Parameter.Name -Text $Parameter.Name -Type Parameter
+                            New-TabItem -Value $Parameter.Name -Text $Parameter.Name -ResultType ParameterValue
                         }
                     }
                 }
@@ -351,7 +338,7 @@ Register-TabExpansion "Get-HotFix" -Type "Command" {
             if ($Context.OtherParameters["ComputerName"]) {
                 $Parameters["ComputerName"] = Resolve-TabExpansionParameterValue $Context.OtherParameters["ComputerName"]
             }
-            Get-HotFix @Parameters | Where-Object {$_.HotFixID -like "$Argument*"} | Select-Object -ExpandProperty HotFixID
+            Get-HotFix @Parameters | Where-Object {$_.HotFixID -like "$Argument*"} | New-TabItem -Value {$_.HotFixID} -Text {$_.HotFixID} -ResultType ParameterValue
         }
     }
 }.GetNewClosure()
@@ -386,7 +373,7 @@ Register-TabExpansion "ConvertTo-HTML" -Type "Command" {
                 Get-ItemProperty -Path $Path -Name "$Argument*" | Get-Member | Where-Object {
                     (("Property","NoteProperty") -contains $_.MemberType) -and
                     (("PSChildName","PSDrive","PSParentPath","PSPath","PSProvider") -notcontains $_.Name)
-                } | Select-Object -ExpandProperty Name -Unique
+                } | Select-Object -ExpandProperty Name -Unique | New-TabItem -Value {$_} -Text {$_} -ResultType ProviderItem
             }
         }
     }.GetNewClosure()
@@ -408,19 +395,19 @@ Register-TabExpansion "ConvertTo-HTML" -Type "Command" {
         switch -exact ($Context.Parameter) {
             'Id' {
                 $TabExpansionHasOutput.Value = $true
-                Get-Job | Select-Object -ExpandProperty Id
+                Get-Job | New-TabItem -Value {$_.Id} -Text {$_.Id} -ResultType ParameterValue
             }
             'InstanceId' {
                 $TabExpansionHasOutput.Value = $true
-                Get-Job | Select-Object -ExpandProperty InstanceId
+                Get-Job | New-TabItem -Value {$_.InstanceId} -Text {$_.InstanceId} -ResultType ParameterValue
             }
             'Location' {
                 $TabExpansionHasOutput.Value = $true
-                Get-TabExpansion "$Argument*" Computer | New-TabItem -Value {$_.Text} -Text {$_.Text} -Type Computer
+                Get-TabExpansion "$Argument*" Computer | New-TabItem -Value {$_.Text} -Text {$_.Text} -ResultType ParameterValue
             }
             'Name' {
                 $TabExpansionHasOutput.Value = $true
-                Get-Job -Name "$Argument*" | Select-Object -ExpandProperty Name
+                Get-Job -Name "$Argument*" | New-TabItem -Value {$_.Name} -Text {$_.Name} -ResultType ParameterValue
             }
             'Job' {
                 if ($Argument -notlike '$*') {
@@ -455,7 +442,7 @@ Register-TabExpansion "Get-Module" -Type "Command" {
             $Modules = @(Get-Module "$Argument*" @Parameters | Sort-Object Name)
             if ($Modules.Count -gt 0) {
                 $TabExpansionHasOutput.Value = $true
-                $Modules | New-TabItem -Value {$_.Name} -Text {$_.Name} -Type Module
+                $Modules | New-TabItem -Value {$_.Name} -Text {$_.Name} -ResultType ParameterValue
             }
         }
     }
@@ -471,7 +458,7 @@ Register-TabExpansion "Import-Module" -Type "Command" {
                 $Modules = @(Find-Module "$Argument*" | Sort-Object BaseName)
                 if ($Modules.Count -gt 0) {
                     $TabExpansionHasOutput.Value = $true
-                    $Modules | New-TabItem -Value {$_.BaseName} -Text {$_.BaseName} -Type Module
+                    $Modules | New-TabItem -Value {$_.BaseName} -Text {$_.BaseName} -ResultType ParameterValue
                 }
             }
         }
@@ -486,7 +473,7 @@ Register-TabExpansion "Remove-Module" -Type "Command" {
         'Name' {
             $TabExpansionHasOutput.Value = $true
             Get-Module "$Argument*" | Sort-Object Name |
-                New-TabItem -Value {$_.Name} -Text {$_.Name} -Type Module
+                New-TabItem -Value {$_.Name} -Text {$_.Name} -ResultType ParameterValue
         }
     }
 }.GetNewClosure()
@@ -530,9 +517,9 @@ Register-TabExpansion "New-Object" -Type "Command" {
                 }
                 if ($Parameters) {
                     $Param = "({0})" -f [String]::Join(', ',$Parameters)
-                    New-TabItem -Value $Param -Text $Param -Type Constructor
+                    New-TabItem -Value $Param -Text $Param -ResultType ParameterValue
                 } else {
-                    New-TabItem -Value "()" -Text "() <Empty Constructor>" -Type Constructor
+                    New-TabItem -Value "()" -Text "() <Empty Constructor>" -ResultType ParameterValue
                 }
             }
         }
@@ -540,25 +527,13 @@ Register-TabExpansion "New-Object" -Type "Command" {
             ## TODO: Maybe cache these like we do with .NET types and WMI object names?
             ## TODO: [workitem:13]
             $TabExpansionHasOutput.Value = $true
-            Get-TabExpansion "$Argument*" COM | New-TabItem -Value {$_.Name} -Text {$_.Name} -Type COMObject
+            Get-TabExpansion "$Argument*" COM | New-TabItem -Value {$_.Name} -Text {$_.Name} -ResultType Type
         }
         'TypeName' {
             if ($Argument -notmatch '^\.') {
                 ## TODO: Find way to differentiate namespaces from types
                 $TabExpansionHasOutput.Value = $true
-                $Dots = $Argument.Split(".").Count - 1
-                $res = @()
-                $res += $dsTabExpansionDatabase.Tables['Types'].Select("NS like '$Argument*' and DC = $($Dots + 1)") |
-                    Select-Object -Unique -ExpandProperty NS | New-TabItem -Value {$_} -Text {"$_."} -Type Namespace
-                $res += $dsTabExpansionDatabase.Tables['Types'].Select("NS like 'System.$Argument*' and DC = $($Dots + 2)") |
-                    Select-Object -Unique -ExpandProperty NS | New-TabItem -Value {$_} -Text {"$_."} -Type Namespace
-                if ($Dots -gt 0) {
-                    $res += $dsTabExpansionDatabase.Tables['Types'].Select("Name like '$Argument*' and DC = $Dots") |
-                        Select-Object -ExpandProperty Name | New-TabItem -Value {$_} -Text {$_} -Type Type
-                    $res += $dsTabExpansionDatabase.Tables['Types'].Select("Name like 'System.$Argument*' and DC = $($Dots + 1)") |
-                        Select-Object -ExpandProperty Name | New-TabItem -Value {$_} -Text {$_} -Type Type
-                }
-                $res | Where-Object {$_}
+                Find-TabExpansionType $Argument
             }
         }
     }
@@ -603,7 +578,7 @@ Register-TabExpansion "Out-Printer" -Type "Command" {
     switch -exact ($Context.Parameter) {
         'Name' {
             $TabExpansionHasOutput.Value = $true
-            Get-CimInstance -ClassName "Win32_Printer" -Filter "Name LIKE '$Argument%'" | New-TabItem -Value {$_.Name} -Text {$_.Name} -Type Printer
+            Get-CimInstance -ClassName "Win32_Printer" -Filter "Name LIKE '$Argument%'" | New-TabItem -Value {$_.Name} -Text {$_.Name} -ResultType ParameterValue
         }
     }
 }.GetNewClosure()
@@ -619,15 +594,15 @@ Register-TabExpansion "Out-Printer" -Type "Command" {
                 $QuoteSpaces.Value = $false
                 if ($Argument -match '^[0-9]+$') {
                     Get-Process | Where-Object {$_.Id.ToString() -like "$Argument*"} |
-                        New-TabItem -Value {$_.Id} -Text {"{0,-4} {1}" -f ([String]$_.Id),$_.Name} -Type Process
+                        New-TabItem -Value {$_.Id} -Text {"{0,-4} {1}" -f ([String]$_.Id),$_.Name} -ResultType ParameterValue
                 } else {
                     Get-Process | Where-Object {$_.Name -like "$Argument*"} |
-                        New-TabItem -Value {$_.Id} -Text {"{0,-4} {1}" -f ([String]$_.Id),$_.Name} -Type Process
+                        New-TabItem -Value {$_.Id} -Text {"{0,-4} {1}" -f ([String]$_.Id),$_.Name} -ResultType ParameterValue
                 }
             }
             'Name' {
                 $TabExpansionHasOutput.Value = $true
-                Get-Process -Name "$Argument*" | Get-Unique | New-TabItem -Value {$_.Name} -Text {$_.Name} -Type Process
+                Get-Process -Name "$Argument*" | Get-Unique | New-TabItem -Value {$_.Name} -Text {$_.Name} -ResultType ParameterValue
             }
         }
     }.GetNewClosure()
@@ -645,10 +620,10 @@ Register-TabExpansion "Out-Printer" -Type "Command" {
                 }
                 if ($Argument -match '^[0-9]+$') {
                     Get-Process @Parameters | Where-Object {$_.Id.ToString() -like "$Argument*"} |
-                        New-TabItem -Value {$_.Id} -Text {"{0,-4} <# {1} #>" -f ([String]$_.Id),$_.Name} -Type Process
+                        New-TabItem -Value {$_.Id} -Text {"{0,-4} <# {1} #>" -f ([String]$_.Id),$_.Name} -ResultType ParameterValue
                 } else {
                     Get-Process @Parameters | Where-Object {$_.Name -like "$Argument*"} |
-                        New-TabItem -Value {$_.Id} -Text {"{0,-4} <# {1} #>" -f ([String]$_.Id),$_.Name} -Type Process
+                        New-TabItem -Value {$_.Id} -Text {"{0,-4} <# {1} #>" -f ([String]$_.Id),$_.Name} -ResultType ParameterValue
                 }
             }
             'Name' {
@@ -657,7 +632,7 @@ Register-TabExpansion "Out-Printer" -Type "Command" {
                 if ($Context.OtherParameters["ComputerName"]) {
                     $Parameters["ComputerName"] = Resolve-TabExpansionParameterValue $Context.OtherParameters["ComputerName"]
                 }
-                Get-Process -Name "$Argument*" @Parameters | Get-Unique | New-TabItem -Value {$_.Name} -Text {$_.Name} -Type Process
+                Get-Process -Name "$Argument*" @Parameters | Get-Unique | New-TabItem -Value {$_.Name} -Text {$_.Name} -ResultType ParameterValue
             }
         }
     }.GetNewClosure()
@@ -700,7 +675,7 @@ Register-TabExpansion "Out-Printer" -Type "Command" {
                     }
                     $Text
                 }
-                Get-PSBreakpoint | Sort-Object Id | New-TabItem -Value {"(Get-PSBreakPoint -Id {0})" -f $_.Id} -Text $DisplayText -Type BreakPoint
+                Get-PSBreakpoint | Sort-Object Id | New-TabItem -Value {"(Get-PSBreakPoint -Id {0})" -f $_.Id} -Text $DisplayText -ResultType ParameterValue
             }
             'Command' {
                 $TabExpansionHasOutput.Value = $true
@@ -710,7 +685,7 @@ Register-TabExpansion "Out-Printer" -Type "Command" {
                 if ($PSVersionTable.PSVersion -ge "3.0") {
                     $CommandTypes += "Workflow"
                 }
-                Get-Command "$Argument*" -CommandType $CommandTypes | New-TabItem -Value {$_.Name} -Text {$_.Name}
+                Get-Command "$Argument*" -CommandType $CommandTypes | New-TabItem -Value {$_.Name} -Text {$_.Name} -ResultType ParameterValue
             }
             'Id' {
                 ## TODO:  More info in display text
@@ -737,19 +712,19 @@ Register-TabExpansion "Out-Printer" -Type "Command" {
                     }
                     $Text
                 }
-                Get-PSBreakpoint | Sort-Object Id | New-TabItem -Value {$_.Id} -Text $DisplayText -Type BreakPoint
+                Get-PSBreakpoint | Sort-Object Id | New-TabItem -Value {$_.Id} -Text $DisplayText -ResultType ParameterValue
             }
             'Line' {
                 ## TODO:  Show line contents?
                 $TabExpansionHasOutput.Value = $true
                 if ($Context.OtherParameters["Script"]) {
                     1..(Get-Content (Resolve-TabExpansionParameterValue $Context.OtherParameters["Script"])).Count |
-                        New-TabItem -Value {$_} -Text {$_}
+                        New-TabItem -Value {$_} -Text {$_} -ResultType ParameterValue
                 }
             }
             'Script' {
                 ## TODO: Display relative paths
-                $Scripts = Get-ChildItem "$Argument*" -Include *.ps1 | Select-Object -ExpandProperty FullName
+                $Scripts = Get-ChildItem "$Argument*" -Include *.ps1 | New-TabItem -Value {$_.FullName} -Text {$_.FullName} -ResultType ParameterValue
                 if ($Scripts) {
                     $TabExpansionHasOutput.Value = $true
                     $Scripts
@@ -758,7 +733,7 @@ Register-TabExpansion "Out-Printer" -Type "Command" {
             'Variable' {
                 if ($Argument -notlike '$*') {
                     $TabExpansionHasOutput.Value = $true
-                    Get-Variable "$Argument*" -Scope Global | Select-Object -ExpandProperty Name
+                    Get-Variable "$Argument*" -Scope Global | New-TabItem -Value {$_.Name} -Text {$_.Name} -ResultType Variable
                 }
             }
         }
@@ -779,7 +754,7 @@ Register-TabExpansion "Out-Printer" -Type "Command" {
         switch -exact ($Context.Parameter) {
             'Name' {
                 $TabExpansionHasOutput.Value = $true
-                Get-PSDrive "$Argument*" | Select-Object -ExpandProperty Name
+                Get-PSDrive "$Argument*" | New-TabItem -Value {$_.Name} -Text {$_.Name} -ResultType ParameterValue
             }
         }
     }.GetNewClosure()
@@ -810,15 +785,15 @@ Register-TabExpansion "Out-Printer" -Type "Command" {
             }
             'Id' {
                 $TabExpansionHasOutput.Value = $true
-                Get-PSSession | Select-Object -ExpandProperty Id
+                Get-PSSession | New-TabItem -Value {$_.Id} -Text {$_.Id} -ResultType ParameterValue
             }
             'InstanceId' {
                 $TabExpansionHasOutput.Value = $true
-                Get-PSSession | Where-Object {$_.InstanceId -like "$Argument*"} | Select-Object -ExpandProperty InstanceId
+                Get-PSSession | Where-Object {$_.InstanceId -like "$Argument*"} | New-TabItem -Value {$_.InstanceId} -Text {$_.InstanceId} -ResultType ParameterValue
             }
             'Name' {
                 $TabExpansionHasOutput.Value = $true
-                Get-PSSession -Name "$Argument*" | Select-Object -ExpandProperty Name
+                Get-PSSession -Name "$Argument*" | New-TabItem -Value {$_.Name} -Text {$_.Name} -ResultType ParameterValue
             }
         }
     }.GetNewClosure()
@@ -837,7 +812,7 @@ Register-TabExpansion "Out-Printer" -Type "Command" {
             'Module' {
                 ## TODO: Grab from session instead?
                 $TabExpansionHasOutput.Value = $true
-                (Get-Module -ListAvailable "$Argument*") + (Get-PSSnapin "$Argument*") | Select-Object -ExpandProperty Name | Sort-Object
+                (Get-Module -ListAvailable "$Argument*") + (Get-PSSnapin "$Argument*") | Sort-Object Name | New-TabItem -Value {$_.Name} -Text {$_.Name} -ResultType ParameterValue
             }
             'Session' {
                 if ($Argument -notlike '$*') {
@@ -878,7 +853,7 @@ Register-TabExpansion "Out-Printer" -Type "Command" {
             }
             'Name' {
                 $TabExpansionHasOutput.Value = $true
-                Get-PSSessionConfiguration "$Argument*" | Select-Object -ExpandProperty Name
+                Get-PSSessionConfiguration "$Argument*" | New-TabItem -Value {$_.Name} -Text {$_.Name} -ResultType ParameterValue
             }
         }
     }
@@ -900,7 +875,7 @@ Register-TabExpansion "Add-PSSnapin" -Type "Command" {
             $TabExpansionHasOutput.Value = $true
             $Loaded = @(Get-PSSnapin)
             Get-PSSnapin "$Argument*" -Registered | Where-Object {$Loaded -notcontains $_} |
-                Select-Object -ExpandProperty Name | Sort-Object
+                Sort-Object Name | New-TabItem -Value {$_.Name} -Text {$_.Name} -ResultType ParameterValue
         }
     }
 }.GetNewClosure()
@@ -916,7 +891,7 @@ Register-TabExpansion "Get-PSSnapin" -Type "Command" {
             if ($Context.OtherParameters["Registered"]) {
                 $Parameters["Registered"] = $true
             }
-            Get-PSSnapin "$Argument*" @Parameters | Select-Object -ExpandProperty Name | Sort-Object
+            Get-PSSnapin "$Argument*" @Parameters | Sort-Object Name | New-TabItem -Value {$_.Name} -Text {$_.Name} -ResultType ParameterValue
         }
     }
 }.GetNewClosure()
@@ -929,11 +904,11 @@ Register-TabExpansion "Get-PSSnapin" -Type "Command" {
         switch -exact ($Context.Parameter) {
             'DisplayName' {
                 $TabExpansionHasOutput.Value = $true
-                Get-Service -DisplayName "*$Argument*" | Select-Object -ExpandProperty DisplayName
+                Get-Service -DisplayName "*$Argument*" | New-TabItem -Value {$_.DisplayName} -Text {$_.DisplayName} -ResultType ParameterValue
             }
             'Name' {
                 $TabExpansionHasOutput.Value = $true
-                Get-Service -Name "$Argument*" | Select-Object -ExpandProperty Name
+                Get-Service -Name "$Argument*" | New-TabItem -Value {$_.Name} -Text {$_.Name} -ResultType ParameterValue
             }
         }
     }.GetNewClosure()
@@ -948,7 +923,7 @@ Register-TabExpansion "Get-PSSnapin" -Type "Command" {
                 if ($Context.OtherParameters["ComputerName"]) {
                     $Parameters["ComputerName"] = Resolve-TabExpansionParameterValue $Context.OtherParameters["ComputerName"]
                 }
-                Get-Service -DisplayName "*$Argument*" @Parameters | Select-Object -ExpandProperty DisplayName
+                Get-Service -DisplayName "*$Argument*" @Parameters | New-TabItem -Value {$_.DisplayName} -Text {$_.DisplayName} -ResultType ParameterValue
             }
             'Name' {
                 $TabExpansionHasOutput.Value = $true
@@ -956,7 +931,7 @@ Register-TabExpansion "Get-PSSnapin" -Type "Command" {
                 if ($Context.OtherParameters["ComputerName"]) {
                     $Parameters["ComputerName"] = Resolve-TabExpansionParameterValue $Context.OtherParameters["ComputerName"]
                 }
-                Get-Service -Name "$Argument*" @Parameters | Select-Object -ExpandProperty Name
+                Get-Service -Name "$Argument*" @Parameters | New-TabItem -Value {$_.Name} -Text {$_.Name} -ResultType ParameterValue
             }
         }
     }.GetNewClosure()
@@ -971,7 +946,7 @@ Register-TabExpansion "Get-PSSnapin" -Type "Command" {
                 if ($Context.OtherParameters["ComputerName"]) {
                     $Parameters["ComputerName"] = Resolve-TabExpansionParameterValue $Context.OtherParameters["ComputerName"]
                 }
-                Get-Service -Name "$Argument*" @Parameters | Select-Object -ExpandProperty Name
+                Get-Service -Name "$Argument*" @Parameters | New-TabItem -Value {$_.Name} -Text {$_.Name} -ResultType ParameterValue
             }
         }
     }.GetNewClosure()
@@ -1005,7 +980,7 @@ Register-TabExpansion "Set-StrictMode" -Type Command {
         switch -exact ($Context.Parameter) {
             'Name' {
                 $TabExpansionHasOutput.Value = $true
-                Get-TraceSource "$Argument*" | Select-Object -ExpandProperty Name
+                Get-TraceSource "$Argument*" | New-TabItem -Value {$_.Name} -Text {$_.Name} -ResultType ParameterValue
             }
             'RemoveListener' {
                 $TabExpansionHasOutput.Value = $true
@@ -1026,7 +1001,7 @@ Register-TabExpansion "Get-Verb" -Type "Command" {
     switch -exact ($Context.Parameter) {
         'Verb' {
             $TabExpansionHasOutput.Value = $true
-            Get-Verb "$Argument*" | Select-Object -ExpandProperty Verb | Sort-Object
+            Get-Verb "$Argument*" | Sort-Object Verb | New-TabItem -Value {$_.Verb} -Text {$_.Verb} -ResultType ParameterValue
         }
     }
 }.GetNewClosure()
@@ -1040,7 +1015,7 @@ Register-TabExpansion "Get-Verb" -Type "Command" {
             'Name' {
                 if ($Argument -notlike '$*') {
                     $TabExpansionHasOutput.Value = $true
-                    Get-Variable "$Argument*" -Scope "Global" | Select-Object -ExpandProperty Name
+                    Get-Variable "$Argument*" -Scope "Global" | New-TabItem -Value {$_.Name} -Text {$_.Name} -ResultType ParameterValue
                 }
             }
             'Scope' {
@@ -1077,20 +1052,20 @@ Register-TabExpansion "Get-WinEvent" -Type "Command" {
         'ListLog' {
             $TabExpansionHasOutput.Value = $true
             ## TODO: Make it easier to access detailed Microsoft-* logs?
-            Get-WinEvent -ListLog "$Argument*" @Parameters | Select-Object -ExpandProperty LogName
+            Get-WinEvent -ListLog "$Argument*" @Parameters | New-TabItem -Value {$_.LogName} -Text {$_.LogName} -ResultType ParameterValue
         }
         'ListProvider' {
             $TabExpansionHasOutput.Value = $true
-            Get-WinEvent -ListProvider "$Argument*" @Parameters | Select-Object -ExpandProperty Name #| Sort-Object
+            Get-WinEvent -ListProvider "$Argument*" @Parameters | New-TabItem -Value {$_.Name} -Text {$_.Name} -ResultType ParameterValue
         }
         'LogName' {
             $TabExpansionHasOutput.Value = $true
             ## TODO: Make it easier to access detailed Microsoft-* logs?
-            Get-WinEvent -ListLog "$Argument*" @Parameters | Select-Object -ExpandProperty LogName
+            Get-WinEvent -ListLog "$Argument*" @Parameters | New-TabItem -Value {$_.LogName} -Text {$_.LogName} -ResultType ParameterValue
         }
         'ProviderName' {
             $TabExpansionHasOutput.Value = $true
-            Get-WinEvent -ListProvider "$Argument*" @Parameters | Select-Object -ExpandProperty Name #| Sort-Object
+            Get-WinEvent -ListProvider "$Argument*" @Parameters | New-TabItem -Value {$_.Name} -Text {$_.Name} -ResultType ParameterValue
         }
     }
 }.GetNewClosure()
@@ -1104,14 +1079,14 @@ Register-TabExpansion "Get-WinEvent" -Type "Command" {
             'Class' {
                 $TabExpansionHasOutput.Value = $true
                 ## TODO: escape special characters?
-                Get-TabExpansion "$Argument*" WMI | New-TabItem -Value {$_.Name} -Text {$_.Name} -Type WMIClass
+                Get-TabExpansion "$Argument*" WMI | New-TabItem -Value {$_.Name} -Text {$_.Name} -ResultType Type
             }
             'Locale' {
                 $TabExpansionHasOutput.Value = $true
                 $QuoteSpaces.Value = $false
                 [System.Globalization.CultureInfo]::GetCultures([System.Globalization.CultureTypes]::InstalledWin32Cultures) |
                     Where-Object {$_.Name -like "$Argument*"} | Sort-Object -Property Name |
-                        New-TabItem -Value {$_.LCID} -Text {$_.Name} -Type Locale
+                        New-TabItem -Value {$_.LCID} -Text {$_.Name} -ResultType ParameterValue
             }
             'Name' {
                 $TabExpansionHasOutput.Value = $true
@@ -1123,7 +1098,7 @@ Register-TabExpansion "Get-WinEvent" -Type "Command" {
                     $Class = [WmiClass](Resolve-TabExpansionParameterValue $Context.PositionalParameters[0])
                 }
                 if ($Class) {
-                    $Class.Methods | Where-Object {$_.Name -like "$Argument*"} | New-TabItem -Value {$_.Name} -Text {$_.Name} -Type Method
+                    $Class.Methods | Where-Object {$_.Name -like "$Argument*"} | New-TabItem -Value {$_.Name} -Text {$_.Name} -ResultType Method
                 }
             }
             'Namespace' {
@@ -1140,7 +1115,7 @@ Register-TabExpansion "Get-WinEvent" -Type "Command" {
                 $ParentNamespace = $Argument -replace '\\[^\\]*$'
                 $Namespaces = New-Object System.Management.ManagementClass "\\$ComputerName\${ParentNamespace}:__NAMESPACE"
                 $Namespaces = foreach ($Namespace in $Namespaces.PSBase.GetInstances()) {"{0}\{1}" -f $Namespace.__NameSpace,$Namespace.Name}
-                $Namespaces | Where-Object {$_ -like "$Argument*"} | Sort-Object | New-TabItem -Value {$_} -Text {$_} -Type WMINamespace
+                $Namespaces | Where-Object {$_ -like "$Argument*"} | Sort-Object | New-TabItem -Value {$_} -Text {$_} -ResultType Type
             }
             'Path' {
                 ## TODO: ???
@@ -1153,7 +1128,7 @@ Register-TabExpansion "Get-WinEvent" -Type "Command" {
                     $Class = [WmiClass](Resolve-TabExpansionParameterValue $Context.PositionalParameters[0])
                 }
                 if ($Class) {
-                    $Class.Properties | Where-Object {$_.Name -like "$Argument*"} | New-TabItem -Value {$_.Name} -Text {$_.Name} -Type Property
+                    $Class.Properties | Where-Object {$_.Name -like "$Argument*"} | New-TabItem -Value {$_.Name} -Text {$_.Name} -ResultType Property
                 }
             }
         }
@@ -1298,7 +1273,7 @@ Register-TabExpansion "function" -Type "Command" {
     if ($Context.PositionalParameters -eq 0) {
         $TabExpansionHasOutput.Value = $true
         if ($Argument -match '^[a-zA-Z]*$') {
-            Get-Verb "$Argument*" | Select-Object -ExpandProperty Verb | Sort-Object
+            Get-Verb "$Argument*" | Sort-Object Verb | New-TabItem -Value {$_.Verb} -Text {$_.Verb} -ResultType ParameterValue
         }
     }
 }.GetNewClosure()
@@ -1314,7 +1289,7 @@ Register-TabExpansion "function" -Type "Command" {
         param($Argument, [ref]$TabExpansionHasOutput)
         if ($Argument -notmatch '^\$') {
             $TabExpansionHasOutput.Value = $true
-            Get-TabExpansion "$Argument*" Computer | New-TabItem -Value {$_.Text} -Text {$_.Text} -Type Computer
+            Get-TabExpansion "$Argument*" Computer | New-TabItem -Value {$_.Text} -Text {$_.Text} -ResultType ParameterValue
         }
     }.GetNewClosure()
 
@@ -1328,7 +1303,7 @@ Register-TabExpansion "function" -Type "Command" {
         param($Argument, [ref]$TabExpansionHasOutput)
         if ($Argument -notlike '^\$') {
             $TabExpansionHasOutput.Value = $true
-            Get-Variable "$Argument*" -Scope Global | New-TabItem -Value {$_.Name} -Text {$_.Name} -Type Variable
+            Get-Variable "$Argument*" -Scope Global | New-TabItem -Value {$_.Name} -Text {$_.Name} -ResultType Variable
         }
     }.GetNewClosure()
     
@@ -1345,7 +1320,7 @@ Register-TabExpansion "function" -Type "Command" {
         if ($Argument -notlike '^\$') {
             $TabExpansionHasOutput.Value = $true
             [System.Globalization.CultureInfo]::GetCultures([System.Globalization.CultureTypes]::InstalledWin32Cultures) |
-                Where-Object {$_.Name -like "$Argument*"} | New-TabItem -Value {$_.Name} -Text {$_.Name} -Type Culture | Sort-Object Name
+                Where-Object {$_.Name -like "$Argument*"} | Sort-Object Name | New-TabItem -Value {$_.Name} -Text {$_.Name} -ResultType ParameterValue
         }
     }.GetNewClosure()
     
@@ -1358,7 +1333,7 @@ Register-TabExpansion "PSDrive" -Type Parameter {
     param($Argument, [ref]$TabExpansionHasOutput)
     if ($Argument -notlike '^\$') {
         $TabExpansionHasOutput.Value = $true
-        Get-PSDrive "$Argument*" | Select-Object -ExpandProperty Name
+        Get-PSDrive "$Argument*" | New-TabItem -Value {$_.Name} -Text {$_.Name} -ResultType ParameterValue
     }
 }.GetNewClosure()
 
@@ -1367,7 +1342,7 @@ Register-TabExpansion "PSProvider" -Type Parameter {
     param($Argument, [ref]$TabExpansionHasOutput)
     if ($Argument -notlike '^\$') {
         $TabExpansionHasOutput.Value = $true
-        Get-PSProvider "$Argument*" | Select-Object -ExpandProperty Name
+        Get-PSProvider "$Argument*" | New-TabItem -Value {$_.Name} -Text {$_.Name} -ResultType ParameterValue
     }
 }.GetNewClosure()
 
@@ -1381,7 +1356,7 @@ Register-TabExpansion "PSProvider" -Type Parameter {
     Register-TabExpansion iexplore.exe -Type ParameterName {
         param($Context, $Parameter)
         $Parameters = "-extoff","-embedding","-k","-nohome"
-        $Parameters | Where-Object {$_ -like "$Parameter*"}
+        $Parameters | Where-Object {$_ -like "$Parameter*"} | New-TabItem -Value {$_} -Text {$_} -ResultType ParameterName
     }.GetNewClosure()
 
     Function iexploreexeparameters {
@@ -1413,7 +1388,7 @@ Register-TabExpansion "PSProvider" -Type Parameter {
                 $Argument = [Regex]::Escape($Argument)
                 $Favorites = Get-ChildItem "$env:USERPROFILE/Favorites/*" -Include *.url -Recurse
                 $Favorites = $Favorites | Where-Object {($_.Name -match $Argument) -or ($_ | Select-String "^URL=.*$Argument")} |
-                    New-TabItem -Value {($_ | Select-String "^URL=").Line -replace "^URL="} -Text {$_.Name -replace '\.url$'} -Type URL
+                    New-TabItem -Value {($_ | Select-String "^URL=").Line -replace "^URL="} -Text {$_.Name -replace '\.url$'} -ResultType ParameterValue
 
                 if ($Favorites) {
                     $TabExpansionHasOutput.Value = $true
@@ -1431,7 +1406,7 @@ Register-TabExpansion "PSProvider" -Type Parameter {
         param($Context, $Parameter)
         $Parameters = "-Command","-EncodedCommand","-ExecutionPolicy","-File","-InputFormat","-NoExit","-NoLogo",
             "-NonInteractive","-NoProfile","-OutputFormat","-PSConsoleFile","-Sta","-Version","-WindowStyle"
-        $Parameters | Where-Object {$_ -like "$Parameter*"}
+        $Parameters | Where-Object {$_ -like "$Parameter*"} | New-TabItem -Value {$_} -Text {$_} -ResultType ParameterName
         <#
         PowerShell[.exe] [-PSConsoleFile <file> | -Version <version>]
         [-NoLogo] [-NoExit] [-Sta] [-NoProfile] [-NonInteractive]
@@ -1500,7 +1475,7 @@ Register-TabExpansion "PSProvider" -Type Parameter {
             'Name' {
                 $TabExpansionHasOutput.Value = $true
                 Get-ChildItem (Join-Path $PSScriptRoot "ColorThemes/Theme${Argument}*") -Include *.csv |
-                    ForEach-Object {$_.Name -replace '^Theme([^\.]+)\.csv$','$1'}
+                    ForEach-Object {$_.Name -replace '^Theme([^\.]+)\.csv$','$1'} | New-TabItem -Value {$_.Name} -Text {$_.Name} -ResultType ParameterValue
             }
         }
     }

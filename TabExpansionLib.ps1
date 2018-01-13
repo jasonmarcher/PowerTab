@@ -1,3 +1,5 @@
+using namespace System.Management.Automation
+
 # TabExpansionLib.ps1
 #
 # 
@@ -106,7 +108,7 @@ Function Invoke-TabItemSelector {
             $Objects += $Object
         }
 
-        trap [System.Management.Automation.PipelineStoppedException] {
+        trap [PipelineStoppedException] {
             ## Pipeline was stopped
             break
         }
@@ -139,7 +141,7 @@ Function Invoke-TabItemSelector {
                     break
                 }
                 'Windows PowerShell ISE Host' {
-                    $SelectionHandler = "Default"
+                    $SelectionHandler = "ObjectDefault"
                     break
                 }
                 default {
@@ -183,9 +185,8 @@ Function Invoke-TabItemSelector {
 
         ## List of selection handlers that can handle objects
         $ObjectHandlers = @("ConsoleList","CommonPrefix","ObjectDefault")
-
         if (($ObjectHandlers -contains $SelectionHandler) -and ($PSCmdlet.ParameterSetName -eq "Values")) {
-            $Objects = foreach ($Item in $Values) {New-TabItem -Value $Item -Text $Item -Type Unknown}
+            $Objects = foreach ($Item in $Values) {New-TabItem -Value $Item -Text $Item}
         } elseif (($ObjectHandlers -notcontains $SelectionHandler) -and ($PSCmdlet.ParameterSetName -eq "Objects")) {
             $Values = foreach ($Item in $Objects) {$Item.Value}
         }
@@ -204,6 +205,7 @@ Function Invoke-TabItemSelector {
 
 Function New-TabItem {
     [CmdletBinding()]
+    [OutputType([System.Management.Automation.CompletionResult])]
     [Diagnostics.CodeAnalysis.SuppressMessageAttribute("PSUseShouldProcessForStateChangingFunctions", "")]
     param(
         [Parameter(Position = 0, Mandatory = $true, ValueFromPipeline = $true)]
@@ -216,13 +218,23 @@ Function New-TabItem {
         [String]
         $Text = $Value
         ,
+        [Parameter()]
         [ValidateNotNullOrEmpty()]
         [String]
         $Type = "Unknown"
+        ,
+        [Parameter()]
+        [CompletionResultType]
+        $ResultType = "Text"
+        ,
+        [Parameter(ValueFromPipeline = $true)]
+        [ValidateNotNullOrEmpty()]
+        [String]
+        $ToolTip = $Text
     )
 
     process {
-        New-Object PSObject -Property @{Text=$Text; DisplayText=""; Value=$Value; Type=$Type}
+        New-Object CompletionResult $Value, $Text, $ResultType, $ToolTip
     }
 }
 
@@ -497,7 +509,7 @@ Function Export-TabExpansionTheme {
             Select-Object @{Name='Name';Expression={$_.Name}},@{Name='Color';Expression={$PowerTabConfig.ConsoleList.Colors."$($_.Name)"}} |
             Export-Csv $ExportPath -NoType
 
-        trap [System.Management.Automation.PipelineStoppedException] {
+        trap [PipelineStoppedException] {
             ## Pipeline was stopped
             break
         }
@@ -628,7 +640,7 @@ Function Add-TabExpansionType {
         $nl | ForEach-Object {[Void]$dsTabExpansionDatabase.Tables['Types'].Rows.Add("Dummy",$_.Split('.').Count, $_)}
         Write-Progress "Adding NameSpaces percent complete:" 100 -Id 1 -Completed
 
-        trap [System.Management.Automation.PipelineStoppedException] {
+        trap [PipelineStoppedException] {
             ## Pipeline was stopped
             Write-Progress "Adding NameSpaces percent complete:" 100 -Id 1 -Completed
             break
@@ -651,14 +663,14 @@ Function Find-TabExpansionType {
         $res = @()
 
         $res += $dsTabExpansionDatabase.Tables['Types'].Select("NS like '$Name*' and DC = $($Dots + 1)") |
-            Select-Object -Unique -ExpandProperty NS | New-TabItem -Value {$_} -Text {"$_."} -Type Namespace
+            Select-Object -Unique -ExpandProperty NS | New-TabItem -Value {$_} -Text {"$_."} -ResultType Namespace
         $res += $dsTabExpansionDatabase.Tables['Types'].Select("NS like 'System.$Name*' and DC = $($Dots + 2)") |
-            Select-Object -Unique -ExpandProperty NS | New-TabItem -Value {$_} -Text {"$_."} -Type Namespace
+            Select-Object -Unique -ExpandProperty NS | New-TabItem -Value {$_} -Text {"$_."} -ResultType Namespace
         if ($Dots -gt 0) {
             $res += $dsTabExpansionDatabase.Tables['Types'].Select("Name like '$Name*' and DC = $Dots") |
-                Select-Object -ExpandProperty Name | New-TabItem -Value {$_} -Text {$_} -Type Type
+                Select-Object -ExpandProperty Name | New-TabItem -Value {$_} -Text {$_} -ResultType Type
             $res += $dsTabExpansionDatabase.Tables['Types'].Select("Name like 'System.$Name*' and DC = $($Dots + 1)") |
-                Select-Object -ExpandProperty Name | New-TabItem -Value {$_} -Text {$_} -Type Type
+                Select-Object -ExpandProperty Name | New-TabItem -Value {$_} -Text {$_} -ResultType Type
         }
         $res | Where-Object {$_}
     }
@@ -753,7 +765,7 @@ Function Add-TabExpansionComputer {
             Write-Progress $Resources.update_tabexpansiondatabase_computer_activity $count -Completed
         }
 
-        trap [System.Management.Automation.PipelineStoppedException] {
+        trap [PipelineStoppedException] {
             ## Pipeline was stopped
             if ($PSCmdlet.ParameterSetName -ne "Name") {
                 Write-Progress $Resources.update_tabexpansiondatabase_computer_activity $count -Completed
@@ -840,7 +852,7 @@ Function Get-TabExpansion {
                 Select-Object Filter,Text,Type | RetypeObject "PowerTab.TabExpansion.Item"
         }
 
-        trap [System.Management.Automation.PipelineStoppedException] {
+        trap [PipelineStoppedException] {
             ## Pipeline was stopped
             break
         }
@@ -882,7 +894,7 @@ Function Add-TabExpansion {
 
         [Void]$dsTabExpansionDatabase.Tables['Custom'].Rows.Add($Filter, $Text, $Type)
 
-        trap [System.Management.Automation.PipelineStoppedException] {
+        trap [PipelineStoppedException] {
             ## Pipeline was stopped
             break
         }
@@ -910,7 +922,7 @@ Function Remove-TabExpansion {
             $Item.Delete()
         }
 
-        trap [System.Management.Automation.PipelineStoppedException] {
+        trap [PipelineStoppedException] {
             ## Pipeline was stopped
             break
         }
@@ -991,7 +1003,7 @@ Function Register-TabExpansion {
             }
         }
 
-        trap [System.Management.Automation.PipelineStoppedException] {
+        trap [PipelineStoppedException] {
             ## Pipeline was stopped
             break
         }

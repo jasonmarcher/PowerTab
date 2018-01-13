@@ -6,7 +6,7 @@ $ClientFeatureHandler = {
     switch -exact ($Context.Parameter) {
         'Name' {
             $TabExpansionHasOutput.Value = $true
-            Get-ClientFeature "$Argument*" | Select-Object -ExpandProperty Name | Sort-Object
+            Get-ClientFeature "$Argument*" | Sort-Object Name | New-TabItem -Value {$_.Name} -Text {$_.Name} -ResultType ParameterValue
         }
     }
 }
@@ -16,7 +16,8 @@ $AddClientFeatureHandler = {
     switch -exact ($Context.Parameter) {
         'Name' {
             $TabExpansionHasOutput.Value = $true
-            Get-ClientFeature "$Argument*" | Where-Object {$_.State -eq "Disabled"} | Select-Object -ExpandProperty Name | Sort-Object
+            Get-ClientFeature "$Argument*" | Where-Object {$_.State -eq "Disabled"} | Sort-Object Name |
+                New-TabItem -Value {$_.Name} -Text {$_.Name} -ResultType ParameterValue
         }
     }
 }
@@ -26,7 +27,8 @@ $RemoveClientFeatureHandler = {
     switch -exact ($Context.Parameter) {
         'Name' {
             $TabExpansionHasOutput.Value = $true
-            Get-ClientFeature "$Argument*" | Where-Object {$_.State -eq "Enabled"} | Select-Object -ExpandProperty Name | Sort-Object
+            Get-ClientFeature "$Argument*" | Where-Object {$_.State -eq "Enabled"} | Sort-Object Name |
+                New-TabItem -Value {$_.Name} -Text {$_.Name} -ResultType ParameterValue
         }
     }
 }

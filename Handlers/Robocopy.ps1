@@ -22,7 +22,7 @@
                     }
                 }
                 #>
-                $RoboHelpObject | Where-Object {$_.Parameter -like "$Argument*"} | Select-Object -ExpandProperty Parameter
+                $RoboHelpObject | Where-Object {$_.Parameter -like "$Argument*"} | New-TabItem -Value {$_.Parameter} -Text {$_.Parameter} -ResultType ParameterName
             }
         }
     }.GetNewClosure()
@@ -57,7 +57,8 @@
                 $TabExpansionHasOutput.Value = $true
                 if ($Argument -notlike "/*") {$Argument = "/$Argument"}
                 $r = [regex]'^\s\s(/\S+)*'
-                xcopy.exe /? | ForEach-Object {$r.Match($_).Groups[1].Value.Trim()} | Where-Object {$_ -like "$Argument*"}
+                xcopy.exe /? | ForEach-Object {$r.Match($_).Groups[1].Value.Trim()} | Where-Object {$_ -like "$Argument*"} |
+                    New-TabItem -Value {$_} -Text {$_} -ResultType ParameterName
             }
         }
     }.GetNewClosure()
