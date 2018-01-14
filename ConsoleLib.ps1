@@ -88,12 +88,9 @@ Function Out-ConsoleList {
         $SelectedItem = 0
         Set-Selection 1 ($SelectedItem + 1) ($ListHandle.ListConfig.ListWidth - 3) $PowerTabConfig.ConsoleList.Colors.SelectedTextColor $PowerTabConfig.ConsoleList.Colors.SelectedBackColor
 
-        ## Listen for first key press
-        $Key = $Host.UI.RawUI.ReadKey('NoEcho,IncludeKeyDown')
-
         ## Process key presses
         $Continue = $true
-        while ($Key.VirtualKeyCode -ne 27 -and $Continue -eq $true) {
+        while ($Continue -and ($Key = $Host.UI.RawUI.ReadKey('NoEcho,IncludeKeyDown,AllowCtrlC')).VirtualKeyCode -ne 27) {
             if (-not $HasChild) {
                 if ($OldFilter -ne $Filter) {
                   $Preview.Clear()
@@ -102,7 +99,7 @@ Function Out-ConsoleList {
                 }
                 $OldFilter = $Filter
             }
-            $ShiftPressed = Get-KeyState 0x10  ## Check for Shift Key
+            $ShiftPressed = 0x10 -band [int]$Key.ControlKeyState  ## Check for Shift Key
             $HasChild = $false
             switch ($Key.VirtualKeyCode) {
                 9 { ## Tab
@@ -328,9 +325,6 @@ Function Out-ConsoleList {
                     break
                 }
             }
-
-            ## Listen for next key press
-            if ($Continue) {$Key = $Host.UI.RawUI.ReadKey('NoEcho,IncludeKeyDown')}
         }
 
         $ListHandle.Clear()
@@ -358,80 +352,79 @@ Function Out-ConsoleList {
             $BackgroundColor = $Host.UI.RawUI.BackgroundColor
         )
 
-        $Box = New-Object System.Management.Automation.PSObject -Property @{
-            'HorizontalDouble' = ([char]9552).ToString()
-            'VerticalDouble' = ([char]9553).ToString()
-            'TopLeftDouble' = ([char]9556).ToString()
-            'TopRightDouble' = ([char]9559).ToString()
-            'BottomLeftDouble' = ([char]9562).ToString()
-            'BottomRightDouble' = ([char]9565).ToString()
-            'Horizontal' = ([char]9472).ToString()
-            'Vertical' = ([char]9474).ToString()
-            'TopLeft' = ([char]9484).ToString()
-            'TopRight' = ([char]9488).ToString()
-            'BottomLeft' = ([char]9492).ToString()
-            'BottomRight' = ([char]9496).ToString()
-            'Cross' = ([char]9532).ToString()
-            'HorizontalDoubleSingleUp' = ([char]9575).ToString()
-            'HorizontalDoubleSingleDown' = ([char]9572).ToString()
-            'VerticalDoubleLeftSingle' = ([char]9570).ToString()
-            'VerticalDoubleRightSingle' = ([char]9567).ToString()
-            'TopLeftDoubleSingle' = ([char]9554).ToString()
-            'TopRightDoubleSingle' = ([char]9557).ToString()
-            'BottomLeftDoubleSingle' = ([char]9560).ToString()
-            'BottomRightDoubleSingle' = ([char]9563).ToString()
-            'TopLeftSingleDouble' = ([char]9555).ToString()
-            'TopRightSingleDouble' = ([char]9558).ToString()
-            'BottomLeftSingleDouble' = ([char]9561).ToString()
-            'BottomRightSingleDouble' = ([char]9564).ToString()
-        }
-
-        if ($PowerTabConfig.ConsoleList.DoubleBorder) {
+        $HorizontalDouble = [string][char]9552
+        $VerticalDouble = [string][char]9553
+        $TopLeftDouble = [string][char]9556
+        $TopRightDouble = [string][char]9559
+        $BottomLeftDouble = [string][char]9562
+        $BottomRightDouble = [string][char]9565
+        $Horizontal = [string][char]9472
+        $Vertical = [string][char]9474
+        $TopLeft = [string][char]9484
+        $TopRight = [string][char]9488
+        $BottomLeft = [string][char]9492
+        $BottomRight = [string][char]9496
+        #$Cross = [string][char]9532
+        #$HorizontalDoubleSingleUp = [string][char]9575
+        #$HorizontalDoubleSingleDown = [string][char]9572
+        #$VerticalDoubleLeftSingle = [string][char]9570
+        #$VerticalDoubleRightSingle = [string][char]9567
+        $TopLeftDoubleSingle = [string][char]9554
+        $TopRightDoubleSingle = [string][char]9557
+        $BottomLeftDoubleSingle = [string][char]9560
+        $BottomRightDoubleSingle = [string][char]9563
+        #$TopLeftSingleDouble = [string][char]9555
+        #$TopRightSingleDouble = [string][char]9558
+        #$BottomLeftSingleDouble = [string][char]9561
+        #$BottomRightSingleDouble = [string][char]9564
+    
+        if ($PowerTabConfig.DoubleBorder) {
             ## Double line box
-            $LineTop = $Box.TopLeftDouble `
-                + $Box.HorizontalDouble * ($Size.width - 2) `
-                + $Box.TopRightDouble
-            $LineField = $Box.VerticalDouble `
+            $LineTop = $TopLeftDouble `
+                + $HorizontalDouble * ($Size.width - 2) `
+                + $TopRightDouble
+            $LineField = $VerticalDouble `
                 + ' ' * ($Size.width - 2) `
-                + $Box.VerticalDouble
-            $LineBottom = $Box.BottomLeftDouble `
-                + $Box.HorizontalDouble * ($Size.width - 2) `
-                + $Box.BottomRightDouble
+                + $VerticalDouble
+            $LineBottom = $BottomLeftDouble `
+                + $HorizontalDouble * ($Size.width - 2) `
+                + $BottomRightDouble
         } elseif ($false) {
             ## Mixed line box, double horizontal, single vertical
-            $LineTop = $Box.TopLeftDoubleSingle `
-                + $Box.HorizontalDouble * ($Size.width - 2) `
-                + $Box.TopRightDoubleSingle
-            $LineField = $Box.Vertical `
+            $LineTop = $TopLeftDoubleSingle `
+                + $HorizontalDouble * ($Size.width - 2) `
+                + $TopRightDoubleSingle
+            $LineField = $Vertical `
                 + ' ' * ($Size.width - 2) `
-                + $Box.Vertical
-            $LineBottom = $Box.BottomLeftDoubleSingle `
-                + $Box.HorizontalDouble * ($Size.width - 2) `
-                + $Box.BottomRightDoubleSingle
+                + $Vertical
+            $LineBottom = $BottomLeftDoubleSingle `
+                + $HorizontalDouble * ($Size.width - 2) `
+                + $BottomRightDoubleSingle
         } elseif ($false) {
             ## Mixed line box, single horizontal, double vertical
-            $LineTop = $Box.TopLeftDoubleSingle `
-                + $Box.HorizontalDouble * ($Size.width - 2) `
-                + $Box.TopRightDoubleSingle
-            $LineField = $Box.Vertical `
+            $LineTop = $TopLeftDoubleSingle `
+                + $HorizontalDouble * ($Size.width - 2) `
+                + $TopRightDoubleSingle
+            $LineField = $Vertical `
                 + ' ' * ($Size.width - 2) `
-                + $Box.Vertical
-            $LineBottom = $Box.BottomLeftDoubleSingle `
-                + $Box.HorizontalDouble * ($Size.width - 2) `
-                + $Box.BottomRightDoubleSingle
-        } else {  
+                + $Vertical
+            $LineBottom = $BottomLeftDoubleSingle `
+                + $HorizontalDouble * ($Size.width - 2) `
+                + $BottomRightDoubleSingle
+        } else {
             ## Single line box
-            $LineTop = $Box.TopLeft `
-                + $Box.Horizontal * ($Size.width - 2) `
-                + $Box.TopRight
-            $LineField = $Box.Vertical `
+            $LineTop = $TopLeft `
+                + $Horizontal * ($Size.width - 2) `
+                + $TopRight
+            $LineField = $Vertical `
                 + ' ' * ($Size.width - 2) `
-                + $Box.Vertical
-            $LineBottom = $Box.BottomLeft `
-                + $Box.Horizontal * ($Size.width - 2) `
-                + $Box.BottomRight
+                + $Vertical
+            $LineBottom = $BottomLeft `
+                + $Horizontal * ($Size.width - 2) `
+                + $BottomRight
         }
-        $Box = & {$LineTop; 1..($Size.Height - 2) | ForEach-Object {$LineField}; $LineBottom}
+
+        $Box = & {$LineTop; 1..($Size.Height - 2) | . {process{$LineField}}; $LineBottom}
         $BoxBuffer = $Host.UI.RawUI.NewBufferCellArray($Box, $ForegroundColor, $BackgroundColor)
         ,$BoxBuffer
     }
@@ -709,7 +702,7 @@ Function Out-ConsoleList {
         $Position.Y += $Y
         $Rectangle = New-Object System.Management.Automation.Host.Rectangle $Position.X, $Position.Y, ($Position.X + $Width), $Position.Y
         $LineBuffer = $Host.UI.RawUI.GetBufferContents($Rectangle)
-        $LineBuffer = $Host.UI.RawUI.NewBufferCellArray(@([String]::Join("", ($LineBuffer | ForEach-Object {$_.Character}))),
+        $LineBuffer = $Host.UI.RawUI.NewBufferCellArray(@([String]::Join("", ($LineBuffer | . {process{$_.Character}}))),
             $ForegroundColor, $BackgroundColor)
         $Host.UI.RawUI.SetBufferContents($Position, $LineBuffer)
     }

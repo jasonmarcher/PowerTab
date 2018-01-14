@@ -382,10 +382,10 @@ Function Invoke-TabExpansion {
                 Write-Trace "Found entry in ParameterName registry for FullCommandName."
 
                 $ScriptBlock = $TabExpansionParameterNameRegistry[$FullCommandName]
-                $PossibleValues = & $ScriptBlock $CurrentContext $LastWord | ForEach-Object {
+                $PossibleValues = & $ScriptBlock $CurrentContext $LastWord | . {process{
                     if ($_ -is [System.String]) {New-TabItem -Value $_ -Text $_ -ResultType ParameterName}
                     else {$_}
-                }
+                }}
                 if ($PossibleValues) {
                     $TabExpansionHasOutput = $true
                 }
@@ -394,10 +394,10 @@ Function Invoke-TabExpansion {
                 Write-Trace "Found entry in ParameterName registry for InternalCommandName."
 
                 $ScriptBlock = $TabExpansionParameterNameRegistry[$InternalCommandName]
-                $PossibleValues = & $ScriptBlock $CurrentContext $LastWord | ForEach-Object {
+                $PossibleValues = & $ScriptBlock $CurrentContext $LastWord | . {process{
                     if ($_ -is [System.String]) {New-TabItem -Value $_ -Text $_ -ResultType ParameterName}
                     else {$_}
-                }
+                }}
                 if ($PossibleValues) {
                     $TabExpansionHasOutput = $true
                 }
@@ -454,7 +454,7 @@ Function Invoke-TabExpansion {
 
                 ## Strongly typed variables
                 if (((Get-Variable ($Tokens[0].Content -replace '\$') -ea SilentlyContinue).Attributes.GetEnumerator() |
-                    Foreach-Object {$_.GetType().Name}) -contains "ArgumentTypeConverterAttribute") {
+                    . {process{$_.GetType().Name}}) -contains "ArgumentTypeConverterAttribute") {
                     if ($VariableType.BaseType -eq [System.Enum]) {
                         ## Tab complete strongly typed enum variables
                         $PossibleValues = [Enum]::GetNames($VariableType) | Where-Object {$_ -like ($CurrentContext.LastWord + "*")} | 
@@ -482,7 +482,7 @@ Function Invoke-TabExpansion {
         }
 
         if ($TabExpansionHasOutput) {
-            $PossibleValues | Invoke-TabItemSelector $LastWord -SelectionHandler $SelectionHandler | ForEach-Object {
+            $PossibleValues | Invoke-TabItemSelector $LastWord -SelectionHandler $SelectionHandler | . {process{
                 if ($_ -is [String]) {
                     if ($QuoteSpaces -and ($_ -match " ") -and ($_ -notmatch "^[`"'].*[`"']`$") -and
                         (($LastToken.Type -eq $_TokenTypes::CommandArgument) -or ($LastWord -eq ""))) {
@@ -498,7 +498,7 @@ Function Invoke-TabExpansion {
                         $_
                     }
                 }
-            }
+            }}
             if ($PossibleValues.Count -lt 1) {
                 ## No values
                 if ($LastWord) {
@@ -617,7 +617,7 @@ Function Invoke-PowerTab {
                 } else {
                     $n -like $Pattern
                 }
-            } | ForEach-Object {
+            } | . {process{
                 if ($_.MemberType -band $_Method) {
                     ## Return a method...
                     $Value = $Object + '.' + $_.Name + '('
@@ -627,7 +627,7 @@ Function Invoke-PowerTab {
                     $Value = $Object + '.' + $_.Name
                     New-TabItem -Value $Value -Text $Value -ResultType Property
                 }
-            }
+            }}
         }
     }
 
@@ -658,14 +658,14 @@ Function Invoke-PowerTab {
 
             &{ trap {continue}
                 Resolve-Member -Object "($($Matches[2]))" -Pattern $Matches[3] |
-                    Invoke-TabItemSelector $LastBlock -SelectionHandler $SelectionHandler | ForEach-Object {
+                    Invoke-TabItemSelector $LastBlock -SelectionHandler $SelectionHandler | . {process{
                         $TabExpansionHasOutput = $true
                         if ($_.IndexOf(' ') -ge 0 ) {
                             ([Regex]::Split($_,' '))[-1].Trim()
                         } else {
                             $_
                         }
-                    }
+                    }}
             }
             if ($TabExpansionHasOutput) {
                 ## Tab expansion handled, don't do anything more
@@ -701,7 +701,7 @@ Function Invoke-PowerTab {
                 } else {
                     $n -like "$Member*"
                 }
-            } | ForEach-Object {
+            } | . {process{
                 if ($_.MemberType -band $_Method) {
                     ## Return a method...
                     $Value = $ScriptBlock + '.' + $_.Name + '('
@@ -711,7 +711,7 @@ Function Invoke-PowerTab {
                     $Value = $ScriptBlock + '.' + $_.Name
                     New-TabItem -Value $Value -Text $Value -ResultType Property
                 }
-            }
+            }}
             $SelectorLastWord = "$ScriptBlock.$Member"
             break
         }
@@ -794,7 +794,7 @@ Function Invoke-PowerTab {
 
         ## DataGrid GUI Shortcuts
         '^a_(.*)' {Get-Help "about_$($Matches[1])*" | Select-Object Name,Synopsis,Length | Out-DataGridView Name |
-            Foreach-Object {Get-Help $_}}
+            . {process{Get-Help $_}}}
         ## TODO: Add description?
         '^w_(.*)' {Get-TabExpansion "win32_$($Matches[1])*" WMI | Select-Object Name | Out-DataGridView Name}
         '^t_(.*)' {Get-TabExpansion "*$($Matches[1])*" Types | Where-Object {$_.Name -ne "Dummy"} |
@@ -848,7 +848,7 @@ Function Invoke-PowerTab {
                 $Pattern = $Matches[2].Split('.')[($Level -1)] + '*'
                 Invoke-Expression "$($Matches[1]) | Get-Member -Static" |
                     Where-Object {$_.Name -like $Pattern -and $_.Name -notmatch '^[ge]et_'} |
-                    ForEach-Object {
+                    . {process{
                         if ($_.MemberType -band $_Method) {
                             $Value = "${LastType}::$($_.Name)" + '('
                             New-TabItem -Value $Value -Text $Value -ResultType Method
@@ -856,7 +856,7 @@ Function Invoke-PowerTab {
                             $Value = "${LastType}::$($_.Name)"
                             New-TabItem -Value $Value -Text $Value -ResultType Property
                         }
-                    }
+                    }}
             }
             $SelectorLastWord = $LastWord
             break
@@ -880,7 +880,7 @@ Function Invoke-PowerTab {
                 $Pattern = $Matches[2].Split('.')[($Level -1)] + '*'
                 Invoke-Expression "$($Matches[1]) | Get-Member -Static" |
                     Where-Object {$_.Name -like $Pattern -and $_.Name -notmatch '^[ge]et_'} |
-                    ForEach-Object {
+                    . {process{
                         if ($_.MemberType -band $_Method) {
                             $Value = "${LastType}${gt}::$($_.Name)" + '('
                             New-TabItem -Value $Value -Text $Value -ResultType Method
@@ -888,7 +888,7 @@ Function Invoke-PowerTab {
                             $Value = "${LastType}${gt}::$($_.Name)"
                             New-TabItem -Value $Value -Text $Value -ResultType Property
                         }
-                    }
+                    }}
                 $SelectorLastWord = $LastWord.Replace('::',"${gt}::")
             }
             break
@@ -905,7 +905,7 @@ Function Invoke-PowerTab {
                     New-TabItem -Value {"${LastType}::$_"} -Text {"${LastType}::$_"} -ResultType ParameterValue
                 $SelectorLastWord = ($LastType + '::')
             } else {
-                $Constructors = Invoke-Expression "$LastType.GetConstructors()" | ForEach-Object {
+                $Constructors = Invoke-Expression "$LastType.GetConstructors()" | . {process{
                     $Parameters = foreach ($Parameter in $_.GetParameters()) {
                         '[{0}] ${1}' -f ($Parameter.ParameterType -replace '^System\.'), $Parameter.Name
                     }
@@ -915,7 +915,7 @@ Function Invoke-PowerTab {
                     } else {
                         "New-Object $($LastType.Trim('[]'))".Replace('([])','()')
                     }
-                }
+                }}
                 if ($Constructors) {
                     $Constructors | New-TabItem -Value {$_} -Text {$_} -ResultType Method
                     $SelectorLastWord = $LastType
@@ -931,7 +931,7 @@ Function Invoke-PowerTab {
             Write-Trace "Core Handler: Evaluating non-static members of a type."
 
             $LastType = $Matches[1].Split(',')[-1]
-            Invoke-Expression "$LastType | Get-Member" | Where-Object {$_.Name -like "$($Matches[2])*"} | ForEach-Object {
+            Invoke-Expression "$LastType | Get-Member" | Where-Object {$_.Name -like "$($Matches[2])*"} | . {process{
                 if ($_.MemberType -band $_Method) {
                     $Value = "$LastType.$($_.Name)" + '('
                     New-TabItem -Value $Value -Text $Value -ResultType Method
@@ -939,7 +939,7 @@ Function Invoke-PowerTab {
                     $Value = "$LastType.$($_.Name)"
                     New-TabItem -Value $Value -Text $Value -ResultType Property
                 }
-            }
+            }}
             $SelectorLastWord = $LastWord
             break
         } 
@@ -1053,9 +1053,9 @@ Function Invoke-PowerTab {
         "(.+)$([Regex]::Escape($PowerTabConfig.Core.ShortcutChars.Invoke))`$" {
             Write-Trace "Core Handler: Evaluating invoke results from database only (special character)."
 
-            Get-TabExpansion "$($Matches[1])*" Invoke | ForEach-Object {
+            Get-TabExpansion "$($Matches[1])*" Invoke | . {process{
                 $ExecutionContext.InvokeCommand.InvokeScript($_.Text) | New-TabItem -Value {$_} -Text {$_}
-            }
+            }}
             $SelectorLastWord = $Matches[1]
             break
         }

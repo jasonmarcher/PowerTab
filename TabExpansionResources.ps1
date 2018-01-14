@@ -82,7 +82,7 @@ Function Update-Resource {
         [Bool]$Modified = $false
         $ControlResources = Import-Resource $ControlCulture -FileName $FileName
         $ControlKeys = $ControlResources.Keys.GetEnumerator() | Sort-Object
-        Compare-Object $BaseKeys $ControlKeys -IncludeEqual | ForEach-Object {
+        Compare-Object $BaseKeys $ControlKeys -IncludeEqual | . {process{
             $Key = $_.InputObject
             switch -exact ($_.SideIndicator) {
                 '<=' {
@@ -108,7 +108,7 @@ Function Update-Resource {
                     }
                 }
             }
-        }
+        }}
         if ($Modified) {
             Export-Resource $ControlCulture $ControlResources -FileName $FileName
         }
@@ -118,7 +118,7 @@ Function Update-Resource {
             $Modified = $false
             $CultureResources = Import-Resource $Culture -FileName $FileName
             $CultureKeys = $CultureResources.Keys.GetEnumerator() | Sort-Object
-            Compare-Object $BaseKeys $CultureKeys -IncludeEqual | ForEach-Object {
+            Compare-Object $BaseKeys $CultureKeys -IncludeEqual | . {process{
                 $Key = $_.InputObject
                 switch -exact ($_.SideIndicator) {
                     '<=' {
@@ -146,7 +146,7 @@ Function Update-Resource {
                         }
                     }
                 }
-            }
+            }}
 
             ## Update culture resources
             if ($Modified) {
@@ -227,4 +227,4 @@ $mod = (get-module -All PowerTab)[0]
 #>
 
 
-$ResourceFiles | ForEach-Object {Update-Resource @_}
+$ResourceFiles | . {process{Update-Resource @_}}

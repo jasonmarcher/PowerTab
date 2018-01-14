@@ -38,7 +38,7 @@ Function Out-DataGridView {
         $First = $true
         foreach ($Item in $Objects) {
             $dr = $dt.NewRow()
-            $Item.PSObject.get_Properties() | ForEach-Object {
+            $Item.PSObject.get_Properties() | . {process{
                 if ($first) {
                     $col =  New-Object System.Data.DataColumn
                     $col.ColumnName = $_.Name.ToString()
@@ -51,7 +51,7 @@ Function Out-DataGridView {
                 } else {
                     $dr.Item($_.Name) = $_.Value
                 }
-            }
+            }}
             $dt.Rows.Add($dr)
             $First = $false
         }
@@ -65,7 +65,7 @@ Function Out-DataGridView {
         $dg.ColumnHeadersHeightSizeMode = [System.Windows.Forms.DataGridViewColumnHeadersHeightSizeMode]::AutoSize
         $dg.SelectionMode = 'FullRowSelect'
         $dg.add_DoubleClick({
-            $script:ret = $this.SelectedRows | ForEach-Object {$_.DataBoundItem["$ReturnField"]}
+            $script:ret = $this.SelectedRows | . {process{$_.DataBoundItem["$ReturnField"]}}
             $form.Close()
         })
 
@@ -73,7 +73,7 @@ Function Out-DataGridView {
         $form.KeyPreview = $true
         $form.add_KeyDown({
             if ($_.KeyCode -eq 'Enter') {
-                $script:ret = $dg.SelectedRows | ForEach-Object {$_.DataBoundItem["$ReturnField"]}
+                $script:ret = $dg.SelectedRows | . {process{$_.DataBoundItem["$ReturnField"]}}
                 $form.Close()
             } elseif ($_.KeyCode -eq 'Escape') {
                 $form.Close()
@@ -477,10 +477,9 @@ Function Invoke-ProviderPathHandler {
             }
             New-TabItem "$Container\$Child" "$Container\$Child" -ResultType $Type  ## TODO: PowerShell Core
         }
-        $ChildItems | Invoke-TabItemSelector $LastPath -SelectionHandler $SelectionHandler -Return $Path -ForceList:$ForceList | ForEach-Object {
-            ## If a path contains any of these characters it needs to be in quotes
-            $_charsRequiringQuotes = ('`&@''#{}()$,; ' + "`t").ToCharArray()
-        } {
+        ## If a path contains any of these characters it needs to be in quotes
+        $_charsRequiringQuotes = ('`&@''#{}()$,; ' + "`t").ToCharArray()
+        $ChildItems | Invoke-TabItemSelector $LastPath -SelectionHandler $SelectionHandler -Return $Path -ForceList:$ForceList | . {process{
             $Quote = ''
             $Invoke = ''
 
@@ -519,7 +518,7 @@ Function Invoke-ProviderPathHandler {
                 ## Need to return the value if we are not quoting
                 $_
             }
-        }
+        }}
     }
 }
 
@@ -839,7 +838,7 @@ Function Find-Module {
         $Files | Where-Object {
                 $parent = [System.IO.Path]::GetFileName( $_.PSParentPath )
                 return $all -or ($parent -eq $_.BaseName) -or ($folder -and ($parent -eq ([System.IO.Path]::GetFileName($folder))) -and ($n -eq $_.BaseName))
-            } | Group-Object PSParentPath | ForEach-Object {@($_.Group)[0]}
+            } | Group-Object PSParentPath | . {process{@($_.Group)[0]}}
 
         ## Possibly useful in the future
         # | Sort-Object {switch ($_.Extension) {".psd1"{1} ".psm1"{2}}})

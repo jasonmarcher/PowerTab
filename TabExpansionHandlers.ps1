@@ -64,7 +64,7 @@ Register-TabExpansion "Get-Command" -Type "Command" {
         'Noun' {
             $TabExpansionHasOutput.Value = $true
             Get-Command -CommandType Cmdlet,Filter,Function | Where-Object {$_.Name -match "^[^-]+-(?<Noun>$Argument.*)"} |
-                ForEach-Object {$Matches.Noun} | Sort-Object -Unique | New-TabItem -Value {$_} -Text {$_} -ResultType ParameterValue
+                . {process{$Matches.Noun}} | Sort-Object -Unique | New-TabItem -Value {$_} -Text {$_} -ResultType ParameterValue
         }
         'Verb' {
             $TabExpansionHasOutput.Value = $true
@@ -511,7 +511,7 @@ Register-TabExpansion "New-Object" -Type "Command" {
                 throw "No TypeName specified."
             }
 
-            Invoke-Expression "[$TypeName].GetConstructors()" | ForEach-Object {
+            Invoke-Expression "[$TypeName].GetConstructors()" | . {process{
                 $Parameters = foreach ($Parameter in $_.GetParameters()) {
                     '[{0}] ${1}' -f ($Parameter.ParameterType -replace '^System\.'), $Parameter.Name
                 }
@@ -521,7 +521,7 @@ Register-TabExpansion "New-Object" -Type "Command" {
                 } else {
                     New-TabItem -Value "()" -Text "() <Empty Constructor>" -ResultType ParameterValue
                 }
-            }
+            }}
         }
         'ComObject' {
             ## TODO: Maybe cache these like we do with .NET types and WMI object names?
@@ -818,7 +818,7 @@ Register-TabExpansion "Out-Printer" -Type "Command" {
                 if ($Argument -notlike '$*') {
                     $TabExpansionHasOutput.Value = $true
                     $QuoteSpaces.Value = $false
-                    Get-PSSession -Name "$Argument*" | ForEach-Object {'(Get-PSSession -Name "{0}")' -f $_.Name}
+                    Get-PSSession -Name "$Argument*" | . {process{'(Get-PSSession -Name "{0}")' -f $_.Name}}
                 }
             }
         }
@@ -1475,7 +1475,7 @@ Register-TabExpansion "PSProvider" -Type Parameter {
             'Name' {
                 $TabExpansionHasOutput.Value = $true
                 Get-ChildItem (Join-Path $PSScriptRoot "ColorThemes/Theme${Argument}*") -Include *.csv |
-                    ForEach-Object {$_.Name -replace '^Theme([^\.]+)\.csv$','$1'} | New-TabItem -Value {$_.Name} -Text {$_.Name} -ResultType ParameterValue
+                    . {process{$_.Name -replace '^Theme([^\.]+)\.csv$','$1'}} | New-TabItem -Value {$_.Name} -Text {$_.Name} -ResultType ParameterValue
             }
         }
     }
