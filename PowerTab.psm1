@@ -57,15 +57,6 @@ $PSv3HasRun = if ($PSVersionTable.PSVersion -eq "3.0") {$false} else {$true}
 
 $PowerTabConfig = New-Object System.Management.Automation.PSObject
 
-New-Variable PowerTabLog -Value (
-    New-Object PSObject -Property @{
-        Error = New-Object System.Collections.ArrayList
-        History = New-Object System.Collections.ArrayList
-        Trace = New-Object System.Collections.ArrayList
-        TraceEnabled = $true
-    }
-)
-
 
 #########################
 ## Functions
@@ -254,4 +245,4 @@ if ($PowerTabConfig.ShowBanner) {
 ## Exported functions, variables, etc.
 $ExcludedFuctions = @("Initialize-TabExpansion")
 $Functions = Get-Command "*-TabExpansion*","New-TabItem" | Where-Object {$ExcludedFuctions -notcontains $_.Name}
-Export-ModuleMember -Function $Functions -Variable PowerTabConfig, PowerTabLog -Alias *
+Export-ModuleMember -Function $Functions -Variable PowerTabConfig -Alias *

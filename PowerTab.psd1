@@ -20,7 +20,7 @@
 "New-TabExpansionDatabase","Import-TabExpansionDataBase","Export-TabExpansionDatabase","Update-TabExpansionDataBase",
 "Import-TabExpansionTheme","Export-TabExpansionTheme","Invoke-TabExpansionEditor","Find-TabExpansionType",
 "Resolve-TabExpansionParameterValue")
-    VariablesToExport  = @('PowerTabConfig','PowerTabLog')
+    VariablesToExport  = @('PowerTabConfig')
     AliasesToExport    = @("ate","gte","itee","rgte","rte","udte")
     # DscResourcesToExport = @()
     # DefaultCommandPrefix = ''

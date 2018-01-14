@@ -1589,4 +1589,15 @@ Function CreatePowerTabConfig {
                     `$dsTabExpansionConfig.Tables['Config'].Select(`"Name = '$($_.Name)'`")[0].Value = [ConsoleColor]`$args[0]") `
                 -Force
         }
+    
+    $Logs = [Ordered]@{
+        Error = New-Object System.Collections.ArrayList
+        History = New-Object System.Collections.ArrayList
+        Trace = New-Object System.Collections.ArrayList
+        TraceEnabled = $true
+    }
+    Add-Member -InputObject $PowerTabConfig -MemberType NoteProperty -Name Log -Value (
+        New-Object PSObject -Property $Logs
+    )
+    Add-Member -InputObject $PowerTabConfig.Log -MemberType ScriptMethod -Name ToString -Value {"{PowerTab Logs}"} -Force
 }

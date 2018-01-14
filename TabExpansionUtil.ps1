@@ -664,7 +664,7 @@ Function Write-Trace {
         [String]$message = "Entering function."  ## TODO: localize
     )
 
-    if ($PowerTabLog.TraceEnabled) {
+    if ($PowerTabConfig.Log.TraceEnabled) {
         $TraceEntry = New-Object PSObject -Property @{
             TraceId = $TraceId
             Time = Get-Date
@@ -673,7 +673,7 @@ Function Write-Trace {
         }
         $TraceEntry.PSObject.TypeNames.Insert(0, "PowerTab.TraceEntry")
 
-        $PowerTabLog.Trace.Insert(0, $TraceEntry)
+        $PowerTabConfig.Log.Trace.Insert(0, $TraceEntry)
     }
 }
 

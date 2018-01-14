@@ -52,7 +52,7 @@ Function Invoke-TabExpansion {
     $script:Error.Clear()
     $script:Error.AddRange($global:Error)
     $global:Error.Clear()
-    $global:Error.AddRange($PowerTabLog.Error)
+    $global:Error.AddRange($PowerTabConfig.Log.Error)
 
     if ($null -eq $PowerTabConfig) {
         ## Something happened to the PowerTabConfig object, recreate it
@@ -261,7 +261,7 @@ Function Invoke-TabExpansion {
     Add-Member -InputObject $CurrentContext -Name LastToken -Value $LastToken.Type -MemberType NoteProperty
 
     ## Save to history
-    $PowerTabLog.History.Insert(0, ($CurrentContext | Select-Object @{n="TraceId";e={$TraceId}},Line,LastWord,LastToken,Command,Parameter,Argument,
+    $PowerTabConfig.Log.History.Insert(0, ($CurrentContext | Select-Object @{n="TraceId";e={$TraceId}},Line,LastWord,LastToken,Command,Parameter,Argument,
         PositionalParameter,PositionalParameters,OtherParameters,isCommandMode,isAssignment,isParameterValue,CommandInfo))
 
     try {
@@ -526,7 +526,7 @@ Function Invoke-TabExpansion {
         Remove-TabActivityIndicator
 
         ## Save PowerTab errors and replace global errors
-        $script:PowerTabLog.Error = $global:Error.Clone()
+        $script:PowerTabConfig.Log.Error = $global:Error.Clone()
         $global:Error.Clear()
         $global:Error.AddRange($script:Error)
     }
