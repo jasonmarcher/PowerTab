@@ -188,7 +188,7 @@ Function Invoke-TabItemSelector {
         if (($ObjectHandlers -contains $SelectionHandler) -and ($PSCmdlet.ParameterSetName -eq "Values")) {
             $Objects = foreach ($Item in $Values) {New-TabItem -Value $Item -Text $Item}
         } elseif (($ObjectHandlers -notcontains $SelectionHandler) -and ($PSCmdlet.ParameterSetName -eq "Objects")) {
-            $Values = foreach ($Item in $Objects) {$Item.Value}
+            $Values = foreach ($Item in $Objects) {$Item.CompletionText}
         }
 
         Write-Trace "Decided to invoke $SelectionHandler, because $SelectionReason."

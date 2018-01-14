@@ -501,18 +501,18 @@ Function Invoke-ProviderPathHandler {
                     "$Invoke$Quote$_$Quote"
                 } else {
                     ## Remove quotes from beginning and end of string
-                    $_.Value = $_.Value -replace '^"|"$'
+                    $_.CompletionText = $_.CompletionText -replace '^"|"$'
                     ## Escape certain characters
-                    $_.Value = $_.Value -replace '([\$"`])','`$1'
+                    $_.CompletionText = $_.CompletionText -replace '([\$"`])','`$1'
 
-                    if ($_.Value.IndexOfAny($_charsRequiringQuotes) -ge 0) {
+                    if ($_.CompletionText.IndexOfAny($_charsRequiringQuotes) -ge 0) {
                         ## Check for quotes in the last block of the input line,
                         ## if they exist, PowerShell will add them to this output
                         ## if not, then quotes can safely be added
                         if (-not (@([Char[]]$LastBlock | Where-Object {$_ -match '"|'''}).Count % 2)) {$Quote = '"'}
                         if (($LastBlock.Trim() -eq $Path)) {$Invoke = '& '}
                     }
-                    $_.Value = "$Invoke$Quote$($_.Value)$Quote"
+                    $_.CompletionText = "$Invoke$Quote$($_.CompletionText)$Quote"
                     $_
                 }
             } else {

@@ -421,7 +421,7 @@ Function Invoke-TabExpansion {
             }
 
             $PossibleValues = foreach ($Value in $PossibleValues) {
-                if ($CurrentContext.OtherParameters.Keys -notcontains $Value.Value.Substring(1)) {
+                if ($CurrentContext.OtherParameters.Keys -notcontains $Value.CompletionText.Substring(1)) {
                     $Value
                 }
             }
@@ -491,9 +491,9 @@ Function Invoke-TabExpansion {
                         $_
                     }
                 } else {
-                    if ($QuoteSpaces -and ($_.Value -match " ") -and ($_.Value -notmatch "^[`"'].*[`"']`$") -and
+                    if ($QuoteSpaces -and ($_.CompletionText -match " ") -and ($_.CompletionText -notmatch "^[`"'].*[`"']`$") -and
                         (($LastToken.Type -eq $_TokenTypes::CommandArgument) -or ($LastWord -eq ""))) {
-                        $_.Value = '"' + ($_.Value -replace '([\$"`])','`$1') + '"'
+                        $_.CompletionText = '"' + ($_.CompletionText -replace '([\$"`])','`$1') + '"'
                     } else {
                         $_
                     }
