@@ -381,6 +381,7 @@ Register-TabExpansion "ConvertTo-HTML" -Type "Command" {
     Register-TabExpansion "Clear-ItemProperty" $ItemPropertyHandler -Type "Command"
     Register-TabExpansion "Copy-ItemProperty" $ItemPropertyHandler -Type "Command"
     Register-TabExpansion "Get-ItemProperty" $ItemPropertyHandler -Type "Command"
+    Register-TabExpansion "Get-ItemPropertyValue" $ItemPropertyHandler -Type "Command"
     Register-TabExpansion "Move-ItemProperty" $ItemPropertyHandler -Type "Command"
     Register-TabExpansion "Remove-ItemProperty" $ItemPropertyHandler -Type "Command"
     Register-TabExpansion "Rename-ItemProperty" $ItemPropertyHandler -Type "Command"
@@ -419,10 +420,12 @@ Register-TabExpansion "ConvertTo-HTML" -Type "Command" {
         }
     }.GetNewClosure()
 
+    Register-TabExpansion "Debug-Job" $JobHandler -Type "Command"
     Register-TabExpansion "Get-Job" $JobHandler -Type "Command"
     Register-TabExpansion "Receive-Job" $JobHandler -Type "Command"
     Register-TabExpansion "Remove-Job" $JobHandler -Type "Command"
     Register-TabExpansion "Stop-Job" $JobHandler -Type "Command"
+    Register-TabExpansion "Suspend-Job" $JobHandler -Type "Command"
     Register-TabExpansion "Wait-Job" $JobHandler -Type "Command"
 }
 
@@ -730,12 +733,6 @@ Register-TabExpansion "Out-Printer" -Type "Command" {
                     $Scripts
                 }
             }
-            'Variable' {
-                if ($Argument -notlike '$*') {
-                    $TabExpansionHasOutput.Value = $true
-                    Get-Variable "$Argument*" -Scope Global | New-TabItem -Value {$_.Name} -Text {$_.Name} -ResultType Variable
-                }
-            }
         }
     }.GetNewClosure()
     
@@ -755,6 +752,10 @@ Register-TabExpansion "Out-Printer" -Type "Command" {
             'Name' {
                 $TabExpansionHasOutput.Value = $true
                 Get-PSDrive "$Argument*" | New-TabItem -Value {$_.Name} -Text {$_.Name} -ResultType ParameterValue
+            }
+            'Scope' {
+                $TabExpansionHasOutput.Value = $true
+                "Global","Local","Script","0"
             }
         }
     }.GetNewClosure()
@@ -896,6 +897,8 @@ Register-TabExpansion "Get-PSSnapin" -Type "Command" {
     }
 }.GetNewClosure()
 
+## TODO: Remove-PSSnapin
+
 ## Service
 & {
     $ServiceHandler = {
@@ -1029,6 +1032,7 @@ Register-TabExpansion "Get-Verb" -Type "Command" {
     Register-TabExpansion "Get-Variable" $VariableHandler -Type "Command"
     Register-TabExpansion "Remove-Variable" $VariableHandler -Type "Command"
     Register-TabExpansion "Set-Variable" $VariableHandler -Type "Command"
+    ## TODO: New-Variable
 }
 
 ## Get-WinEvent
@@ -1136,7 +1140,7 @@ Register-TabExpansion "Get-WinEvent" -Type "Command" {
     
     Register-TabExpansion "Get-WmiObject" $WmiObjectHandler -Type "Command"
     Register-TabExpansion "Invoke-WmiMethod" $WmiObjectHandler -Type "Command"
-    Register-TabExpansion "Register-WmiEvent" $WmiObjectHandler -Type "Command"
+    # Register-TabExpansion "Register-WmiEvent" $WmiObjectHandler -Type "Command"
     Register-TabExpansion "Remove-WmiObject" $WmiObjectHandler -Type "Command"
     Register-TabExpansion "Set-WmiInstance" $WmiObjectHandler -Type "Command"
 }
@@ -1307,10 +1311,12 @@ Register-TabExpansion "function" -Type "Command" {
         }
     }.GetNewClosure()
     
-    Register-TabExpansion "ErrorVariable" $VariableHandler -Type Parameter
     Register-TabExpansion "OutVariable" $VariableHandler -Type Parameter
-    Register-TabExpansion "Variable" $VariableHandler -Type Parameter
+    Register-TabExpansion "ErrorVariable" $VariableHandler -Type Parameter
     Register-TabExpansion "WarningVariable" $VariableHandler -Type Parameter
+    Register-TabExpansion "InformationVariable" $VariableHandler -Type Parameter
+    Register-TabExpansion "PipelineVariable" $VariableHandler -Type Parameter
+    Register-TabExpansion "Variable" $VariableHandler -Type Parameter
 }
 
 ## Parameters that take the name of a culture
