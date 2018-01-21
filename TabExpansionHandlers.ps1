@@ -1410,17 +1410,22 @@ Register-TabExpansion "PSProvider" -Type Parameter {
 & {
     Register-TabExpansion powershell.exe -Type ParameterName {
         param($Context, $Parameter)
-        $Parameters = "-Command","-EncodedCommand","-ExecutionPolicy","-File","-InputFormat","-NoExit","-NoLogo",
-            "-NonInteractive","-NoProfile","-OutputFormat","-PSConsoleFile","-Sta","-Version","-WindowStyle"
-        $Parameters | Where-Object {$_ -like "$Parameter*"} | New-TabItem -Value {$_} -Text {$_} -ResultType ParameterName
+        $Parameters = "-Command","ConfigurationName","-EncodedCommand","-ExecutionPolicy","-File","Help",
+            "-InputFormat","-Mta","-NoExit","-NoLogo","-NonInteractive","-NoProfile","-OutputFormat",
+            "-PSConsoleFile","-Sta","-Version","-WindowStyle"
+        $Parameters | Where-Object {$_ -like "$Parameter*"} |
+            New-TabItem -Value {$_} -Text {$_} -ResultType ParameterName
         <#
         PowerShell[.exe] [-PSConsoleFile <file> | -Version <version>]
-        [-NoLogo] [-NoExit] [-Sta] [-NoProfile] [-NonInteractive]
+        [-NoLogo] [-NoExit] [-Sta] [-Mta] [-NoProfile] [-NonInteractive]
         [-InputFormat {Text | XML}] [-OutputFormat {Text | XML}]
         [-WindowStyle <style>] [-EncodedCommand <Base64EncodedCommand>]
+        [-ConfigurationName <string>]
         [-File <filePath> <args>] [-ExecutionPolicy <ExecutionPolicy>]
         [-Command { - | <script-block> [-args <arg-array>]
                       | <string> [<CommandParameters>] } ]
+
+        PowerShell[.exe] -Help | -? | /?
         #>
     }.GetNewClosure()
 
@@ -1437,6 +1442,8 @@ Register-TabExpansion "PSProvider" -Type Parameter {
             [ValidateSet("Text","XML")]
             [String]$InputFormat
             ,
+            [String]$ConfigurationName
+            ,
             [Switch]$NoExit
             ,
             [Switch]$NonInteractive
@@ -1452,11 +1459,15 @@ Register-TabExpansion "PSProvider" -Type Parameter {
             ,
             [Switch]$Sta
             ,
+            [Switch]$Mta
+            ,
             [ValidateSet("1.0","2.0")]
             [String]$Version
             ,
             [ValidateSet("Normal","Minimized","Maximized","Hidden")]
             [String]$WindowStyle
+            ,
+            [Switch]$Help
         )
     }
 
