@@ -26,11 +26,27 @@ showing up from Get-Command.
                 $TabExpansionHasOutput.Value = $true
                 Get-Alias -Name "$Argument*" | New-TabItem -Value {$_.Name} -Text {$_.Name} -ResultType Command
             }
+            'Scope' {
+                $TabExpansionHasOutput.Value = $true
+                "Global","Local","Script","0" | Where-Object {$_ -like "$Argument*"}
+            }
+        }
+    }.GetNewClosure()
+    $SetAliasHandler = {
+        param($Context, [ref]$TabExpansionHasOutput)
+        $Argument = $Context.Argument
+        switch -exact ($Context.Parameter) {
+            'Scope' {
+                $TabExpansionHasOutput.Value = $true
+                "Global","Local","Script","0" | Where-Object {$_ -like "$Argument*"}
+            }
         }
     }.GetNewClosure()
     
     Register-TabExpansion "Export-Alias" $AliasHandler -Type "Command"
     Register-TabExpansion "Get-Alias" $AliasHandler -Type "Command"
+    Register-TabExpansion "New-Alias" $SetAliasHandler -Type "Command"
+    Register-TabExpansion "Set-Alias" $SetAliasHandler -Type "Command"
 }
 
 ## Get-Command
@@ -755,7 +771,7 @@ Register-TabExpansion "Out-Printer" -Type "Command" {
             }
             'Scope' {
                 $TabExpansionHasOutput.Value = $true
-                "Global","Local","Script","0"
+                "Global","Local","Script","0" | Where-Object {$_ -like "$Argument*"}
             }
         }
     }.GetNewClosure()
@@ -765,7 +781,7 @@ Register-TabExpansion "Out-Printer" -Type "Command" {
         switch -exact ($Context.Parameter) {
             'Scope' {
                 $TabExpansionHasOutput.Value = $true
-                "Global","Local","Script","0"
+                "Global","Local","Script","0" | Where-Object {$_ -like "$Argument*"}
             }
         }
     }.GetNewClosure()
