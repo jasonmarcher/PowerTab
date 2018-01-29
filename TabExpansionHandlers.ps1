@@ -89,20 +89,6 @@ Register-TabExpansion "Get-Command" -Type "Command" {
     }
 }.GetNewClosure()
 
-## Reset-ComputerMachinePassword
-Register-TabExpansion "Reset-ComputerMachinePassword" -Type "Command" {
-    param($Context, [ref]$TabExpansionHasOutput)
-    $Argument = $Context.Argument
-    switch -exact ($Context.Parameter) {
-        'Server' {
-            if ($Argument -notmatch '^\$') {
-                $TabExpansionHasOutput.Value = $true
-                Get-TabExpansion "$Argument*" Computer | New-TabItem -Value {$_.Text} -Text {$_.Text} -ResultType ParameterValue
-            }
-        }
-    }
-}.GetNewClosure()
-
 ## ComputerRestore
 & {
     $ComputerRestoreHandler = {
@@ -440,6 +426,7 @@ Register-TabExpansion "ConvertTo-HTML" -Type "Command" {
     Register-TabExpansion "Get-Job" $JobHandler -Type "Command"
     Register-TabExpansion "Receive-Job" $JobHandler -Type "Command"
     Register-TabExpansion "Remove-Job" $JobHandler -Type "Command"
+    Register-TabExpansion "Resume-Job" $JobHandler -Type "Command"
     Register-TabExpansion "Stop-Job" $JobHandler -Type "Command"
     Register-TabExpansion "Suspend-Job" $JobHandler -Type "Command"
     Register-TabExpansion "Wait-Job" $JobHandler -Type "Command"
@@ -755,8 +742,8 @@ Register-TabExpansion "Out-Printer" -Type "Command" {
     Register-TabExpansion "Disable-PSBreakpoint" $PSBreakpointHandler -Type Command
     Register-TabExpansion "Enable-PSBreakpoint" $PSBreakpointHandler -Type Command
     Register-TabExpansion "Get-PSBreakpoint" $PSBreakpointHandler -Type Command
-    Register-TabExpansion "Set-PSBreakpoint" $PSBreakpointHandler -Type Command
     Register-TabExpansion "Remove-PSBreakpoint" $PSBreakpointHandler -Type Command
+    Register-TabExpansion "Set-PSBreakpoint" $PSBreakpointHandler -Type Command
 }
 
 ## PSDrive
