@@ -12,6 +12,20 @@ PowerTab offers enhanced tab expansion for PowerShell.
 - **Supports Many PowerShell Hosts** - Works in any PowerShell host that runs tab expansion. See the [Host Support](Docs/Usage/HostSupport.md) page.
 - **New Interfaces** - Offers several GUI options for displaying tab expansion options using [Tab Item Selectors](Docs/Usage/ItemSelectors.md).
 
+## Install
+
+Inspect
+
+```powershell
+PS> Save-Module -Name PowerTab -Path <path>
+```
+
+Install
+
+```powershell
+PS> Install-Module -Name PowerTab
+```
+
 ## Help Index
 
 - Setup

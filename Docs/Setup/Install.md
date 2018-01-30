@@ -1,8 +1,24 @@
 # Installing PowerTab
 
-Before getting started, please download the latest PowerTab version from this site. PowerTab is distributed as a standard PowerShell module in a ZIP package. The following instructions are very similar for other PowerShell modules.
-
 ## Installing the PowerTab Module
+
+### Install from PowerShell Gallery
+
+Inspect
+
+```powershell
+PS> Save-Module -Name PowerTab -Path <path>
+```
+
+Install
+
+```powershell
+PS> Install-Module -Name PowerTab
+```
+
+### Install manually
+
+Before getting started, please download the latest PowerTab version from this site. PowerTab is distributed as a standard PowerShell module in a ZIP package. The following instructions are very similar for other PowerShell modules.
 
 The first step is to unblock the download package containing PowerTab. This can be done from Windows Explorer by Right-Clicking on **PowerTab-<version>.zip** and selecting **Properties**. Then click on the **Unblock** button near the bottom of the properties dialog. Finally, press **OK**.
 
