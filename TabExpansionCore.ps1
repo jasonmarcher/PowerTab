@@ -345,10 +345,12 @@ Function Invoke-TabExpansion {
                     ## Enum
                     if ($ParameterInfo.ParameterType.BaseType -eq [System.Enum]) {
                         $TabExpansionHasOutput = $true
+                        Write-Trace "Detected Parameter of type Enum."
                         $PossibleValues = [Enum]::GetNames($ParameterInfo.ParameterType) | Where-Object {$_ -like ($CurrentContext.Argument + "*")} | 
                             New-TabItem -Value {$_} -Text {$_} -ResultType ParameterValue
                     } elseif ($ParameterInfo.ParameterType -eq [System.Boolean]) {
                         ## Treat boolean parameters as enums
+                        Write-Trace "Detected Parameter of type Boolean."
                         $PossibleValues = 'true','false' | Where-Object {$_ -like ($CurrentContext.LastWord + "*")} | 
                             New-TabItem -Value {"`$$_"} -Text {$_} -ResultType ParameterValue
                         if ($PossibleValues) {
@@ -361,12 +363,24 @@ Function Invoke-TabExpansion {
                         $ValidateSet = $ParameterInfo.Attributes | Where-Object {$_ -is [System.Management.Automation.ValidateSetAttribute]}
                         if ($ValidateSet) {
                             $TabExpansionHasOutput = $true
+                            Write-Trace "Detected Parameter with ValidateSet attribute."
                             $PossibleValues = $ValidateSet | Select-Object -ExpandProperty ValidValues |
                                 Where-Object {$_ -like ($CurrentContext.Argument + "*")} | 
                                 New-TabItem -Value {$_} -Text {$_} -ResultType ParameterValue
                         }
                     }
                 } catch {}
+            }
+
+            ## System.Text.Encoding support
+            if (-not $TabExpansionHasOutput) {
+                if ($ParameterInfo.ParameterType -eq [System.Text.Encoding]) {
+                    $TabExpansionHasOutput = $true
+                    Write-Trace "Detected Parameter of type System.Text.Encoding."
+                    $PossibleValues = "ASCII","BigEndianUnicode","Default","Unicode","UTF32","UTF7","UTF8" |
+                        Where-Object {$_ -like ($CurrentContext.Argument + "*")} | 
+                        New-TabItem -Value {"[System.Text.Encoding]::$_"} -Text {$_} -ResultType ParameterValue
+                }
             }
 
             ## Ensure that variables get handled
