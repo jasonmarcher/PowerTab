@@ -1150,6 +1150,110 @@ Register-TabExpansion "Get-WinEvent" -Type "Command" {
 
 ## CIM
 & {
+    $CimObjectHandler = {
+        param($Context, [ref]$TabExpansionHasOutput, [ref]$QuoteSpaces)
+        $Argument = $Context.Argument
+        switch -exact ($Context.Parameter) {
+            'ClassName' {
+                $TabExpansionHasOutput.Value = $true
+                ## TODO: escape special characters?
+                Get-TabExpansion "$Argument*" WMI | New-TabItem -Value {$_.Name} -Text {$_.Name} -ResultType Type
+            }
+            'Locale' {
+                $TabExpansionHasOutput.Value = $true
+                $QuoteSpaces.Value = $false
+                [System.Globalization.CultureInfo]::GetCultures([System.Globalization.CultureTypes]::InstalledWin32Cultures) |
+                    Where-Object {$_.Name -like "$Argument*"} | Sort-Object -Property Name |
+                        New-TabItem -Value {$_.LCID} -Text {$_.Name} -ResultType ParameterValue
+            }
+            'MethodName' {
+                $TabExpansionHasOutput.Value = $true
+                if ($Context.OtherParameters["ClassName"]) {
+                    $Class = [WmiClass](Resolve-TabExpansionParameterValue $Context.OtherParameters["ClassName"])
+                } elseif ($Context.OtherParameters["Path"]) {
+                    $Class = [WmiClass]((Resolve-TabExpansionParameterValue $Context.OtherParameters["Path"]) -replace '\.\w.+')
+                } elseif ($Context.PositionalParameters[0]) {
+                    $Class = [WmiClass](Resolve-TabExpansionParameterValue $Context.PositionalParameters[0])
+                }
+                if ($Class) {
+                    $Class.Methods | Where-Object {$_.Name -like "$Argument*"} | New-TabItem -Value {$_.Name} -Text {$_.Name} -ResultType Method
+                }
+            }
+            'Namespace' {
+                $TabExpansionHasOutput.Value = $true
+                if ($Argument -notlike "ROOT\*") {
+                    $Argument = "ROOT\$Argument"
+                }
+                if ($Context.OtherParameters["ComputerName"]) {
+                    $ComputerName = Resolve-TabExpansionParameterValue $Context.OtherParameters["ComputerName"]
+                } else {
+                    $ComputerName = "."
+                }
+                
+                $ParentNamespace = $Argument -replace '\\[^\\]*$'
+                $Namespaces = New-Object System.Management.ManagementClass "\\$ComputerName\${ParentNamespace}:__NAMESPACE"
+                $Namespaces = foreach ($Namespace in $Namespaces.PSBase.GetInstances()) {"{0}\{1}" -f $Namespace.__NameSpace,$Namespace.Name}
+                $Namespaces | Where-Object {$_ -like "$Argument*"} | Sort-Object | New-TabItem -Value {$_} -Text {$_} -ResultType Type
+            }
+            'PropertyName' {
+                $TabExpansionHasOutput.Value = $true
+                if ($Context.OtherParameters["ClassName"]) {
+                    $Class = [WmiClass](Resolve-TabExpansionParameterValue $Context.OtherParameters["ClassName"])
+                } elseif ($Context.PositionalParameters[0]) {
+                    $Class = [WmiClass](Resolve-TabExpansionParameterValue $Context.PositionalParameters[0])
+                }
+                if ($Class) {
+                    $Class.Properties | Where-Object {$_.Name -like "$Argument*"} | New-TabItem -Value {$_.Name} -Text {$_.Name} -ResultType Property
+                }
+            }
+            'Property' {
+                if ($Context.Command -eq "Get-CimInstance") {
+                    $TabExpansionHasOutput.Value = $true
+                    if ($Context.OtherParameters["ClassName"]) {
+                        $Class = [WmiClass](Resolve-TabExpansionParameterValue $Context.OtherParameters["ClassName"])
+                    } elseif ($Context.PositionalParameters[0]) {
+                        $Class = [WmiClass](Resolve-TabExpansionParameterValue $Context.PositionalParameters[0])
+                    }
+                    if ($Class) {
+                        $Class.Properties | Where-Object {$_.Name -like "$Argument*"} | New-TabItem -Value {$_.Name} -Text {$_.Name} -ResultType Property
+                    }
+                }
+            }
+        }
+    }.GetNewClosure()
+
+    Register-TabExpansion "Get-CimAssociatedInstance" $CimObjectHandler -Type "Command"
+    Register-TabExpansion "Get-CimClass" $CimObjectHandler -Type "Command"
+    Register-TabExpansion "Get-CimInstance" $CimObjectHandler -Type "Command"
+    Register-TabExpansion "Invoke-CimMethod" $CimObjectHandler -Type "Command"
+    Register-TabExpansion "New-CimInstance" $CimObjectHandler -Type "Command"
+    Register-TabExpansion "Remove-CimInstance" $CimObjectHandler -Type "Command"
+    Register-TabExpansion "Set-CimInstance" $CimObjectHandler -Type "Command"
+}
+
+## CimSession
+& {
+    $CimSessionHandler = {
+        param($Context, [ref]$TabExpansionHasOutput, [ref]$QuoteSpaces)
+        $Argument = $Context.Argument
+        switch -exact ($Context.Parameter) {
+            'Id' {
+                $TabExpansionHasOutput.Value = $true
+                Get-CimSession | New-TabItem -Value {$_.Id} -Text {"$($_.Id) " + $_.Name} -ResultType ParameterValue
+            }
+            'InstanceId' {
+                $TabExpansionHasOutput.Value = $true
+                Get-CimSession | New-TabItem -Value {$_.InstanceId} -Text {$_.Name} -ResultType ParameterValue
+            }
+            'Name' {
+                $TabExpansionHasOutput.Value = $true
+                if ($Context.Command -eq "New-CimSession") {break}
+                Get-CimSession -Name "$Argument*" | New-TabItem -Value {$_.Name} -Text {$_.Name} -ResultType ParameterValue
+            }
+        }
+    }.GetNewClosure()
+    Register-TabExpansion "Get-CimSession" $CimSessionHandler -Type "Command"
+    Register-TabExpansion "Remove-CimSession" $CimSessionHandler -Type "Command"
 }
 
 ## WSMan & WSManInstance & WSManAction
