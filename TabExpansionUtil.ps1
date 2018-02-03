@@ -388,6 +388,7 @@ Function GetCommand {
 
 ############
 
+## TODO: Make private in 2.0
 Function Resolve-TabExpansionParameterValue {
     param(
         [String]$Value

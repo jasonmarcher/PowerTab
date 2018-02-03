@@ -203,6 +203,7 @@ Function Invoke-TabItemSelector {
 }
 
 
+# .ExternalHelp TabExpansionLib-Help.xml
 Function New-TabItem {
     [CmdletBinding()]
     [OutputType([System.Management.Automation.CompletionResult])]
@@ -649,8 +650,10 @@ Function Add-TabExpansionType {
 }
 
 
+# .ExternalHelp TabExpansionLib-Help.xml
 Function Find-TabExpansionType {
     [CmdletBinding()]
+    [OutputType([System.Management.Automation.CompletionResult])]
     param(
         [Parameter(Position = 0, ValueFromPipeline = $true)]
         [String]
