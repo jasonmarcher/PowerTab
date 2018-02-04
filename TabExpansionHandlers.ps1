@@ -22,6 +22,11 @@ showing up from Get-Command.
         param($Context, [ref]$TabExpansionHasOutput)
         $Argument = $Context.Argument
         switch -exact ($Context.Parameter) {
+            'Definition' {
+                $TabExpansionHasOutput.Value = $true
+                Get-Command "$Argument*" -CommandType Function,Cmdlet,Filter,Workflow |
+                    New-TabItem -Value {$_.Name} -Text {$_.Name} -ResultType Command
+            }
             'Name' {
                 $TabExpansionHasOutput.Value = $true
                 Get-Alias -Name "$Argument*" | New-TabItem -Value {$_.Name} -Text {$_.Name} -ResultType Command
@@ -39,6 +44,11 @@ showing up from Get-Command.
             'Scope' {
                 $TabExpansionHasOutput.Value = $true
                 "Global","Local","Script","0" | Where-Object {$_ -like "$Argument*"}
+            }
+            'Value' {
+                $TabExpansionHasOutput.Value = $true
+                Get-Command "$Argument*" -CommandType Function,Cmdlet,Filter,Workflow |
+                    New-TabItem -Value {$_.Name} -Text {$_.Name} -ResultType Command
             }
         }
     }.GetNewClosure()
