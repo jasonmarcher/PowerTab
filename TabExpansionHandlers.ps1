@@ -24,7 +24,11 @@ showing up from Get-Command.
         switch -exact ($Context.Parameter) {
             'Definition' {
                 $TabExpansionHasOutput.Value = $true
-                Get-Command "$Argument*" -CommandType Function,Cmdlet,Filter,Workflow |
+                $CommandTypes = "Function","Filter","Cmdlet"
+                if ($PSVersionTable.PSVersion -ge "3.0") {
+                    $CommandTypes += "Workflow"
+                }
+                Get-Command "$Argument*" -CommandType $CommandTypes |
                     New-TabItem -Value {$_.Name} -Text {$_.Name} -ResultType Command
             }
             'Name' {
@@ -47,7 +51,11 @@ showing up from Get-Command.
             }
             'Value' {
                 $TabExpansionHasOutput.Value = $true
-                Get-Command "$Argument*" -CommandType Function,Cmdlet,Filter,Workflow |
+                $CommandTypes = "Function","Filter","Cmdlet"
+                if ($PSVersionTable.PSVersion -ge "3.0") {
+                    $CommandTypes += "Workflow"
+                }
+                Get-Command "$Argument*" -CommandType $CommandTypes |
                     New-TabItem -Value {$_.Name} -Text {$_.Name} -ResultType Command
             }
         }
@@ -89,7 +97,11 @@ Register-TabExpansion "Get-Command" -Type "Command" {
         }
         'Noun' {
             $TabExpansionHasOutput.Value = $true
-            Get-Command -CommandType Cmdlet,Filter,Function | Where-Object {$_.Name -match "^[^-]+-(?<Noun>$Argument.*)"} |
+            $CommandTypes = "Function","Filter","Cmdlet"
+            if ($PSVersionTable.PSVersion -ge "3.0") {
+                $CommandTypes += "Workflow"
+            }
+            Get-Command -CommandType $CommandTypes | Where-Object {$_.Name -match "^[^-]+-(?<Noun>$Argument.*)"} |
                 . {process{$Matches.Noun}} | Sort-Object -Unique | New-TabItem -Value {$_} -Text {$_} -ResultType ParameterValue
         }
         'Verb' {
