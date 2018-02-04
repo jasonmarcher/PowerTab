@@ -834,6 +834,8 @@ Register-TabExpansion "Out-Printer" -Type "Command" {
     Register-TabExpansion "Get-PSSession" $PSSessionHandler -Type "Command"
     Register-TabExpansion "Import-PSSession" $ImportPSSessionHandler -Type "Command"
     Register-TabExpansion "Remove-PSSession" $PSSessionHandler -Type "Command"
+    Register-TabExpansion "Connect-PSSession" $PSSessionHandler -Type "Command"
+    Register-TabExpansion "Disconnect-PSSession" $PSSessionHandler -Type "Command"
 }
 
 ## PSSessionConfiguration
