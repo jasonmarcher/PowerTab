@@ -1010,6 +1010,15 @@ Register-TabExpansion "Set-StrictMode" -Type Command {
         param($Context, [ref]$TabExpansionHasOutput)
         $Argument = $Context.Argument
         switch -exact ($Context.Parameter) {
+            'Command' {
+                $TabExpansionHasOutput.Value = $true
+                $CommandTypes = "Function","ExternalScript","Filter","Cmdlet"
+                if ($PSVersionTable.PSVersion -ge "3.0") {
+                    $CommandTypes += "Workflow"
+                }
+                Get-Command "$Argument*" -CommandType $CommandTypes |
+                    New-TabItem -Value {$_.Name} -Text {$_.Name} -ResultType Command
+            }
             'Name' {
                 $TabExpansionHasOutput.Value = $true
                 Get-TraceSource "$Argument*" | New-TabItem -Value {$_.Name} -Text {$_.Name} -ResultType ParameterValue
