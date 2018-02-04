@@ -176,7 +176,8 @@ Register-TabExpansion "Get-Command" -Type "Command" {
         switch -exact ($Context.Parameter) {
             'SourceIdentifier' {
                 $TabExpansionHasOutput.Value = $true
-                Get-Event "$Argument*" | Sort-Object SourceIdentifier | New-TabItem -Value {$_.SourceIdentifier} -Text {$_.SourceIdentifier} -ResultType ParameterValue
+                Get-Event "$Argument*" | Sort-Object SourceIdentifier |
+                    New-TabItem -Value {$_.SourceIdentifier} -Text {$_.SourceIdentifier} -ResultType ParameterValue
             }
             'EventIdentifier' {
                 $TabExpansionHasOutput.Value = $true
@@ -197,7 +198,8 @@ Register-TabExpansion "Get-Command" -Type "Command" {
                 if ($Context.OtherParameters["InputObject"]) {
                     $TabExpansionHasOutput.Value = $true
                     Invoke-Expression $Context.OtherParameters["InputObject"] | Get-Member | 
-                        Where-Object {$_.MemberType -eq "Event" -and $_.Name -like "$Argument*"} | New-TabItem -Value {$_.Name} -Text {$_.Name} -ResultType ParameterValue
+                        Where-Object {$_.MemberType -eq "Event" -and $_.Name -like "$Argument*"} |
+                        New-TabItem -Value {$_.Name} -Text {$_.Name} -ResultType ParameterValue
                 }
             }
             'Namespace' {
@@ -230,7 +232,7 @@ Register-TabExpansion "Get-Command" -Type "Command" {
     Register-TabExpansion "Register-EngineEvent" $EventHandler -Type "Command"
     Register-TabExpansion "Register-WmiEvent" $EventHandler -Type "Command"
     Register-TabExpansion "Register-CimIndicationEvent" $EventHandler -Type "Command"
-    Register-TabExpansion "Remove-Event" $EventHandler -Type "Command"
+    Register-TabExpansion "Remove-Event" $GetEventHandler -Type "Command"
     Register-TabExpansion "Unregister-Event" $EventHandler -Type "Command"
     Register-TabExpansion "Wait-Event" $EventHandler -Type "Command"
 }
