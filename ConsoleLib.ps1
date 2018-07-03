@@ -378,7 +378,7 @@ Function Out-ConsoleList {
         #$BottomLeftSingleDouble = [string][char]9561
         #$BottomRightSingleDouble = [string][char]9564
     
-        if ($PowerTabConfig.DoubleBorder) {
+        if ($PowerTabConfig.ConsoleList.DoubleBorder) {
             ## Double line box
             $LineTop = $TopLeftDouble `
                 + $HorizontalDouble * ($Size.width - 2) `
