@@ -17,13 +17,13 @@ PowerTab offers enhanced tab expansion for PowerShell.
 Inspect
 
 ```powershell
-PS> Save-Module -Name PowerTab -Path <path>
+Save-Module -Name PowerTab -Path <path>
 ```
 
 Install
 
 ```powershell
-PS> Install-Module -Name PowerTab
+Install-Module -Name PowerTab
 ```
 
 ## Help Index
