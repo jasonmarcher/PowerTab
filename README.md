@@ -2,7 +2,7 @@
 
 Powertab is an extension of the PowerShell [tab expansion](http://technet.microsoft.com/en-us/library/dd315316.aspx) feature.
 
-![Example of PowerTab in use.](Docs/PowerTab.png)
+![Example of PowerTab in use.](Docs/powertab-demo.png)
 
 PowerTab offers enhanced tab expansion for PowerShell.
 
