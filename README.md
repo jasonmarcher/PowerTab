@@ -1,6 +1,6 @@
 # PowerTab
 
-Powertab is an extension of the PowerShell [tab expansion](http://technet.microsoft.com/en-us/library/dd315316.aspx) feature.
+Powertab is an extension of the PowerShell [tab expansion](http://docs.microsoft.com/en-us/powershell/scripting/core-powershell/console/using-tab-expansion?view=powershell-6) feature.
 
 ![Example of PowerTab in use.](Docs/powertab-demo.gif)
 
