@@ -96,8 +96,6 @@ $ConfigurationPathParam = ""
 
     if ($ConfigurationPath) {
         $script:ConfigurationPathParam = $ConfigurationPath
-    } elseif ($PrivateData = (Parse-Manifest).PrivateData) {
-        $script:ConfigurationPathParam = $PrivateData
     } elseif (Test-Path (Join-Path (Split-Path $Profile) $ConfigFileName)) {
         $script:ConfigurationPathParam = (Join-Path (Split-Path $Profile) $ConfigFileName)
     } elseif (Test-Path (Join-Path $PSScriptRoot $ConfigFileName)) {
