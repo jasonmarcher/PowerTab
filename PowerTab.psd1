@@ -1,6 +1,6 @@
 @{
     ## Module Info
-    ModuleVersion      = '1.0.0'
+    ModuleVersion      = '1.1.0'
     Description        = "A module that enhances PowerShell's tab expansion."
     GUID               = '64c85865-df87-4bd6-bccd-ea294dc335b3'
     # HelpInfoURI        = ''
@@ -58,7 +58,32 @@
 
             # ReleaseNotes of this module
             ReleaseNotes = @"
-## 2018-01-XX - Version 1.0.0
+## 2018-09-XX - Version 1.1.0
+
+Features:
+
+- Add support for new Cmdlets
+  - PlatyPS module
+  - CIM Cmdlets
+  - Connect-PSSession and Disconnect-PSSession
+  - Remove-Event
+- Added support for more Parameters
+  - *-Alias `-Definition` and `-Value`
+  - Trace-Command `-Command`
+  - Parameters of type `[System.Text.Encoding]`
+- Added basic support for OpenSSH on Windows command line options
+
+Bug Fixes:
+
+- Fix error on first import of PowerTab (regression in 1.0.0)
+- ConsoleList double boarder setting now works
+- Fixed bug with completing paths on their own (particularly `~\` and `.\`)
+- Fixed completing cmdlets when using fully qualified names (example: `PowerTab\Add-TabExpansion`)
+
+Detailed list available here:
+https://github.com/jasonmarcher/PowerTab/milestone/2?closed=1
+
+## 2018-01-29 - Version 1.0.0
 
 Features:
 
