@@ -262,7 +262,7 @@ Function Invoke-TabExpansion {
 
     ## Save to history
     $PowerTabConfig.Log.History.Insert(0, ($CurrentContext | Select-Object @{n="TraceId";e={$TraceId}},Line,LastWord,LastToken,Command,Parameter,Argument,
-        PositionalParameter,PositionalParameters,OtherParameters,isCommandMode,isAssignment,isParameterValue,CommandInfo))
+        PositionalParameter,PositionalParameters,OtherParameters,hasCommand,isCommandMode,isAssignment,isParameterValue,CommandInfo))
 
     try {
         ## Detect DoubleTab if enabled
