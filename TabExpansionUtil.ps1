@@ -374,11 +374,6 @@ Function GetCommand {
     )
 
     end {
-        ## Here be hack, try to prevent paths from returning results
-        if ($Name -match '^[~\.][\\/].*') {
-            return
-        }
-
         ## The closures prevent internal PowerTab methods from being shown.
         & {Get-Command $Name -Module $Module -CommandType $CommandType -ErrorAction SilentlyContinue}.GetNewClosure()
     }

@@ -1099,8 +1099,20 @@ Function Invoke-PowerTab {
         if ($PSVersionTable.PSVersion -ge "3.0") {
             $CommandTypes += "Workflow"
         }
-        $PossibleValues = @(GetCommand -CommandType $CommandTypes -Name "$LastWord*" |
-            New-TabItem -Value {$_.Name} -Text {$_.Name} -ResultType Command)
+
+        if ($LastWord -match "\\") {
+            ## Full name usage
+            $Module = $LastWord.Substring(0, $LastWord.Indexof("\"))
+            $CommandName = $LastWord.Substring($LastWord.Indexof("\") + 1, $LastWord.length - ($LastWord.Indexof("\") + 1))
+            if (Get-Module $Module) {
+                $PossibleValues = @(GetCommand -CommandType $CommandTypes -Name "$CommandName*" -Module $Module |
+                    New-TabItem -Value {"${Module}\" + $_.Name} -Text {$_.Name} -ResultType Command)
+            }
+        } else {
+            $PossibleValues = @(GetCommand -CommandType $CommandTypes -Name "$LastWord*" |
+                New-TabItem -Value {$_.Name} -Text {$_.Name} -ResultType Command)
+        }
+
         $SelectorLastWord = $LastWord
     }
 
