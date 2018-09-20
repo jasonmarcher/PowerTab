@@ -58,7 +58,7 @@
 
             # ReleaseNotes of this module
             ReleaseNotes = @"
-## 2018-09-XX - Version 1.1.0
+## 2018-09-21 - Version 1.1.0
 
 Features:
 
