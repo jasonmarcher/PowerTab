@@ -558,6 +558,11 @@ Function Update-TabExpansionType {
     [Diagnostics.CodeAnalysis.SuppressMessageAttribute("PSUseShouldProcessForStateChangingFunctions", "")]
     param()
 
+    begin {
+        ## Ensure that important .NET DLLs are loaded
+        LoadLibs
+    }
+
     end {
         $dsTabExpansionDatabase.Tables['Types'].Clear()
         $Assemblies = [AppDomain]::CurrentDomain.GetAssemblies()

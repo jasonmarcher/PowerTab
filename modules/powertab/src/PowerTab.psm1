@@ -5,11 +5,6 @@
 [Diagnostics.CodeAnalysis.SuppressMessageAttribute("PSUseDeclaredVarsMoreThanAssignments", "")]
 param()
 
-## Load forms library when not loaded 
-if (-not ([AppDomain]::CurrentDomain.GetAssemblies() | Where-Object {$_.ManifestModule -like "System.Windows.Forms*"})) {
-    [Void][System.Reflection.Assembly]::LoadWithPartialName("System.Windows.Forms")
-}
-
 
 #########################
 ## Cleanup
