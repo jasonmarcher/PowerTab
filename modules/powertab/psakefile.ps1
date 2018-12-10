@@ -39,7 +39,7 @@ Task 'build' -Depends clean {
         $ModuleContent += Get-Content $script.FullName
     }
     $ModuleContent += Get-Content "$SrcDirectory/$ModuleName.psm1"
-    Set-Content "$OutputDirectory/$ModuleName.txt" -Value $ModuleContent -Encoding UTF8 -Force
+    # Set-Content "$OutputDirectory/$ModuleName.txt" -Value $ModuleContent -Encoding UTF8 -Force
 
     ## Copy resources
     Copy-Item "$SrcDirectory/res/*" -Destination $OutputDirectory -Recurse -Force
