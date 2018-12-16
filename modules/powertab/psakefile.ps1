@@ -55,7 +55,7 @@ Task 'deploy' -Depends build {
 
     New-Item $DeployDirectory -ItemType Directory -ErrorAction SilentlyContinue > $null
 
-    Copy-Item "$OutputDirectory/*" -Destination $DeployDirectory -Force
+    Copy-Item "$OutputDirectory/*" -Destination $DeployDirectory -Recurse -Force
 }
 
 Task 'checkStyle' -Depends build {
