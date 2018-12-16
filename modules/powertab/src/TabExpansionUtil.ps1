@@ -843,13 +843,6 @@ Function Get-ModulePath {
     $Env:PSModulePath -split ";" | Select-Object -Unique | Where-Object {Test-Path $_}
 }
 
-Function LoadLibs {
-    ## Load forms library when not loaded 
-    if (-not ([AppDomain]::CurrentDomain.GetAssemblies() | Where-Object {$_.ManifestModule -like "System.Windows.Forms*"})) {
-        [Void][System.Reflection.Assembly]::LoadWithPartialName("System.Windows.Forms")
-    }
-}
-
 function isWindows {
     if (($PSVersionTable.Platform -eq "Win32NT") -or ($env:OS -like "Windows*")) {
         $true
