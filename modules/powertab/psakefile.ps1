@@ -16,7 +16,16 @@ Task 'clean' {
     }
 }
 
-Task 'build' -Depends clean {
+Task 'buildHelp' {
+    New-Item $OutputDirectory -ItemType Directory -ErrorAction SilentlyContinue > $null
+
+    New-ExternalHelp -Path $HelpDirectory -OutputPath $OutputDirectory
+
+    ## Copy about topics
+    Copy-Item "$HelpDirectory/*" -Include "about_*.txt" -Destination $OutputDirectory -Force
+}
+
+Task 'build' -Depends buildHelp {
     New-Item $OutputDirectory -ItemType Directory -ErrorAction SilentlyContinue > $null
 
     ## Copy manifest
@@ -43,12 +52,9 @@ Task 'build' -Depends clean {
 
     ## Copy resources
     Copy-Item "$SrcDirectory/res/*" -Destination $OutputDirectory -Recurse -Force
-
-    ## Copy help
-    Copy-Item "$HelpDirectory/*" -Include "about_*.txt" -Destination $OutputDirectory -Force
 }
 
-Task 'deploy' -Depends build {
+Task 'deploy' {
     if (Test-Path $DeployDirectory) {
         Remove-Item $DeployDirectory -Recurse -Force
     }
@@ -58,7 +64,7 @@ Task 'deploy' -Depends build {
     Copy-Item "$OutputDirectory/*" -Destination $DeployDirectory -Recurse -Force
 }
 
-Task 'checkStyle' -Depends build {
+Task 'checkStyle' {
     New-Item $ReportDirectory -ItemType Directory -ErrorAction SilentlyContinue > $null
 
     $FilesToCheck = Get-ChildItem $SrcDirectory -Include *.ps1 -Recurse
