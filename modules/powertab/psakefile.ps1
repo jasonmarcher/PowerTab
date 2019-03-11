@@ -4,7 +4,7 @@ Properties {
     $SrcDirectory = "$PSScriptRoot/src"
     $HelpDirectory = "$PSScriptRoot/help"
     $OutputDirectory = "$RootDirectory/build/$ModuleName"
-    $ReportDirectory = "$RootDirectory/build/reports"
+    $ReportDirectory = "$RootDirectory/build/reports/$ModuleName"
     $DeployDirectory = "$HOME/Documents/WindowsPowerShell/Modules/$ModuleName"
 }
 
