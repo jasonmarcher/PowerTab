@@ -46,9 +46,8 @@ RegisterArgumentCompleter -CommandName "Wait-Job" -ParameterName "Name" -ScriptB
 $Completion_JobJob = {
     param($commandName, $parameterName, $wordToComplete, $commandAst, $fakeBoundParameter)
 
-    if ($wordToComplete -notlike '$*') {
-        foreach ($Job in Get-Job -Name "$wordToComplete*") {'(Get-Job "{0}")' -f $Job.Name |
-            NewTabItem -Value {$_} -Text {$_} -ResultType ParameterValue}
+    foreach ($Job in Get-Job -Name "$wordToComplete*") {
+        '(Get-Job "{0}")' -f $Job.Name | Sort-Object | NewTabItem -Value {$_} -Text {$_} -ResultType ParameterValue
     }
 }
 
