@@ -33,3 +33,14 @@ RegisterArgumentCompleter -CommandName "Get-Command" -ParameterName "Get-Command
 RegisterArgumentCompleter -CommandName "Get-Module" -ParameterName "Name" -ScriptBlock $Completion_ModuleName
 RegisterArgumentCompleter -CommandName "Import-Module" -ParameterName "Name" -ScriptBlock $Completion_ModuleName
 RegisterArgumentCompleter -CommandName "Remove-Module" -ParameterName "Name" -ScriptBlock $Completion_ModuleName
+
+$Completion_ModuleOrSnapin = {
+    param($commandName, $parameterName, $wordToComplete, $commandAst, $fakeBoundParameter)
+
+    ## TODO: Grab from session instead?
+    (Get-Module -ListAvailable "$wordToComplete*") + (Get-PSSnapin "$wordToComplete*") | Sort-Object Name |
+        NewTabItem -Value {$_.Name} -Text {$_.Name} -ResultType ParameterValue
+}
+
+RegisterArgumentCompleter -CommandName "Import-PSSession" -ParameterName "Module" -ScriptBlock $Completion_ModuleOrSnapin
+RegisterArgumentCompleter -CommandName "Export-PSSession" -ParameterName "Module" -ScriptBlock $Completion_ModuleOrSnapin
