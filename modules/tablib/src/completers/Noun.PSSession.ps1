@@ -37,3 +37,18 @@ RegisterArgumentCompleter -CommandName "Enter-PSSession" -ParameterName "Name" -
 RegisterArgumentCompleter -CommandName "Get-PSSession" -ParameterName "Name" -ScriptBlock $Completion_PSSessionName
 RegisterArgumentCompleter -CommandName "Receive-PSSession" -ParameterName "Name" -ScriptBlock $Completion_PSSessionName
 RegisterArgumentCompleter -CommandName "Remove-PSSession" -ParameterName "Name" -ScriptBlock $Completion_PSSessionName
+
+$Completion_PSSessionSession = {
+    param($commandName, $parameterName, $wordToComplete, $commandAst, $fakeBoundParameter)
+
+    foreach ($Session in Get-PSSession -Name "$wordToComplete*") {
+        '(Get-PSSession -Name "{0}")' -f $Session.Name | Sort-Object | NewTabItem -Value {$_} -Text {$_} -ResultType ParameterValue
+    }
+}
+
+RegisterArgumentCompleter -CommandName "Connect-PSSession" -ParameterName "Session" -ScriptBlock $Completion_PSSessionSession
+RegisterArgumentCompleter -CommandName "Disconnect-PSSession" -ParameterName "Session" -ScriptBlock $Completion_PSSessionSession
+RegisterArgumentCompleter -CommandName "Enter-PSSession" -ParameterName "Session" -ScriptBlock $Completion_PSSessionSession
+RegisterArgumentCompleter -CommandName "New-PSSession" -ParameterName "Session" -ScriptBlock $Completion_PSSessionSession
+RegisterArgumentCompleter -CommandName "Receive-PSSession" -ParameterName "Session" -ScriptBlock $Completion_PSSessionSession
+RegisterArgumentCompleter -CommandName "Remove-PSSession" -ParameterName "Session" -ScriptBlock $Completion_PSSessionSession
