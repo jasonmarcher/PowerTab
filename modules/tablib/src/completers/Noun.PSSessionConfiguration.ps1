@@ -10,6 +10,7 @@ RegisterArgumentCompleter -CommandName "Get-PSSessionConfiguration" -ParameterNa
 RegisterArgumentCompleter -CommandName "Register-PSSessionConfiguration" -ParameterName "Name" -ScriptBlock $Completion_PSSessionConfigurationName
 RegisterArgumentCompleter -CommandName "Receive-PSSessionConfiguration" -ParameterName "Name" -ScriptBlock $Completion_PSSessionConfigurationName
 RegisterArgumentCompleter -CommandName "Set-PSSessionConfiguration" -ParameterName "Name" -ScriptBlock $Completion_PSSessionConfigurationName
+RegisterArgumentCompleter -CommandName "Unregister-PSSessionConfiguration" -ParameterName "Name" -ScriptBlock $Completion_PSSessionConfigurationName
 
 $Completion_PSSessionConfigurationConfigurationTypeName = {
     param($commandName, $parameterName, $wordToComplete, $commandAst, $fakeBoundParameter)
