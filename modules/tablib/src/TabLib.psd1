@@ -40,7 +40,7 @@
     PrivateData        = @{
         PSData = @{
             # Tags applied to this module. These help with module discovery in online galleries.
-            Tags = @("productivity","tabexpansion","tab-completion")
+            Tags = @("productivity","tabexpansion","tab-completion","Register-ArgumentCompleter")
 
             # A URL to the license for this module.
             # LicenseUri = ''
@@ -57,37 +57,9 @@
 
 Features:
 
-- Some compatibility changes for PowerShell Core
-  - Removed Intellisense Item Selector
-- Console history from PSReadline used if available
-- Added support for new parameters
-  - Workflow names
-  - Get-Help -Parameter
-  - *-Event -SourceIdentifier
-  - Get-Command -Noun
-  - Receive-Job -Location
-  - WMI parameters
-  - New-Object -ArgumentList (display syntax for constructors)
-  - Parameters of type Bool
-  - ConvertTo-HTML calculated properties
-- Added support for assignments to enum variables
-- Added array functions from PowerShell v3.0
-- Remove parameters already used for parameter completion
-- New History and Trace logs for PowerTab usage
-- ConsoleList
-  - New color theme based on CMD
-
-Bug Fixes:
-
-- General compatiblity fixes with latest PowerShell versions
-  - Fix display issue with TrueType fonts
-  - Only loaded commands are shown for PowerShell 3.0 and later
-- Compatibility fixes with PowerShell Core and non-Windows OSes
-  - NOTE: This is not fully tested but full compatibility is a goal
-- Consistency fixes for behavior compared to default PowerShell tab expansion
-  - Many small fixes for provider paths
-- Get-Command <TAB> now includes scripts from `$env:PATH
-- PowerTab now recognizes automatic aliases for Get-* commands
+- Modules
+  - Microsoft.PowerShell.Core
+  - Microsoft.PowerShell.Diagnostics
 
 Detailed list available here:
 https://github.com/jasonmarcher/PowerTab/milestone/1?closed=1
