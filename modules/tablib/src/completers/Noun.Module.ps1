@@ -33,6 +33,7 @@ RegisterArgumentCompleter -CommandName "Get-Command" -ParameterName "Get-Command
 RegisterArgumentCompleter -CommandName "Get-Module" -ParameterName "Name" -ScriptBlock $Completion_ModuleName
 RegisterArgumentCompleter -CommandName "Import-Module" -ParameterName "Name" -ScriptBlock $Completion_ModuleName
 RegisterArgumentCompleter -CommandName "Remove-Module" -ParameterName "Name" -ScriptBlock $Completion_ModuleName
+RegisterArgumentCompleter -CommandName "Update-Help" -ParameterName "Module" -ScriptBlock $Completion_ModuleName
 
 $Completion_ModuleOrSnapin = {
     param($commandName, $parameterName, $wordToComplete, $commandAst, $fakeBoundParameter)
