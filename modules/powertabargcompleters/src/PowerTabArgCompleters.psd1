@@ -60,6 +60,7 @@ Features:
 - Modules
   - Microsoft.PowerShell.Core
   - Microsoft.PowerShell.Diagnostics
+  - Microsoft.PowerShell.Management
 
 Detailed list available here:
 https://github.com/jasonmarcher/PowerTab/milestone/1?closed=1
