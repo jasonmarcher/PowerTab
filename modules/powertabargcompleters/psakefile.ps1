@@ -1,5 +1,5 @@
 Properties {
-    $ModuleName = 'TabLib'
+    $ModuleName = 'PowerTabArgCompleters'
     $RootDirectory = "$PSScriptRoot/../.."
     $SrcDirectory = "$PSScriptRoot/src"
     $HelpDirectory = "$PSScriptRoot/help"
@@ -34,10 +34,6 @@ Task 'build' -Depends buildHelp {
     ## Build module
     $ModuleContent = @(
         'using namespace System.Management.Automation',
-        '## Reason: Using Write-Host is intentional',
-        '[Diagnostics.CodeAnalysis.SuppressMessageAttribute("PSAvoidUsingWriteHost", "")]',
-        '## Reason: ConsoleList uses variables that are intended to be used in recursive calls',
-        '[Diagnostics.CodeAnalysis.SuppressMessageAttribute("PSUseDeclaredVarsMoreThanAssignments", "")]',
         'param()'
     )
     foreach ($script in (Get-ChildItem "$SrcDirectory/utils" -Include '*.ps1' -Recurse)) {

@@ -6,7 +6,7 @@
     # HelpInfoURI        = ''
 
     ## Module Components
-    RootModule         = @("TabLib.psm1")
+    RootModule         = @("PowerTabArgCompleters.psm1")
     ScriptsToProcess   = @()
     TypesToProcess     = @()
     FormatsToProcess   = @()
