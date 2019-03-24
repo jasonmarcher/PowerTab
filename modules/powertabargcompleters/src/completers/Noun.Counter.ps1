@@ -7,8 +7,8 @@ $Completion_Counter = {
         Sort-Object PathsWithInstances | NewTabItem -Value {$_.PathsWithInstances} -Text {$_.PathsWithInstances} -ResultType ParameterValue
 }
 
-RegisterArgumentCompleter -CommandName "Get-Counter" -ParameterName "Version" -ScriptBlock $Completion_Counter
-RegisterArgumentCompleter -CommandName "Import-Counter" -ParameterName "Version" -ScriptBlock $Completion_Counter
+RegisterArgumentCompleter -CommandName "Get-Counter" -ParameterName "Counter" -ScriptBlock $Completion_Counter
+RegisterArgumentCompleter -CommandName "Import-Counter" -ParameterName "Counter" -ScriptBlock $Completion_Counter
 
 $Completion_CounterSet = {
     param($commandName, $parameterName, $wordToComplete, $commandAst, $fakeBoundParameter)
@@ -18,8 +18,8 @@ $Completion_CounterSet = {
     Get-Counter -ListSet "$wordToComplete*" @Parameters | NewTabItem -Value {$_.CounterSetName} -Text {$_.CounterSetName} -ResultType ParameterValue
 }
 
-RegisterArgumentCompleter -CommandName "Get-Counter" -ParameterName "Version" -ScriptBlock $Completion_CounterSet
-RegisterArgumentCompleter -CommandName "Import-Counter" -ParameterName "Version" -ScriptBlock $Completion_CounterSet
+RegisterArgumentCompleter -CommandName "Get-Counter" -ParameterName "ListSet" -ScriptBlock $Completion_CounterSet
+RegisterArgumentCompleter -CommandName "Import-Counter" -ParameterName "ListSet" -ScriptBlock $Completion_CounterSet
 
 $Completion_CounterFormat = {
     param($commandName, $parameterName, $wordToComplete, $commandAst, $fakeBoundParameter)
