@@ -25,5 +25,8 @@ $Completion_PSHostProcessName = {
         NewTabItem -Value {$_.ProcessName} -Text {$_.ProcessName} -ResultType ParameterValue
 }
 
+RegisterArgumentCompleter -CommandName "Disable-RunspaceDebug" -ParameterName "ProcessName" -ScriptBlock $Completion_PSHostProcessName
+RegisterArgumentCompleter -CommandName "Enable-RunspaceDebug" -ParameterName "ProcessName" -ScriptBlock $Completion_PSHostProcessName
 RegisterArgumentCompleter -CommandName "Enter-PSHostProcess" -ParameterName "Name" -ScriptBlock $Completion_PSHostProcessName
 RegisterArgumentCompleter -CommandName "Get-PSHostProcessInfo" -ParameterName "Name" -ScriptBlock $Completion_PSHostProcessName
+RegisterArgumentCompleter -CommandName "Get-RunspaceDebug" -ParameterName "ProcessName" -ScriptBlock $Completion_PSHostProcessName
