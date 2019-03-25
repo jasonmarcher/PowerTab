@@ -31,7 +31,9 @@ $Completion_ModuleName = {
 
 RegisterArgumentCompleter -CommandName "Get-Command" -ParameterName "Get-Command" -ScriptBlock $Completion_ModuleName
 RegisterArgumentCompleter -CommandName "Get-Module" -ParameterName "Name" -ScriptBlock $Completion_ModuleName
+RegisterArgumentCompleter -CommandName "Get-OperationValidation" -ParameterName "ModuleName" -ScriptBlock $Completion_ModuleName
 RegisterArgumentCompleter -CommandName "Import-Module" -ParameterName "Name" -ScriptBlock $Completion_ModuleName
+RegisterArgumentCompleter -CommandName "Invoke-OperationValidation" -ParameterName "ModuleName" -ScriptBlock $Completion_ModuleName
 RegisterArgumentCompleter -CommandName "Remove-Module" -ParameterName "Name" -ScriptBlock $Completion_ModuleName
 RegisterArgumentCompleter -CommandName "Update-Help" -ParameterName "Module" -ScriptBlock $Completion_ModuleName
 
