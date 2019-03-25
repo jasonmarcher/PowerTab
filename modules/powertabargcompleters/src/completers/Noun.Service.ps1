@@ -1,7 +1,7 @@
 $Completion_ServiceDisplayName = {
     param($commandName, $parameterName, $wordToComplete, $commandAst, $fakeBoundParameter)
 
-    Get-Service -DisplayName "*$Argument*" | New-TabItem -Value {$_.DisplayName} -Text {$_.DisplayName} -ResultType ParameterValue
+    Get-Service -DisplayName "*$Argument*" | NewTabItem -Value {$_.DisplayName} -Text {$_.DisplayName} -ResultType ParameterValue
 
     $Parameters = @{}
 
