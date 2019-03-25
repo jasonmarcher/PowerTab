@@ -30,3 +30,17 @@ RegisterArgumentCompleter -CommandName "Enable-RunspaceDebug" -ParameterName "Pr
 RegisterArgumentCompleter -CommandName "Enter-PSHostProcess" -ParameterName "Name" -ScriptBlock $Completion_PSHostProcessName
 RegisterArgumentCompleter -CommandName "Get-PSHostProcessInfo" -ParameterName "Name" -ScriptBlock $Completion_PSHostProcessName
 RegisterArgumentCompleter -CommandName "Get-RunspaceDebug" -ParameterName "ProcessName" -ScriptBlock $Completion_PSHostProcessName
+
+$Completion_PSHostProcessAppDomainName = {
+    param($commandName, $parameterName, $wordToComplete, $commandAst, $fakeBoundParameter)
+
+    $Parameters = @{}
+
+    Get-PSHostProcessInfo @Parameters | Select-Object -ExpandProperty AppDomainName -Unique |
+        Where-Object {$_ -like "$wordToComplete*"} | NewTabItem -Value {$_} -Text {$_} -ResultType ParameterValue
+}
+
+RegisterArgumentCompleter -CommandName "Disable-RunspaceDebug" -ParameterName "AppDomainName" -ScriptBlock $Completion_PSHostProcessAppDomainName
+RegisterArgumentCompleter -CommandName "Enable-RunspaceDebug" -ParameterName "AppDomainName" -ScriptBlock $Completion_PSHostProcessAppDomainName
+RegisterArgumentCompleter -CommandName "Enter-PSHostProcess" -ParameterName "AppDomainName" -ScriptBlock $Completion_PSHostProcessAppDomainName
+RegisterArgumentCompleter -CommandName "Get-RunspaceDebug" -ParameterName "AppDomainName" -ScriptBlock $Completion_PSHostProcessAppDomainName
