@@ -22,3 +22,17 @@ $Completion_Geoid = {
 }
 
 RegisterArgumentCompleter -CommandName "Set-WinHomeLocation" -ParameterName "GeoId" -ScriptBlock $Completion_Geoid
+
+$Completion_Locale = {
+    param($commandName, $parameterName, $wordToComplete, $commandAst, $fakeBoundParameter)
+
+    [System.Globalization.CultureInfo]::GetCultures([System.Globalization.CultureTypes]::InstalledWin32Cultures) |
+        Where-Object {$_.Name -like "$wordToComplete*"} | Sort-Object -Property Name |
+        NewTabItem -Value {$_.LCID} -Text {$_.Name} -ResultType ParameterValue
+}
+
+RegisterArgumentCompleter -CommandName "Get-WmiObject" -ParameterName "Locale" -ScriptBlock $Completion_Locale
+RegisterArgumentCompleter -CommandName "Invoke-WmiMethod" -ParameterName "Locale" -ScriptBlock $Completion_Locale
+RegisterArgumentCompleter -CommandName "New-MarkdownHelp" -ParameterName "Locale" -ScriptBlock $Completion_Locale
+RegisterArgumentCompleter -CommandName "Remove-WmiObject" -ParameterName "Locale" -ScriptBlock $Completion_Locale
+RegisterArgumentCompleter -CommandName "Set-WmiInstance" -ParameterName "Locale" -ScriptBlock $Completion_Locale
