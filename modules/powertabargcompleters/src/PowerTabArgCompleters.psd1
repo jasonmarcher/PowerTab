@@ -58,9 +58,12 @@
 Features:
 
 - Modules
+  - International
   - Microsoft.PowerShell.Core
   - Microsoft.PowerShell.Diagnostics
   - Microsoft.PowerShell.Management
+  - Microsoft.PowerShell.Operation.Validation
+  - Microsoft.PowerShell.Utility
 
 Detailed list available here:
 https://github.com/jasonmarcher/PowerTab/milestone/1?closed=1
