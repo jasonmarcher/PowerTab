@@ -46,17 +46,25 @@ Function RegisterArgumentCompleter {
         $ScriptBlock
     )
 
-    if ($CommandName -and $ParameterName) {
-        Register-ArgumentCompleter -CommandName $CommandName -ParameterName $ParameterName -ScriptBlock $ScriptBlock
-    } elseif ($CommandName) {
-        Register-ArgumentCompleter -CommandName $CommandName -ScriptBlock $ScriptBlock
+    if ($PSVersionTable.PSVersion -ge "5.0") {
+        if ($CommandName -and $ParameterName) {
+            Register-ArgumentCompleter -CommandName $CommandName -ParameterName $ParameterName -ScriptBlock $ScriptBlock
+        } elseif ($CommandName) {
+            Register-ArgumentCompleter -CommandName $CommandName -ScriptBlock $ScriptBlock
+        } else {
+            Register-ArgumentCompleter -ParameterName $ParameterName -ScriptBlock $ScriptBlock
+        }
     } else {
-        Register-ArgumentCompleter -ParameterName $ParameterName -ScriptBlock $ScriptBlock
-    }
+        if (-not $global:options) { $global:options = @{CustomArgumentCompleters = @{};NativeArgumentCompleters = @{}}}
 
-    # TODO: Conditional code for PS v3 and v4
-    # if (-not $global:options) { $global:options = @{CustomArgumentCompleters = @{};NativeArgumentCompleters = @{}}}
-    # $global:options['CustomArgumentCompleters']['Get-PSSnapin:Name'] = $Completion_PSSnapinName 
+        if ($CommandName -and $ParameterName) {
+            $global:options['CustomArgumentCompleters']["${CommandName}:$ParameterName"] = $ScriptBlock
+        } elseif ($CommandName) {
+            $global:options['CustomArgumentCompleters'][$CommandName] = $ScriptBlock
+        } else {
+            $global:options['CustomArgumentCompleters'][$ParameterName] = $ScriptBlock
+        }
+    }
 }
 
 Function FindModule {
