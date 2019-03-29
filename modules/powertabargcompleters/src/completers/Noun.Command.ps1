@@ -12,6 +12,7 @@ $Completion_Command = {
 RegisterArgumentCompleter -CommandName "Get-Alias" -ParameterName "Definition" -ScriptBlock $Completion_Command
 RegisterArgumentCompleter -CommandName "Get-Job" -ParameterName "Command" -ScriptBlock $Completion_Command
 RegisterArgumentCompleter -CommandName "Get-PSBreakpoint" -ParameterName "Command" -ScriptBlock $Completion_Command
+RegisterArgumentCompleter -CommandName "New-Alias" -ParameterName "Value" -ScriptBlock $Completion_Command
 RegisterArgumentCompleter -CommandName "Set-Alias" -ParameterName "Value" -ScriptBlock $Completion_Command
 RegisterArgumentCompleter -CommandName "Set-PSBreakpoint" -ParameterName "Command" -ScriptBlock $Completion_Command
 RegisterArgumentCompleter -CommandName "Trace-Command" -ParameterName "Command" -ScriptBlock $Completion_Command
