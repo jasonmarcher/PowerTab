@@ -48,3 +48,4 @@ $Completion_CommandVerb = {
 }
 
 RegisterArgumentCompleter -CommandName "Get-Command" -ParameterName "Verb" -ScriptBlock $Completion_CommandVerb
+RegisterArgumentCompleter -CommandName "Get-Verb" -ParameterName "Verb" -ScriptBlock $Completion_CommandVerb
