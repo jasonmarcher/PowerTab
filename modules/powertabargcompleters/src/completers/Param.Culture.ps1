@@ -27,7 +27,8 @@ $Completion_Locale = {
     param($commandName, $parameterName, $wordToComplete, $commandAst, $fakeBoundParameter)
 
     [System.Globalization.CultureInfo]::GetCultures([System.Globalization.CultureTypes]::InstalledWin32Cultures) |
-        Where-Object {$_.Name -like "$wordToComplete*"} | Sort-Object -Property Name |
+        Where-Object {$_.Name -like "$wordToComplete*"} | Sort-Object -Property Name | Select-Object LCID, Name |
+        ForEach-Object {if ($_.LCID -eq 127) {$_.Name = "Invariant Language"}; $_} |
         NewTabItem -Value {$_.LCID} -Text {$_.Name} -ResultType ParameterValue
 }
 
