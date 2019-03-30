@@ -30,3 +30,7 @@ Task 'checkStyle' -Depends build {
     Invoke-psake -buildFile modules/powertab/psakefile.ps1 -taskList 'checkStyle'
     Invoke-psake -buildFile modules/powertabargcompleters/psakefile.ps1 -taskList 'checkStyle'
 }
+
+Task 'test' {
+    Invoke-psake -buildFile modules/powertabargcompleters/psakefile.ps1 -taskList 'test'
+}
