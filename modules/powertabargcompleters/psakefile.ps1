@@ -75,5 +75,5 @@ Task 'test' {
     New-Item $ReportDirectory -ItemType Directory -ErrorAction SilentlyContinue > $null
 
     Invoke-Pester `
-        -OutputFile "$ReportDirectory/tests_unit.xml" #-CodeCoverage "$SrcDirectory/completers/*.ps1" -CodeCoverageOutputFile "$ReportDirectory/coverage.xml" 
+        -OutputFile "$ReportDirectory/tests_unit.xml" -CodeCoverage "$SrcDirectory/completers/*.ps1" -CodeCoverageOutputFile "$ReportDirectory/coverage.xml" 
 }
