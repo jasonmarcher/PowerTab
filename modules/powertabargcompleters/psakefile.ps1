@@ -1,8 +1,9 @@
 Properties {
     $ModuleName = 'PowerTabArgCompleters'
     $RootDirectory = "$PSScriptRoot/../.."
-    $SrcDirectory = "$PSScriptRoot/src"
     $HelpDirectory = "$PSScriptRoot/help"
+    $SrcDirectory = "$PSScriptRoot/src"
+    $TestDirectory = "$PSScriptRoot/test"
     $OutputDirectory = "$RootDirectory/build/$ModuleName"
     $ReportDirectory = "$RootDirectory/build/reports/$ModuleName"
     $DeployDirectory = "$HOME/Documents/WindowsPowerShell/Modules/$ModuleName"
@@ -68,4 +69,11 @@ Task 'checkStyle' {
     $Results = $FilesToCheck | ForEach-Object {Invoke-ScriptAnalyzer $_.FullName}
     $Results | Where-Object Severity -eq "Error" | Format-Table | Out-String | Write-Host -ForegroundColor Red
     $Results | Select-Object RuleName,Severity,Line,Column,ScriptName,Message | ConvertTo-Csv -NoTypeInformation | Set-Content "$ReportDirectory/checkstyle.csv" -Force
+}
+
+Task 'test' {
+    New-Item $ReportDirectory -ItemType Directory -ErrorAction SilentlyContinue > $null
+
+    Invoke-Pester `
+        -OutputFile "$ReportDirectory/tests_unit.xml" #-CodeCoverage "$SrcDirectory/completers/*.ps1" -CodeCoverageOutputFile "$ReportDirectory/coverage.xml" 
 }
