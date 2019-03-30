@@ -7,7 +7,7 @@ $Completion_ProcessId = {
         Get-Process @Parameters | Where-Object {$_.Id.ToString() -like "$wordToComplete*"} |
             NewTabItem -Value {$_.Id} -Text {"{0,-4} <# {1} #>" -f ([String]$_.Id),$_.Name} -ResultType ParameterValue
     } else {
-        Get-Process @Parameters | Where-Object {$_.Name -like "$wordToComplete*"} |
+        Get-Process -Name "$wordToComplete*" @Parameters |
             NewTabItem -Value {$_.Id} -Text {"{0,-4} <# {1} #>" -f ([String]$_.Id),$_.Name} -ResultType ParameterValue
     }
 }
@@ -22,8 +22,8 @@ $Completion_ProcessName = {
 
     $Parameters = @{}
 
-    Get-Process -Name "$wordToComplete*" @Parameters | Get-Unique |
-        NewTabItem -Value {$_.Name} -Text {$_.Name} -ResultType ParameterValue
+    Get-Process -Name "$wordToComplete*" @Parameters | Select-Object -ExpandProperty Name -Unique |
+        NewTabItem -Value {$_} -Text {$_} -ResultType ParameterValue
 }
 
 RegisterArgumentCompleter -CommandName "Debug-Process" -ParameterName "Name" -ScriptBlock $Completion_ProcessName
