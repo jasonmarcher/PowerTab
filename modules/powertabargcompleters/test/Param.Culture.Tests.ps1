@@ -5,7 +5,7 @@
 Describe -Tag "Unit" "Unit-Param.Culture" {
     Context "Culture" {
         It "given No Arguments, it should return all Cultures" {
-            $Results = Invoke-Handler $Completion_Locale
+            $Results = Invoke-Handler $Completion_Culture
 
             $AllCultures = [System.Globalization.CultureInfo]::GetCultures([System.Globalization.CultureTypes]::InstalledWin32Cultures)
 

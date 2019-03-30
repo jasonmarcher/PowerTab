@@ -2,7 +2,9 @@ $Completion_Culture = {
     param($commandName, $parameterName, $wordToComplete, $commandAst, $fakeBoundParameter)
 
     [System.Globalization.CultureInfo]::GetCultures([System.Globalization.CultureTypes]::InstalledWin32Cultures) |
-        Where-Object {$_.Name -like "$wordToComplete*"} | Sort-Object Name | NewTabItem -Value {$_.Name} -Text {$_.Name} -ResultType ParameterValue
+        Where-Object {$_.Name -like "$wordToComplete*"} | Sort-Object Name | Select-Object LCID, Name |
+        ForEach-Object {if ($_.LCID -eq 127) {$_.Name = "Invariant Language"}; $_} |
+        NewTabItem -Value {$_.Name} -Text {$_.Name} -ResultType ParameterValue
 }
 
 RegisterArgumentCompleter -ParameterName "Culture" -ScriptBlock $Completion_Culture
