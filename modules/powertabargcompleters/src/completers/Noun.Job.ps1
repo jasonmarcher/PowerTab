@@ -31,7 +31,7 @@ RegisterArgumentCompleter -CommandName "Wait-Job" -ParameterName "InstanceId" -S
 $Completion_JobName = {
     param($commandName, $parameterName, $wordToComplete, $commandAst, $fakeBoundParameter)
 
-    Get-Job -Name "$Argument*" | NewTabItem -Value {$_.Name} -Text {$_.Name} -ResultType ParameterValue
+    Get-Job -Name "$wordToComplete*" | NewTabItem -Value {$_.Name} -Text {$_.Name} -ResultType ParameterValue
 }
 
 RegisterArgumentCompleter -CommandName "Debug-Job" -ParameterName "Name" -ScriptBlock $Completion_JobName
