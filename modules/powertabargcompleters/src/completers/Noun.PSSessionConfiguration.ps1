@@ -1,7 +1,7 @@
 $Completion_PSSessionConfigurationName = {
     param($commandName, $parameterName, $wordToComplete, $commandAst, $fakeBoundParameter)
 
-    Get-PSSessionConfiguration "$Argument*" | NewTabItem -Value {$_.Name} -Text {$_.Name} -ResultType ParameterValue
+    Get-PSSessionConfiguration "$wordToComplete*" | NewTabItem -Value {$_.Name} -Text {$_.Name} -ResultType ParameterValue
 }
 
 RegisterArgumentCompleter -CommandName "Disable-PSSessionConfiguration" -ParameterName "Name" -ScriptBlock $Completion_PSSessionConfigurationName
