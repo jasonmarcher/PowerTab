@@ -2,10 +2,10 @@
 
 . "$SrcDirectory/completers/Noun.Process.ps1"
 
-$MockObjects = @{Id = "1"; Name = "Process 1"}, @{Id = "2"; Name = "Process 2"},
-    @{Id = "3"; Name = "Process 3"}, @{Id = "10"; Name = "Foo Ten"},
-    @{Id = "1000"; Name = "Bar Thousand"},@{Id = "10000"; Name = "Baz Ten-Thousand"},
-    @{Id = "20000"; Name = "Baz Twenty-Thousand"} | ForEach-Object {New-Object PSObject -Property $_}
+$MockObjects = @{Id = 1; Name = "Process 1"}, @{Id = 2; Name = "Process 2"},
+    @{Id = 3; Name = "Process 3"}, @{Id = 10; Name = "Foo Ten"},
+    @{Id = 1000; Name = "Bar Thousand"},@{Id = 10000; Name = "Baz Ten-Thousand"},
+    @{Id = 20000; Name = "Baz Twenty-Thousand"} | ForEach-Object {New-Object PSObject -Property $_}
 
 Describe -Tag "Unit" "Unit-Noun.Process" {
     Mock Get-Process {
