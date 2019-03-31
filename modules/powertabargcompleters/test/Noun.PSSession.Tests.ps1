@@ -59,4 +59,27 @@ Describe -Tag "Unit" "Unit-Noun.PSSession" {
             $Results.Count | Should -Be 2
         }
     }
+
+    Context "PSSessionSession" {
+        It "given No Arguments, it should return All Items" {
+            $Results = Invoke-Handler $Completion_PSSessionSession
+
+            Assert-MockCalled Get-PSSession -Exactly 1 -Scope It
+            $Results.Count | Should -Be $MockObjects.Count
+        }
+
+        It "given a Name 'Foo', it should return 2 Items" {
+            $Results = Invoke-Handler $Completion_PSSessionSession -wordToComplete "Foo"
+
+            Assert-MockCalled Get-PSSession -Exactly 1 -Scope It
+            $Results.Count | Should -Be 2
+        }
+
+        It "given a Name '*Bar', it should return 2 Items" {
+            $Results = Invoke-Handler $Completion_PSSessionSession -wordToComplete "*Bar"
+
+            Assert-MockCalled Get-PSSession -Exactly 1 -Scope It
+            $Results.Count | Should -Be 2
+        }
+    }
 }
