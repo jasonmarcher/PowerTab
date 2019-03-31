@@ -21,11 +21,11 @@ Describe -Tag "Unit" "Unit-Noun.Alias" {
     }
 
     Context "AliasName" {
-        It "given No Arguments, it should return 7 Items" {
+        It "given No Arguments, it should return All Items" {
             $Results = Invoke-Handler $Completion_AliasName
 
             Assert-MockCalled Get-Alias -Exactly 1 -Scope It
-            $Results.Count | Should -Be 7
+            $Results.Count | Should -Be $MockObjects.Count
         }
 
         It "given a Name 'c', it should return 1 Item" {

@@ -23,11 +23,11 @@ Describe -Tag "Unit" "Unit-Noun.Process" {
     Context "ProcessId" {
         $TextPattern = "{0,-4} <# {1} #>"
 
-        It "given No Arguments, it should return 7 Items" {
+        It "given No Arguments, it should return All Items" {
             $Results = Invoke-Handler $Completion_ProcessId
 
             Assert-MockCalled Get-Process -Exactly 1 -Scope It
-            $Results.Count | Should -Be 7
+            $Results.Count | Should -Be $MockObjects.Count
         }
 
         It "given an ID '1', it should return 4 Items" {
@@ -55,11 +55,11 @@ Describe -Tag "Unit" "Unit-Noun.Process" {
     }
 
     Context "ProcessName" {
-        It "given No Arguments, it should return 7 Items" {
+        It "given No Arguments, it should return All Items" {
             $Results = Invoke-Handler $Completion_ProcessName
 
             Assert-MockCalled Get-Process -Exactly 1 -Scope It
-            $Results.Count | Should -Be 7
+            $Results.Count | Should -Be $MockObjects.Count
         }
 
         It "given a Name 'Proc', it should return 3 Items" {

@@ -4,7 +4,7 @@
 
 Describe -Tag "Unit" "Unit-Param.Scope" {
     Context "ParamScope" {
-        It "given No Arguments, it should return 4 Items" {
+        It "given No Arguments, it should return All Items" {
             $Results = Invoke-Handler $Completion_ParamScope
 
             $Results.Count | Should -Be 4

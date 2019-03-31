@@ -22,11 +22,11 @@ Describe -Tag "Unit" "Unit-Noun.ComputerRestore" {
             $MockObjects
         }
 
-        It "given No Arguments, it should return 2 Items" {
+        It "given No Arguments, it should return All Items" {
             $Results = Invoke-Handler $Completion_ComputerRestoreDrive
 
             Assert-MockCalled Get-PSDrive -Exactly 1 -ParameterFilter {$PSProvider -eq "FileSystem"} -Scope It
-            $Results.Count | Should -Be 2
+            $Results.Count | Should -Be $MockObjects.Count
         }
 
         It "given a Name 'f', it should return 1 Item" {
