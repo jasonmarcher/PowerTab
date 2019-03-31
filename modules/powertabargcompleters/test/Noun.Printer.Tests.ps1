@@ -2,6 +2,9 @@
 
 . "$SrcDirectory/completers/Noun.Printer.ps1"
 
+$MockObjects = @{Name = "Foo"}, @{Name = "Bar"}, @{Name = "FooBar"} |
+    ForEach-Object {New-Object PSObject -Property $_}
+
 Describe -Tag "Unit" "Unit-Noun.Printer" {
     Context "PrinterName" {
         Mock Get-CimInstance {
@@ -9,6 +12,8 @@ Describe -Tag "Unit" "Unit-Noun.Printer" {
                 $ClassName,
                 $Filter
             )
+
+            $MockObjects
         }
 
         It "it should call 'Get-CimInstance' with the correct arguments" {
