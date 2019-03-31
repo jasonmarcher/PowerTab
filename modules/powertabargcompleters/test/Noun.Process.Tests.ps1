@@ -44,7 +44,7 @@ Describe -Tag "Unit" "Unit-Noun.Process" {
             $Results.Count | Should -Be 3
         }
 
-        It "given No Arguments, the display text for each result should be propertly formatted" {
+        It "the display text for each result should be propertly formatted" {
             $Results = Invoke-Handler $Completion_ProcessId
 
             Assert-MockCalled Get-Process -Exactly 1 -Scope It
@@ -70,7 +70,7 @@ Describe -Tag "Unit" "Unit-Noun.Process" {
         }
 
         It "given a Name '*Thousand', it should return 3 Items" {
-            $Results = Invoke-Handler $Completion_ProcessName -wordToComplete "Proc"
+            $Results = Invoke-Handler $Completion_ProcessName -wordToComplete "*Thousand"
 
             Assert-MockCalled Get-Process -Exactly 1 -Scope It
             $Results.Count | Should -Be 3
