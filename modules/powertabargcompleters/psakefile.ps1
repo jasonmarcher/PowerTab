@@ -1,5 +1,5 @@
 Properties {
-    $ModuleName = 'PowerTabArgCompleters'
+    $ModuleName = 'PTAG'
     $RootDirectory = "$PSScriptRoot/../.."
     $HelpDirectory = "$PSScriptRoot/help"
     $SrcDirectory = "$PSScriptRoot/src"

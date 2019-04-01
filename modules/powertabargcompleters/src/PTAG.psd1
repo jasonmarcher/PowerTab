@@ -1,12 +1,12 @@
 @{
     ## Module Info
     ModuleVersion      = '1.0.0'
-    Description        = "A module that enhances PowerShell's tab expansion."
+    Description        = "A library of argument completers."
     GUID               = '3ad03dca-ce9c-4a0b-92bc-36eee90828ae'
     # HelpInfoURI        = ''
 
     ## Module Components
-    RootModule         = @("PowerTabArgCompleters.psm1")
+    RootModule         = @("PTAG.psm1")
     ScriptsToProcess   = @()
     TypesToProcess     = @()
     FormatsToProcess   = @()
@@ -40,7 +40,7 @@
     PrivateData        = @{
         PSData = @{
             # Tags applied to this module. These help with module discovery in online galleries.
-            Tags = @("productivity","tabexpansion","tab-completion","Register-ArgumentCompleter")
+            Tags = @("powertab","productivity","tabexpansion","tab-completion","Register-ArgumentCompleter")
 
             # A URL to the license for this module.
             # LicenseUri = ''
@@ -65,8 +65,8 @@ Features:
   - Microsoft.PowerShell.Operation.Validation
   - Microsoft.PowerShell.Utility
 
-Detailed list available here:
-https://github.com/jasonmarcher/PowerTab/milestone/1?closed=1
+Detailed list of supported parameters available here:
+https://github.com/jasonmarcher/PowerTab/blob/master/Docs/ptag/FeatureList.md
 
 "@
         } # End of PSData hashtable
